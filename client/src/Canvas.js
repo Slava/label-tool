@@ -12,6 +12,8 @@ export default class Canvas extends Component {
 
     this.state = {
       bounds: null,
+      height: null,
+      width: null,
     };
   }
 
@@ -29,17 +31,18 @@ export default class Canvas extends Component {
     const crs = L.CRS.Simple;
     imgRef.src = url;
     imgRef.onload = () => {
+      const { height, width } = imgRef;
       const southWest = crs.unproject({ x: 0, y: imgRef.height }, maxZoom - 1);
       const northEast = crs.unproject({ x: imgRef.width, y: 0 }, maxZoom - 1);
       const bounds = new L.LatLngBounds(southWest, northEast);
 
-      this.setState({ bounds });
+      this.setState({ bounds, height, width });
     };
   }
 
   render() {
     const { url } = this.props;
-    const { bounds } = this.state;
+    const { bounds, height, width } = this.state;
 
     if (!bounds) {
       return null;
@@ -47,12 +50,14 @@ export default class Canvas extends Component {
 
     return (
       <Map
-        maxBounds={bounds}
         crs={L.CRS.Simple}
-        zoom={0}
-        minZoom={-1}
+        zoom={-1}
+        minZoom={-50}
         maxZoom={maxZoom}
-        center={[0, 0]}
+        center={[height / 2, width / 2]}
+        zoomAnimation={false}
+        zoomSnap={0.1}
+        attributionControl={false}
       >
         <ImageOverlay url={url} bounds={bounds} />
       </Map>

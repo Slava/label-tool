@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import L from 'leaflet';
-import { Map, ImageOverlay } from 'react-leaflet';
+import { Map, ImageOverlay, Polyline, CircleMarker } from 'react-leaflet';
 
 import 'leaflet/dist/leaflet.css';
 
@@ -41,7 +41,7 @@ export default class Canvas extends Component {
   }
 
   render() {
-    const { url } = this.props;
+    const { url, polygon, color, onChange } = this.props;
     const { bounds, height, width } = this.state;
 
     if (!bounds) {
@@ -58,9 +58,41 @@ export default class Canvas extends Component {
         zoomAnimation={false}
         zoomSnap={0.1}
         attributionControl={false}
+        onClick={e => onChange('add', { point: convertPoint(e.latlng) })}
       >
         <ImageOverlay url={url} bounds={bounds} />
+        <Polyline
+          positions={polygon}
+          color={color}
+          weight={5}
+          fill={true}
+          fillColor={color}
+          interactive={false}
+        />
+        {polygon.map((pos, i) => (
+          <CircleMarker
+            key={JSON.stringify(pos)}
+            color={color}
+            fillColor="white"
+            fill={true}
+            center={pos}
+            radius={5}
+            onClick={() => {
+              if (i == 0) {
+                onChange('add', { point: pos });
+                return false;
+              }
+            }}
+          />
+        ))}
       </Map>
     );
   }
+}
+
+function convertPoint(p) {
+  return {
+    lat: p.lat,
+    lng: p.lng,
+  };
 }

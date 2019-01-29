@@ -30,3 +30,20 @@
     transform: rotate(360deg);
   }
 }
+
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+}
+
+#root {
+  height: 100vh;
+}
+
+#root > * {
+  height: 100%;
+}
+
+.ui.grid {
+  height: 100%;
+}

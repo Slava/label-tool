@@ -47,27 +47,26 @@ class App extends Component {
 
     this.handleOnChange = this.handleOnChange.bind(this);
   }
-  handleOnChange(eventType, { point, pos }) {
-    const { polygons, selected } = this.state;
-    if (!selected) return;
-    let newState = polygons[selected];
-
-    switch (eventType) {
-      case 'add':
-        if (pos !== undefined) {
-          newState = update(newState, { $splice: [[pos, 0, point]] });
-        } else {
-          newState = update(newState, { $push: [point] });
-        }
-        break;
-    }
-
+  handleOnChange(eventType, { figure }) {
+    const label = labels[colors.indexOf(figure.color)];
     this.setState({
-      polygons: update(polygons, { [selected]: { $set: newState } }),
+      polygons: update(this.state.polygons, {
+        [label]: {
+          $push: [figure.points],
+        },
+      }),
     });
   }
 
   render() {
+    const { polygons, selected } = this.state;
+    const figures = [];
+    labels.map((label, i) =>
+      polygons[label].map(poly =>
+        figures.push({ color: colors[i], points: poly })
+      )
+    );
+
     return (
       <div>
         <Grid columns={3} divided stretched>
@@ -86,7 +85,7 @@ class App extends Component {
                       onSelect: () => {
                         this.setState({ selected: label });
                       },
-                      selected: this.state.selected === label,
+                      selected: selected === label,
                     })
                   )}
                 </List>
@@ -95,8 +94,8 @@ class App extends Component {
             <Grid.Column width={12} style={{ padding: 0 }}>
               <Canvas
                 url="http://kempe.net/images/newspaper-big.jpg"
-                polygon={this.state.polygons[this.state.selected] || []}
-                color={colors[labels.indexOf(this.state.selected)]}
+                figures={figures}
+                color={colors[labels.indexOf(selected)]}
                 onChange={this.handleOnChange}
               />
             </Grid.Column>

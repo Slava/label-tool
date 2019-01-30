@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import { CRS, LatLngBounds } from 'leaflet';
 import { Map, ImageOverlay, Polyline, CircleMarker } from 'react-leaflet';
+import Hotkeys from 'react-hot-keys';
 import update from 'immutability-helper';
 import 'leaflet-path-drag';
 
@@ -149,15 +150,23 @@ export default class Canvas extends Component {
 
     const figuresDOM = figures.map((f, i) =>
       Figure(f, {
-        editing: selectedFigure === f.id && state === 'editing',
+        editing:
+          selectedFigure && selectedFigure.id === f.id && state === 'editing',
         finished: true,
         interactive: state !== 'drawing',
-        onSelect: () =>
-          this.setState({ selectedFigure: f.id, state: 'editing' }),
+        onSelect: () => this.setState({ selectedFigure: f, state: 'editing' }),
         onChange: handleChange,
         calcDistance,
       })
     );
+
+    const hotkeysDOM =
+      state === 'editing' ? (
+        <Hotkeys
+          keyName="backspace,del"
+          onKeyDown={() => onChange('delete', selectedFigure)}
+        />
+      ) : null;
 
     return (
       <Map
@@ -184,6 +193,7 @@ export default class Canvas extends Component {
         <ImageOverlay url={url} bounds={bounds} />
         {unfinishedDrawingDOM}
         {figuresDOM}
+        {hotkeysDOM}
       </Map>
     );
   }

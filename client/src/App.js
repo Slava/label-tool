@@ -53,6 +53,8 @@ class App extends Component {
   handleOnChange(eventType, figure) {
     const label = labels[colors.indexOf(figure.color)];
     const { polygons } = this.state;
+    const idx = polygons[label].findIndex(f => f.id === figure.id);
+
     switch (eventType) {
       case 'new':
         this.setState({
@@ -66,11 +68,20 @@ class App extends Component {
         break;
 
       case 'replace':
-        const replIdx = polygons[label].findIndex(f => f.id === figure.id);
         this.setState({
           polygons: update(polygons, {
             [label]: {
-              $splice: [[replIdx, 1, { id: figure.id, points: figure.points }]],
+              $splice: [[idx, 1, { id: figure.id, points: figure.points }]],
+            },
+          }),
+        });
+        break;
+
+      case 'delete':
+        this.setState({
+          polygons: update(polygons, {
+            [label]: {
+              $splice: [[idx, 1]],
             },
           }),
         });

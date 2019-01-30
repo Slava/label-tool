@@ -129,6 +129,13 @@ export default class Canvas extends Component {
             update(figure, { points: { $splice: [[pos, 1, point]] } })
           );
           break;
+
+        case 'remove':
+          onChange(
+            'replace',
+            update(figure, { points: { $splice: [[pos, 1]] } })
+          );
+          break;
       }
     };
 
@@ -190,8 +197,9 @@ export default class Canvas extends Component {
               skipNextClickEvent = false;
               return;
             }
-            if (state === 'drawing')
+            if (state === 'drawing') {
               handleChange('add', { point: convertPoint(e.latlng) });
+            }
           }}
           onZoom={e => this.setState({ zoom: e.target.getZoom() })}
           ref={this.mapRef}
@@ -232,6 +240,13 @@ function Figure(figure, options) {
         if (!finished && i === 0) {
           onChange('end', {});
           skipNextClickEvent = true;
+          return false;
+        }
+
+        if (finished && editing) {
+          if (points.length > 3) {
+            onChange('remove', { pos: i, figure });
+          }
           return false;
         }
       }}

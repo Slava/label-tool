@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import L from 'leaflet';
+import { CRS, LatLngBounds } from 'leaflet';
 import { Map, ImageOverlay, Polyline, CircleMarker } from 'react-leaflet';
 import update from 'immutability-helper';
 
@@ -18,7 +18,10 @@ export default class Canvas extends Component {
       width: null,
       state: 'none', // enum { none, editing, drawing }
       unfinishedFigure: null,
+      selectedFigure: null,
     };
+
+    this.mapRef = React.createRef();
   }
 
   componentDidMount() {
@@ -32,7 +35,12 @@ export default class Canvas extends Component {
   }
 
   static getDerivedStateFromProps(props, state) {
-    const st = props.color ? 'drawing' : 'none';
+    const st =
+      state.state !== 'editing'
+        ? props.color
+          ? 'drawing'
+          : 'none'
+        : 'editing';
     if (
       !state.unfinishedFigure ||
       props.color !== state.unfinishedFigure.color
@@ -52,13 +60,13 @@ export default class Canvas extends Component {
   }
 
   calcBounds(url) {
-    const crs = L.CRS.Simple;
+    const crs = CRS.Simple;
     imgRef.src = url;
     imgRef.onload = () => {
       const { height, width } = imgRef;
       const southWest = crs.unproject({ x: 0, y: imgRef.height }, maxZoom - 1);
       const northEast = crs.unproject({ x: imgRef.width, y: 0 }, maxZoom - 1);
-      const bounds = new L.LatLngBounds(southWest, northEast);
+      const bounds = new LatLngBounds(southWest, northEast);
 
       this.setState({ bounds, height, width });
     };
@@ -66,7 +74,14 @@ export default class Canvas extends Component {
 
   render() {
     const { url, figures, color, onChange } = this.props;
-    const { bounds, height, width, state, unfinishedFigure } = this.state;
+    const {
+      bounds,
+      height,
+      width,
+      state,
+      unfinishedFigure,
+      selectedFigure,
+    } = this.state;
 
     if (!bounds) {
       return null;
@@ -87,8 +102,7 @@ export default class Canvas extends Component {
               }),
             });
           } else {
-            // should be working on the selected figure under editing
-            //newState = update(newState, { $push: [point] });
+            //onChange('edit', );
           }
           break;
 
@@ -105,9 +119,37 @@ export default class Canvas extends Component {
       }
     };
 
+    const calcDistance = (p1, p2) => {
+      const map = this.mapRef.current.leafletElement;
+      return map.latLngToLayerPoint(p1).distanceTo(map.latLngToLayerPoint(p2));
+    };
+
+    const unfinishedDrawingDOM =
+      state === 'drawing'
+        ? Figure(unfinishedFigure, {
+            finished: false,
+            editing: false,
+            interactive: false,
+            onChange: handleChange,
+            calcDistance,
+          })
+        : null;
+
+    const figuresDOM = figures.map((f, i) =>
+      Figure(f, {
+        key: i,
+        editing: selectedFigure === f && state === 'editing',
+        finished: true,
+        interactive: state !== 'drawing',
+        onSelect: () => this.setState({ selectedFigure: f, state: 'editing' }),
+        onChange: handleChange,
+        calcDistance,
+      })
+    );
+
     return (
       <Map
-        crs={L.CRS.Simple}
+        crs={CRS.Simple}
         zoom={-1}
         minZoom={-50}
         maxZoom={maxZoom}
@@ -124,60 +166,80 @@ export default class Canvas extends Component {
           if (state === 'drawing')
             handleChange('add', { point: convertPoint(e.latlng) });
         }}
+        ref={this.mapRef}
       >
         <ImageOverlay url={url} bounds={bounds} />
-        {state === 'drawing'
-          ? Figure(unfinishedFigure, {
-              finished: false,
-              editing: false,
-              onChange: handleChange,
-            })
-          : null}
-        {figures.map((f, i) =>
-          Figure(f, { key: i, editing: false, finished: true })
-        )}
+        {unfinishedDrawingDOM}
+        {figuresDOM}
       </Map>
     );
   }
 }
 
-function Figure({ points, color }, { key, editing, finished, onChange }) {
+function Figure({ points, color }, options) {
+  const {
+    key,
+    editing,
+    finished,
+    interactive,
+    calcDistance,
+    onChange,
+    onSelect,
+  } = options;
+
   let polygon = points;
   if (finished) {
     polygon = points.concat([points[0]]);
   }
 
-  const vertices =
-    finished || editing
-      ? null
-      : points.map((pos, i) => (
-          <CircleMarker
-            key={JSON.stringify(pos)}
-            color={color}
-            fillColor="white"
-            fill={true}
-            center={pos}
-            radius={5}
-            onClick={e => {
-              if (!finished && i === 0) {
-                onChange('end', {});
-                skipNextClickEvent = true;
-                return false;
-              }
-            }}
-          />
-        ));
+  const vertices = points.map((pos, i) => (
+    <CircleMarker
+      key={JSON.stringify(pos)}
+      color={color}
+      center={pos}
+      radius={5}
+      onClick={e => {
+        if (!finished && i === 0) {
+          onChange('end', {});
+          skipNextClickEvent = true;
+          return false;
+        }
+      }}
+    />
+  ));
+
+  const midPoints = points
+    .map((pos, i) => [pos, points[(i + 1) % points.length], i])
+    .filter(([a, b]) => calcDistance(a, b) > 40)
+    .map(([a, b, i]) => (
+      <CircleMarker
+        key={JSON.stringify(a) + '-mid'}
+        color="white"
+        center={midPoint(a, b)}
+        radius={3}
+        opacity={0.5}
+        onClick={e => {
+          onChange('add', { point: midPoint(a, b), pos: i + 1 });
+        }}
+      />
+    ));
+
+  const allCircles = (!finished || editing ? vertices : []).concat(
+    finished && editing ? midPoints : []
+  );
+
   return (
     <Fragment key={key}>
       <Polyline
         positions={polygon}
         color={color}
-        weight={5}
+        weight={3}
         fill={true}
         fillColor={color}
-        interactive={false}
+        interactive={interactive}
+        onClick={() => interactive && onSelect()}
       />
-      {vertices}
+      {allCircles}
     </Fragment>
   );
 }
@@ -186,5 +248,12 @@ function convertPoint(p) {
   return {
     lat: p.lat,
     lng: p.lng,
+  };
+}
+
+function midPoint(p1, p2) {
+  return {
+    lat: (p1.lat + p2.lat) / 2,
+    lng: (p1.lng + p2.lng) / 2,
   };
 }

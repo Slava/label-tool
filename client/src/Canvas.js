@@ -169,32 +169,39 @@ export default class Canvas extends Component {
       ) : null;
 
     return (
-      <Map
-        crs={CRS.Simple}
-        zoom={zoom}
-        minZoom={-50}
-        maxZoom={maxZoom}
-        center={[height / 2, width / 2]}
-        zoomAnimation={false}
-        zoomSnap={0.1}
-        attributionControl={false}
-        onClick={e => {
-          if (skipNextClickEvent) {
-            // a hack, for whatever reason it is really hard to stop event propagation in leaflet
-            skipNextClickEvent = false;
-            return;
-          }
-          if (state === 'drawing')
-            handleChange('add', { point: convertPoint(e.latlng) });
+      <div
+        style={{
+          cursor: state === 'drawing' ? 'crosshair' : 'grab',
+          height: '100%',
         }}
-        onZoom={e => this.setState({ zoom: e.target.getZoom() })}
-        ref={this.mapRef}
       >
-        <ImageOverlay url={url} bounds={bounds} />
-        {unfinishedDrawingDOM}
-        {figuresDOM}
-        {hotkeysDOM}
-      </Map>
+        <Map
+          crs={CRS.Simple}
+          zoom={zoom}
+          minZoom={-50}
+          maxZoom={maxZoom}
+          center={[height / 2, width / 2]}
+          zoomAnimation={false}
+          zoomSnap={0.1}
+          attributionControl={false}
+          onClick={e => {
+            if (skipNextClickEvent) {
+              // a hack, for whatever reason it is really hard to stop event propagation in leaflet
+              skipNextClickEvent = false;
+              return;
+            }
+            if (state === 'drawing')
+              handleChange('add', { point: convertPoint(e.latlng) });
+          }}
+          onZoom={e => this.setState({ zoom: e.target.getZoom() })}
+          ref={this.mapRef}
+        >
+          <ImageOverlay url={url} bounds={bounds} />
+          {unfinishedDrawingDOM}
+          {figuresDOM}
+          {hotkeysDOM}
+        </Map>
+      </div>
     );
   }
 }

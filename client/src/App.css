@@ -11,3 +11,7 @@
 .ui.grid {
   height: 100%;
 }
+
+.leaflet-container {
+  cursor: inherit !important;
+}

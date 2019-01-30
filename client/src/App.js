@@ -47,16 +47,32 @@ class App extends Component {
 
     this.handleOnChange = this.handleOnChange.bind(this);
   }
-  handleOnChange(eventType, { figure }) {
+  handleOnChange(eventType, figure) {
     const label = labels[colors.indexOf(figure.color)];
-    this.setState({
-      polygons: update(this.state.polygons, {
-        [label]: {
-          $push: [figure.points],
-        },
-      }),
-      selected: null, // deselect the label after the figure is finished
-    });
+    const { polygons } = this.state;
+    switch (eventType) {
+      case 'new':
+        this.setState({
+          polygons: update(polygons, {
+            [label]: {
+              $push: [{ id: genId(), points: figure.points }],
+            },
+          }),
+          selected: null, // deselect the label after the figure is finished
+        });
+        break;
+
+      case 'replace':
+        const replIdx = polygons[label].findIndex(f => f.id === figure.id);
+        this.setState({
+          polygons: update(polygons, {
+            [label]: {
+              $splice: [[replIdx, 1, { id: figure.id, points: figure.points }]],
+            },
+          }),
+        });
+        break;
+    }
   }
 
   render() {
@@ -64,7 +80,7 @@ class App extends Component {
     const figures = [];
     labels.map((label, i) =>
       polygons[label].map(poly =>
-        figures.push({ color: colors[i], points: poly })
+        figures.push({ color: colors[i], points: poly.points, id: poly.id })
       )
     );
 
@@ -105,6 +121,17 @@ class App extends Component {
       </div>
     );
   }
+}
+
+function genId() {
+  return (
+    Math.random()
+      .toString(36)
+      .substring(2, 15) +
+    Math.random()
+      .toString(36)
+      .substring(2, 15)
+  );
 }
 
 export default App;

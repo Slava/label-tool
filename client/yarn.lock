@@ -5882,6 +5882,11 @@ lcid@^2.0.0:
   dependencies:
     invert-kv "^2.0.0"
 
+leaflet-path-drag@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/leaflet-path-drag/-/leaflet-path-drag-1.1.0.tgz#586e464b51ee3b712e74b4a92dc10a259f0eb9ff"
+  integrity sha512-wd2uNgn3yuMl7HI0YG0z6qhxnRbvCQHE8ncpERfUZ6gTPbM5Xctwzyi+gE8cMnIDlv22GO3slSBupD9GW7jIEQ==
+
 leaflet@^1.4.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/leaflet/-/leaflet-1.4.0.tgz#d5f56eeb2aa32787c24011e8be4c77e362ae171b"

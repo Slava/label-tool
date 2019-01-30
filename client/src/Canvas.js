@@ -2,6 +2,7 @@ import React, { Component, Fragment } from 'react';
 import { CRS, LatLngBounds } from 'leaflet';
 import { Map, ImageOverlay, Polyline, CircleMarker } from 'react-leaflet';
 import update from 'immutability-helper';
+import 'leaflet-path-drag';
 
 import 'leaflet/dist/leaflet.css';
 
@@ -13,7 +14,9 @@ export default class Canvas extends Component {
     super(props, context);
 
     this.state = {
+      lastColor: null,
       bounds: null,
+      zoom: -1,
       height: null,
       width: null,
       state: 'none', // enum { none, editing, drawing }
@@ -41,21 +44,22 @@ export default class Canvas extends Component {
           ? 'drawing'
           : 'none'
         : 'editing';
-    if (
-      !state.unfinishedFigure ||
-      props.color !== state.unfinishedFigure.color
-    ) {
+
+    if (props.color !== state.lastColor && props.color) {
       return {
         unfinishedFigure: {
+          id: 'unfinished',
           color: props.color,
           points: [],
         },
-        state: st,
+        lastColor: props.color,
+        state: 'drawing',
       };
     }
 
     return {
       state: st,
+      lastColor: props.color,
     };
   }
 
@@ -73,9 +77,10 @@ export default class Canvas extends Component {
   }
 
   render() {
-    const { url, figures, color, onChange } = this.props;
+    const { url, figures, onChange } = this.props;
     const {
       bounds,
+      zoom,
       height,
       width,
       state,
@@ -87,7 +92,7 @@ export default class Canvas extends Component {
       return null;
     }
 
-    const handleChange = (eventType, { point, pos }) => {
+    const handleChange = (eventType, { point, pos, figure }) => {
       switch (eventType) {
         case 'add':
           if (state === 'drawing') {
@@ -102,19 +107,26 @@ export default class Canvas extends Component {
               }),
             });
           } else {
-            //onChange('edit', );
+            onChange(
+              'replace',
+              update(figure, { points: { $splice: [[pos, 0, point]] } })
+            );
           }
           break;
 
         case 'end':
-          const figure = unfinishedFigure;
-          onChange('new', { figure });
+          const f = unfinishedFigure;
+          onChange('new', f);
           this.setState({
-            unfinishedFigure: {
-              color,
-              points: [],
-            },
+            unfinishedFigure: null,
           });
+          break;
+
+        case 'move':
+          onChange(
+            'replace',
+            update(figure, { points: { $splice: [[pos, 1, point]] } })
+          );
           break;
       }
     };
@@ -137,11 +149,11 @@ export default class Canvas extends Component {
 
     const figuresDOM = figures.map((f, i) =>
       Figure(f, {
-        key: i,
-        editing: selectedFigure === f && state === 'editing',
+        editing: selectedFigure === f.id && state === 'editing',
         finished: true,
         interactive: state !== 'drawing',
-        onSelect: () => this.setState({ selectedFigure: f, state: 'editing' }),
+        onSelect: () =>
+          this.setState({ selectedFigure: f.id, state: 'editing' }),
         onChange: handleChange,
         calcDistance,
       })
@@ -150,7 +162,7 @@ export default class Canvas extends Component {
     return (
       <Map
         crs={CRS.Simple}
-        zoom={-1}
+        zoom={zoom}
         minZoom={-50}
         maxZoom={maxZoom}
         center={[height / 2, width / 2]}
@@ -166,6 +178,7 @@ export default class Canvas extends Component {
           if (state === 'drawing')
             handleChange('add', { point: convertPoint(e.latlng) });
         }}
+        onZoom={e => this.setState({ zoom: e.target.getZoom() })}
         ref={this.mapRef}
       >
         <ImageOverlay url={url} bounds={bounds} />
@@ -176,9 +189,9 @@ export default class Canvas extends Component {
   }
 }
 
-function Figure({ points, color }, options) {
+function Figure(figure, options) {
+  const { id, points, color } = figure;
   const {
-    key,
     editing,
     finished,
     interactive,
@@ -194,7 +207,7 @@ function Figure({ points, color }, options) {
 
   const vertices = points.map((pos, i) => (
     <CircleMarker
-      key={JSON.stringify(pos)}
+      key={id + '-' + i}
       color={color}
       center={pos}
       radius={5}
@@ -205,6 +218,10 @@ function Figure({ points, color }, options) {
           return false;
         }
       }}
+      draggable={editing}
+      onDragend={e =>
+        onChange('move', { point: e.target.getLatLng(), pos: i, figure })
+      }
     />
   ));
 
@@ -213,13 +230,13 @@ function Figure({ points, color }, options) {
     .filter(([a, b]) => calcDistance(a, b) > 40)
     .map(([a, b, i]) => (
       <CircleMarker
-        key={JSON.stringify(a) + '-mid'}
+        key={id + '-' + i + '-mid'}
         color="white"
         center={midPoint(a, b)}
         radius={3}
         opacity={0.5}
         onClick={e => {
-          onChange('add', { point: midPoint(a, b), pos: i + 1 });
+          onChange('add', { point: midPoint(a, b), pos: i + 1, figure });
         }}
       />
     ));
@@ -229,7 +246,7 @@ function Figure({ points, color }, options) {
   );
 
   return (
-    <Fragment key={key}>
+    <Fragment key={id}>
       <Polyline
         positions={polygon}
         color={color}

@@ -5,6 +5,7 @@
   "dependencies": {
     "immutability-helper": "^3.0.0",
     "leaflet": "^1.4.0",
+    "leaflet-path-drag": "^1.1.0",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
     "react-leaflet": "^2.2.0",

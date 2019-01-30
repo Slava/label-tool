@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Grid, Container, Header, List, Label } from 'semantic-ui-react';
+import Hotkeys from 'react-hot-keys';
 import update from 'immutability-helper';
 
 import 'semantic-ui-css/semantic.min.css';
@@ -28,10 +29,12 @@ const labels = ['cat', 'dog', 'car', 'tree', 'another one'];
 function ListItem({ shortcut, label, onSelect, color, selected = false }) {
   return (
     <List.Item onClick={onSelect} active={selected} key={label}>
-      <Label color={color} horizontal>
-        {shortcut}
-      </Label>
-      {label}
+      <Hotkeys keyName={shortcut} onKeyDown={onSelect}>
+        <Label color={color} horizontal>
+          {shortcut}
+        </Label>
+        {label}
+      </Hotkeys>
     </List.Item>
   );
 }
@@ -105,6 +108,10 @@ class App extends Component {
                       selected: selected === label,
                     })
                   )}
+                  <Hotkeys
+                    keyName="esc"
+                    onKeyDown={() => this.setState({ selected: null })}
+                  />
                 </List>
               </div>
             </Grid.Column>

@@ -55,6 +55,7 @@ class App extends Component {
           $push: [figure.points],
         },
       }),
+      selected: null, // deselect the label after the figure is finished
     });
   }
 
@@ -95,7 +96,7 @@ class App extends Component {
               <Canvas
                 url="http://kempe.net/images/newspaper-big.jpg"
                 figures={figures}
-                color={colors[labels.indexOf(selected)]}
+                color={selected ? colors[labels.indexOf(selected)] : null}
                 onChange={this.handleOnChange}
               />
             </Grid.Column>

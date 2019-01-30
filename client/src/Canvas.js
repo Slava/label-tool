@@ -32,7 +32,7 @@ export default class Canvas extends Component {
   }
 
   static getDerivedStateFromProps(props, state) {
-    const st = props.color ? 'drawing' : null;
+    const st = props.color ? 'drawing' : 'none';
     if (
       !state.unfinishedFigure ||
       props.color !== state.unfinishedFigure.color
@@ -42,12 +42,12 @@ export default class Canvas extends Component {
           color: props.color,
           points: [],
         },
-        state: st || state.state,
+        state: st,
       };
     }
 
     return {
-      state: st || state.state,
+      state: st,
     };
   }
 
@@ -133,13 +133,15 @@ export default class Canvas extends Component {
               onChange: handleChange,
             })
           : null}
-        {figures.map(f => Figure(f, { editing: false, finished: true }))}
+        {figures.map((f, i) =>
+          Figure(f, { key: i, editing: false, finished: true })
+        )}
       </Map>
     );
   }
 }
 
-function Figure({ points, color }, { editing, finished, onChange }) {
+function Figure({ points, color }, { key, editing, finished, onChange }) {
   let polygon = points;
   if (finished) {
     polygon = points.concat([points[0]]);
@@ -166,7 +168,7 @@ function Figure({ points, color }, { editing, finished, onChange }) {
           />
         ));
   return (
-    <Fragment>
+    <Fragment key={key}>
       <Polyline
         positions={polygon}
         color={color}

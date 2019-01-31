@@ -1,5 +1,13 @@
 import React, { Component } from 'react';
-import { Grid, Header, List, Label, Icon, Segment } from 'semantic-ui-react';
+import {
+  Grid,
+  Header,
+  List,
+  Label,
+  Icon,
+  Segment,
+  Table,
+} from 'semantic-ui-react';
 import Hotkeys from 'react-hot-keys';
 import update from 'immutability-helper';
 
@@ -67,7 +75,10 @@ class App extends Component {
       selected: null,
       polygons: {}, // mapping from label name to a list of polygon structures
       toggles: {},
+
+      // UI
       reassigning: false,
+      hotkeysPanel: false,
     };
     labels.map(label => (this.state.polygons[label] = []));
     labels.map(label => (this.state.toggles[label] = true));
@@ -117,7 +128,13 @@ class App extends Component {
   }
 
   render() {
-    const { polygons, selected, reassigning, toggles } = this.state;
+    const {
+      polygons,
+      selected,
+      reassigning,
+      toggles,
+      hotkeysPanel,
+    } = this.state;
     const figures = [];
     labels.map((label, i) =>
       polygons[label].map(
@@ -152,7 +169,15 @@ class App extends Component {
             this.setState({
               toggles: update(toggles, { [label]: { $set: !toggles[label] } }),
             }),
+          openHotkeys: () => this.setState({ hotkeysPanel: true }),
         };
+
+    const hotkeysPanelDOM = hotkeysPanel ? (
+      <HotkeysPanel
+        labels={labels}
+        onClose={() => this.setState({ hotkeysPanel: false })}
+      />
+    ) : null;
 
     return (
       <div style={{ display: 'flex' }}>
@@ -161,6 +186,7 @@ class App extends Component {
           {...sidebarProps}
           style={{ flex: 1, maxWidth: 300 }}
         />
+        {hotkeysPanelDOM}
         <Canvas
           url="http://kempe.net/images/newspaper-big.jpg"
           figures={figures}
@@ -178,6 +204,7 @@ class App extends Component {
   }
 }
 
+const headerIconStyle = { fontSize: '0.8em', float: 'right' };
 class Sidebar extends Component {
   render() {
     const {
@@ -188,10 +215,24 @@ class Sidebar extends Component {
       toggles,
       onToggle,
       style,
+      openHotkeys,
     } = this.props;
+
+    const hotkeysButton = openHotkeys ? (
+      <Icon
+        link
+        name="keyboard"
+        style={headerIconStyle}
+        onClick={openHotkeys}
+      />
+    ) : null;
+
     return (
       <div style={{ padding: '1em 0.5em', ...style }}>
-        <Header size="large">{title}</Header>
+        <Header size="large">
+          {title}
+          {hotkeysButton}
+        </Header>
         <List divided selection>
           {labels.map((label, i) =>
             ListItem({
@@ -211,17 +252,60 @@ class Sidebar extends Component {
   }
 }
 
-function HotkeysPanel() {
+function HotkeysPanel({ labels, onClose }) {
   return (
-    <div>
+    <div style={{ height: '100vh' }}>
       <Header as="h2" attached="top">
         Hotkeys
+        <Icon link name="close" style={headerIconStyle} onClick={onClose} />
       </Header>
-      <Segment attached>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-        tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
-        veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-        commodo consequat.
+      <Segment attached style={{ height: '100%' }}>
+        <Header as="h3"> Labels </Header>
+        <Table celled>
+          <Table.Header>
+            <Table.Row>
+              <Table.HeaderCell>Action</Table.HeaderCell>
+              <Table.HeaderCell>Key</Table.HeaderCell>
+            </Table.Row>
+          </Table.Header>
+
+          <Table.Body>
+            {labels.map((label, i) => (
+              <Table.Row>
+                <Table.Cell>{label}</Table.Cell>
+                <Table.Cell>{i}</Table.Cell>
+              </Table.Row>
+            ))}
+          </Table.Body>
+        </Table>
+        <Header as="h3"> General </Header>
+        <Table celled>
+          <Table.Header>
+            <Table.Row>
+              <Table.HeaderCell>Action</Table.HeaderCell>
+              <Table.HeaderCell>Key</Table.HeaderCell>
+            </Table.Row>
+          </Table.Header>
+
+          <Table.Body>
+            <Table.Row>
+              <Table.Cell>Complete shape</Table.Cell>
+              <Table.Cell>f</Table.Cell>
+            </Table.Row>
+            <Table.Row>
+              <Table.Cell>Change label</Table.Cell>
+              <Table.Cell>c</Table.Cell>
+            </Table.Row>
+            <Table.Row>
+              <Table.Cell>Delete figure</Table.Cell>
+              <Table.Cell>Delete</Table.Cell>
+            </Table.Row>
+            <Table.Row>
+              <Table.Cell>Cancel selection</Table.Cell>
+              <Table.Cell>Escape</Table.Cell>
+            </Table.Row>
+          </Table.Body>
+        </Table>
       </Segment>
     </div>
   );

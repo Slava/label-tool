@@ -197,8 +197,13 @@ export default class Canvas extends Component {
               skipNextClickEvent = false;
               return;
             }
+
             if (state === 'drawing') {
               handleChange('add', { point: convertPoint(e.latlng) });
+            }
+
+            if (state === 'editing') {
+              this.setState({ selectedFigure: null });
             }
           }}
           onZoom={e => this.setState({ zoom: e.target.getZoom() })}
@@ -269,6 +274,7 @@ function Figure(figure, options) {
         opacity={0.5}
         onClick={e => {
           onChange('add', { point: midPoint(a, b), pos: i + 1, figure });
+          skipNextClickEvent = true;
         }}
       />
     ));
@@ -286,7 +292,12 @@ function Figure(figure, options) {
         fill={true}
         fillColor={color}
         interactive={interactive}
-        onClick={() => interactive && onSelect()}
+        onClick={() => {
+          if (interactive) {
+            onSelect();
+            skipNextClickEvent = true;
+          }
+        }}
       />
       {allCircles}
     </Fragment>

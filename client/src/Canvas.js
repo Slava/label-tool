@@ -238,7 +238,12 @@ export default class Canvas extends Component {
 class Figure extends Component {
   constructor(props) {
     super(props);
+    this.state = {
+      dragging: false,
+      guides: null,
+    };
   }
+
   render() {
     const { figure, options } = this.props;
     const { id, points, color } = figure;
@@ -250,6 +255,7 @@ class Figure extends Component {
       onChange,
       onSelect,
     } = options;
+    const { dragging, guides } = this.state;
 
     const vertices = points.map((pos, i) => (
       <CircleMarker
@@ -274,10 +280,22 @@ class Figure extends Component {
           }
         }}
         draggable={editing}
-        onDrag={e => {}}
-        onDragend={e =>
-          onChange('move', { point: e.target.getLatLng(), pos: i, figure })
-        }
+        onDrag={e => {
+          this.setState({
+            guides: [
+              [
+                points[(i - 1 + points.length) % points.length],
+                e.target.getLatLng(),
+              ],
+              [points[(i + 1) % points.length], e.target.getLatLng()],
+            ],
+          });
+        }}
+        onDragstart={e => this.setState({ dragging: true })}
+        onDragend={e => {
+          onChange('move', { point: e.target.getLatLng(), pos: i, figure });
+          this.setState({ dragging: false, guides: null });
+        }}
       />
     ));
 
@@ -299,8 +317,20 @@ class Figure extends Component {
       ));
 
     const allCircles = (!finished || editing ? vertices : []).concat(
-      finished && editing ? midPoints : []
+      finished && editing && !dragging ? midPoints : []
     );
+
+    const guideLines = guides
+      ? guides.map((pos, i) => (
+          <Polyline
+            key={i}
+            positions={pos}
+            color={color}
+            opacity={0.7}
+            dashArray="4"
+          />
+        ))
+      : null;
 
     const PolyComp = finished ? Polygon : Polyline;
 
@@ -321,6 +351,7 @@ class Figure extends Component {
           }}
         />
         {allCircles}
+        {guideLines}
       </Fragment>
     );
   }

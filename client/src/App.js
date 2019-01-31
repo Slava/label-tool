@@ -154,25 +154,23 @@ class App extends Component {
         };
 
     return (
-      <div>
-        <Grid columns={3} divided stretched>
-          <Grid.Row stretched>
-            <Grid.Column width={4} style={{ overflow: 'auto' }}>
-              <Sidebar labels={labels} {...sidebarProps} />
-            </Grid.Column>
-            <Grid.Column width={12} style={{ padding: 0 }}>
-              <Canvas
-                url="http://kempe.net/images/newspaper-big.jpg"
-                figures={figures}
-                color={selected ? colors[labels.indexOf(selected)] : null}
-                onChange={this.handleChange}
-                onReassignment={() => this.setState({ reassigning: true })}
-                ref={this.canvasRef}
-              />
-            </Grid.Column>
-          </Grid.Row>
-        </Grid>
-      </div>
+      <Grid columns={3} divided stretched style={{ margin: 0 }}>
+        <Grid.Row stretched style={{ padding: 0 }}>
+          <Grid.Column width={4} style={{ overflow: 'auto' }}>
+            <Sidebar labels={labels} {...sidebarProps} />
+          </Grid.Column>
+          <Grid.Column width={12} style={{ padding: 0 }}>
+            <Canvas
+              url="http://kempe.net/images/newspaper-big.jpg"
+              figures={figures}
+              color={selected ? colors[labels.indexOf(selected)] : null}
+              onChange={this.handleChange}
+              onReassignment={() => this.setState({ reassigning: true })}
+              ref={this.canvasRef}
+            />
+          </Grid.Column>
+        </Grid.Row>
+      </Grid>
     );
   }
 }

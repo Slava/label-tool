@@ -7,9 +7,12 @@
   height: 100vh;
 }
 
+html,
+body,
 #root > *,
 .ui.grid {
   height: 100%;
+  min-height: 100%;
 }
 
 .leaflet-container {

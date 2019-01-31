@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Grid, Header, List, Label, Icon } from 'semantic-ui-react';
+import { Grid, Header, List, Label, Icon, Segment } from 'semantic-ui-react';
 import Hotkeys from 'react-hot-keys';
 import update from 'immutability-helper';
 
@@ -77,6 +77,7 @@ class App extends Component {
   }
 
   handleChange(eventType, figure) {
+    if (!figure.color) return;
     const label = labels[colors.indexOf(figure.color)];
     const { polygons } = this.state;
     const idx = polygons[label].findIndex(f => f.id === figure.id);
@@ -166,6 +167,9 @@ class App extends Component {
           color={selected ? colors[labels.indexOf(selected)] : null}
           onChange={this.handleChange}
           onReassignment={() => this.setState({ reassigning: true })}
+          onSelectionChange={figure =>
+            figure || this.setState({ reassigning: false })
+          }
           ref={this.canvasRef}
           style={{ flex: 4 }}
         />
@@ -186,10 +190,8 @@ class Sidebar extends Component {
       style,
     } = this.props;
     return (
-      <div style={{ padding: '1em 0', ...style }}>
-        <Header size="large" align="center">
-          {title}
-        </Header>
+      <div style={{ padding: '1em 0.5em', ...style }}>
+        <Header size="large">{title}</Header>
         <List divided selection>
           {labels.map((label, i) =>
             ListItem({
@@ -207,6 +209,22 @@ class Sidebar extends Component {
       </div>
     );
   }
+}
+
+function HotkeysPanel() {
+  return (
+    <div>
+      <Header as="h2" attached="top">
+        Hotkeys
+      </Header>
+      <Segment attached>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+        tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
+        veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+        commodo consequat.
+      </Segment>
+    </div>
+  );
 }
 
 function genId() {

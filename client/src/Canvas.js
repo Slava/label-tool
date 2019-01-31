@@ -30,6 +30,7 @@ export default class Canvas extends Component {
       unfinishedFigure: null,
       selectedFigure: null,
     };
+    this.prevSelectedFigure = null;
 
     this.mapRef = React.createRef();
     this.handleChange = this.handleChange.bind(this);
@@ -152,7 +153,14 @@ export default class Canvas extends Component {
   }
 
   render() {
-    const { url, figures, onChange, onReassignment, style } = this.props;
+    const {
+      url,
+      figures,
+      onChange,
+      onReassignment,
+      onSelectionChange,
+      style,
+    } = this.props;
     const {
       bounds,
       zoom,
@@ -165,6 +173,11 @@ export default class Canvas extends Component {
 
     if (!bounds) {
       return null;
+    }
+
+    if (this.prevSelectedFigure !== selectedFigure && onSelectionChange) {
+      this.prevSelectedFigure = selectedFigure;
+      onSelectionChange(selectedFigure);
     }
 
     const calcDistance = (p1, p2) => {
@@ -213,7 +226,9 @@ export default class Canvas extends Component {
             }
           } else if (state === 'editing') {
             if (key === 'c') {
-              onReassignment();
+              if (selectedFigure) {
+                onReassignment();
+              }
             } else {
               onChange('delete', selectedFigure);
             }

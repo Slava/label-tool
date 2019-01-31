@@ -1,6 +1,12 @@
 import React, { Component, Fragment } from 'react';
 import { CRS, LatLngBounds } from 'leaflet';
-import { Map, ImageOverlay, Polyline, CircleMarker } from 'react-leaflet';
+import {
+  Map,
+  ImageOverlay,
+  Polyline,
+  Polygon,
+  CircleMarker,
+} from 'react-leaflet';
 import Hotkeys from 'react-hot-keys';
 import update from 'immutability-helper';
 import 'leaflet-path-drag';
@@ -162,13 +168,18 @@ export default class Canvas extends Component {
       })
     );
 
-    const hotkeysDOM =
-      state === 'editing' ? (
-        <Hotkeys
-          keyName="backspace,del"
-          onKeyDown={() => onChange('delete', selectedFigure)}
-        />
-      ) : null;
+    const hotkeysDOM = (
+      <Hotkeys
+        keyName="backspace,del,f"
+        onKeyDown={key => {
+          if (key === 'f' && state === 'drawing') {
+            handleChange('end', {});
+          } else if (state === 'editing') {
+            onChange('delete', selectedFigure);
+          }
+        }}
+      />
+    );
 
     return (
       <div
@@ -225,11 +236,6 @@ function Figure(figure, options) {
     onSelect,
   } = options;
 
-  let polygon = points;
-  if (finished) {
-    polygon = points.concat([points[0]]);
-  }
-
   const vertices = points.map((pos, i) => (
     <CircleMarker
       key={id + '-' + i}
@@ -278,10 +284,12 @@ function Figure(figure, options) {
     finished && editing ? midPoints : []
   );
 
+  const PolyComp = finished ? Polygon : Polyline;
+
   return (
     <Fragment key={id}>
-      <Polyline
-        positions={polygon}
+      <PolyComp
+        positions={points}
         color={color}
         weight={3}
         fill={true}

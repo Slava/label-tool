@@ -52,7 +52,7 @@ export default class Canvas extends Component {
     if (props.color !== state.lastColor && props.color) {
       return {
         unfinishedFigure: {
-          id: 'unfinished',
+          id: null,
           color: props.color,
           points: [],
         },
@@ -80,9 +80,9 @@ export default class Canvas extends Component {
     };
   }
 
-  getSelectedFigureId() {
+  getSelectedFigure() {
     const { selectedFigure } = this.state;
-    return selectedFigure && selectedFigure.id;
+    return selectedFigure;
   }
 
   handleChange(eventType, { point, pos, figure }) {
@@ -152,7 +152,7 @@ export default class Canvas extends Component {
   }
 
   render() {
-    const { url, figures, onChange } = this.props;
+    const { url, figures, onChange, onReassignment } = this.props;
     const {
       bounds,
       zoom,
@@ -205,14 +205,18 @@ export default class Canvas extends Component {
 
     const hotkeysDOM = (
       <Hotkeys
-        keyName="backspace,del,f"
+        keyName="backspace,del,c,f"
         onKeyDown={key => {
           if (key === 'f' && state === 'drawing') {
             if (unfinishedFigure.points.length >= 3) {
               this.handleChange('end', {});
             }
           } else if (state === 'editing') {
-            onChange('delete', selectedFigure);
+            if (key === 'c') {
+              onReassignment();
+            } else {
+              onChange('delete', selectedFigure);
+            }
           }
         }}
       />

@@ -20,7 +20,7 @@ export default class Canvas extends Component {
       zoom: -1,
       height: null,
       width: null,
-      state: 'none', // enum { none, editing, drawing }
+      state: 'editing', // enum { editing, drawing }
       unfinishedFigure: null,
       selectedFigure: null,
     };
@@ -39,12 +39,7 @@ export default class Canvas extends Component {
   }
 
   static getDerivedStateFromProps(props, state) {
-    const st =
-      state.state !== 'editing'
-        ? props.color
-          ? 'drawing'
-          : 'none'
-        : 'editing';
+    const st = props.color ? 'drawing' : 'editing';
 
     if (props.color !== state.lastColor && props.color) {
       return {

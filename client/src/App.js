@@ -154,32 +154,39 @@ class App extends Component {
         };
 
     return (
-      <Grid columns={3} divided stretched style={{ margin: 0 }}>
-        <Grid.Row stretched style={{ padding: 0 }}>
-          <Grid.Column width={4} style={{ overflow: 'auto' }}>
-            <Sidebar labels={labels} {...sidebarProps} />
-          </Grid.Column>
-          <Grid.Column width={12} style={{ padding: 0 }}>
-            <Canvas
-              url="http://kempe.net/images/newspaper-big.jpg"
-              figures={figures}
-              color={selected ? colors[labels.indexOf(selected)] : null}
-              onChange={this.handleChange}
-              onReassignment={() => this.setState({ reassigning: true })}
-              ref={this.canvasRef}
-            />
-          </Grid.Column>
-        </Grid.Row>
-      </Grid>
+      <div style={{ display: 'flex' }}>
+        <Sidebar
+          labels={labels}
+          {...sidebarProps}
+          style={{ flex: 1, maxWidth: 300 }}
+        />
+        <Canvas
+          url="http://kempe.net/images/newspaper-big.jpg"
+          figures={figures}
+          color={selected ? colors[labels.indexOf(selected)] : null}
+          onChange={this.handleChange}
+          onReassignment={() => this.setState({ reassigning: true })}
+          ref={this.canvasRef}
+          style={{ flex: 4 }}
+        />
+      </div>
     );
   }
 }
 
 class Sidebar extends Component {
   render() {
-    const { title, onSelect, labels, selected, toggles, onToggle } = this.props;
+    const {
+      title,
+      onSelect,
+      labels,
+      selected,
+      toggles,
+      onToggle,
+      style,
+    } = this.props;
     return (
-      <div style={{ padding: '1em 0' }}>
+      <div style={{ padding: '1em 0', ...style }}>
         <Header size="large" align="center">
           {title}
         </Header>

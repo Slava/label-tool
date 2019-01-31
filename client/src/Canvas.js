@@ -152,7 +152,7 @@ export default class Canvas extends Component {
   }
 
   render() {
-    const { url, figures, onChange, onReassignment } = this.props;
+    const { url, figures, onChange, onReassignment, style } = this.props;
     const {
       bounds,
       zoom,
@@ -227,6 +227,7 @@ export default class Canvas extends Component {
         style={{
           cursor: state === 'drawing' ? 'crosshair' : 'grab',
           height: '100%',
+          ...style,
         }}
       >
         <Map

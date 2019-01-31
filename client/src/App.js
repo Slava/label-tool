@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Grid, Container, Header, List, Label } from 'semantic-ui-react';
+import { Grid, Header, List, Label } from 'semantic-ui-react';
 import Hotkeys from 'react-hot-keys';
 import update from 'immutability-helper';
 

@@ -146,34 +146,44 @@ export default class Canvas extends Component {
     };
 
     const unfinishedDrawingDOM =
-      state === 'drawing'
-        ? Figure(unfinishedFigure, {
+      state === 'drawing' ? (
+        <Figure
+          figure={unfinishedFigure}
+          options={{
             finished: false,
             editing: false,
             interactive: false,
             onChange: handleChange,
             calcDistance,
-          })
-        : null;
+          }}
+        />
+      ) : null;
 
-    const figuresDOM = figures.map((f, i) =>
-      Figure(f, {
-        editing:
-          selectedFigure && selectedFigure.id === f.id && state === 'editing',
-        finished: true,
-        interactive: state !== 'drawing',
-        onSelect: () => this.setState({ selectedFigure: f, state: 'editing' }),
-        onChange: handleChange,
-        calcDistance,
-      })
-    );
+    const figuresDOM = figures.map((f, i) => (
+      <Figure
+        key={f.id}
+        figure={f}
+        options={{
+          editing:
+            selectedFigure && selectedFigure.id === f.id && state === 'editing',
+          finished: true,
+          interactive: state !== 'drawing',
+          onSelect: () =>
+            this.setState({ selectedFigure: f, state: 'editing' }),
+          onChange: handleChange,
+          calcDistance,
+        }}
+      />
+    ));
 
     const hotkeysDOM = (
       <Hotkeys
         keyName="backspace,del,f"
         onKeyDown={key => {
           if (key === 'f' && state === 'drawing') {
-            handleChange('end', {});
+            if (unfinishedFigure.points.length >= 3) {
+              handleChange('end', {});
+            }
           } else if (state === 'editing') {
             onChange('delete', selectedFigure);
           }
@@ -225,86 +235,95 @@ export default class Canvas extends Component {
   }
 }
 
-function Figure(figure, options) {
-  const { id, points, color } = figure;
-  const {
-    editing,
-    finished,
-    interactive,
-    calcDistance,
-    onChange,
-    onSelect,
-  } = options;
+class Figure extends Component {
+  constructor(props) {
+    super(props);
+  }
+  render() {
+    const { figure, options } = this.props;
+    const { id, points, color } = figure;
+    const {
+      editing,
+      finished,
+      interactive,
+      calcDistance,
+      onChange,
+      onSelect,
+    } = options;
 
-  const vertices = points.map((pos, i) => (
-    <CircleMarker
-      key={id + '-' + i}
-      color={color}
-      center={pos}
-      radius={5}
-      onClick={e => {
-        if (!finished && i === 0) {
-          onChange('end', {});
-          skipNextClickEvent = true;
-          return false;
-        }
-
-        if (finished && editing) {
-          if (points.length > 3) {
-            onChange('remove', { pos: i, figure });
-          }
-          return false;
-        }
-      }}
-      draggable={editing}
-      onDragend={e =>
-        onChange('move', { point: e.target.getLatLng(), pos: i, figure })
-      }
-    />
-  ));
-
-  const midPoints = points
-    .map((pos, i) => [pos, points[(i + 1) % points.length], i])
-    .filter(([a, b]) => calcDistance(a, b) > 40)
-    .map(([a, b, i]) => (
+    const vertices = points.map((pos, i) => (
       <CircleMarker
-        key={id + '-' + i + '-mid'}
-        color="white"
-        center={midPoint(a, b)}
-        radius={3}
-        opacity={0.5}
+        key={id + '-' + i}
+        color={color}
+        center={pos}
+        radius={5}
         onClick={e => {
-          onChange('add', { point: midPoint(a, b), pos: i + 1, figure });
-          skipNextClickEvent = true;
+          if (!finished && i === 0) {
+            if (points.length >= 3) {
+              onChange('end', {});
+            }
+            skipNextClickEvent = true;
+            return false;
+          }
+
+          if (finished && editing) {
+            if (points.length > 3) {
+              onChange('remove', { pos: i, figure });
+            }
+            return false;
+          }
         }}
+        draggable={editing}
+        onDrag={e => {}}
+        onDragend={e =>
+          onChange('move', { point: e.target.getLatLng(), pos: i, figure })
+        }
       />
     ));
 
-  const allCircles = (!finished || editing ? vertices : []).concat(
-    finished && editing ? midPoints : []
-  );
-
-  const PolyComp = finished ? Polygon : Polyline;
-
-  return (
-    <Fragment key={id}>
-      <PolyComp
-        positions={points}
-        color={color}
-        weight={3}
-        fill={true}
-        fillColor={color}
-        interactive={interactive}
-        onClick={() => {
-          if (interactive) {
-            onSelect();
+    const midPoints = points
+      .map((pos, i) => [pos, points[(i + 1) % points.length], i])
+      .filter(([a, b]) => calcDistance(a, b) > 40)
+      .map(([a, b, i]) => (
+        <CircleMarker
+          key={id + '-' + i + '-mid'}
+          color="white"
+          center={midPoint(a, b)}
+          radius={3}
+          opacity={0.5}
+          onClick={e => {
+            onChange('add', { point: midPoint(a, b), pos: i + 1, figure });
             skipNextClickEvent = true;
-          }
-        }}
-      />
-      {allCircles}
-    </Fragment>
-  );
+          }}
+        />
+      ));
+
+    const allCircles = (!finished || editing ? vertices : []).concat(
+      finished && editing ? midPoints : []
+    );
+
+    const PolyComp = finished ? Polygon : Polyline;
+
+    return (
+      <Fragment key={id}>
+        <PolyComp
+          positions={points}
+          color={color}
+          weight={3}
+          fill={true}
+          fillColor={color}
+          interactive={interactive}
+          onClick={() => {
+            if (interactive) {
+              onSelect();
+              skipNextClickEvent = true;
+            }
+          }}
+        />
+        {allCircles}
+      </Fragment>
+    );
+  }
 }
 
 function convertPoint(p) {

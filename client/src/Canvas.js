@@ -32,6 +32,8 @@ export default class Canvas extends Component {
     };
 
     this.mapRef = React.createRef();
+    this.handleChange = this.handleChange.bind(this);
+    this.handleClick = this.handleClick.bind(this);
   }
 
   componentDidMount() {
@@ -78,6 +80,77 @@ export default class Canvas extends Component {
     };
   }
 
+  getSelectedFigureId() {
+    const { selectedFigure } = this.state;
+    return selectedFigure && selectedFigure.id;
+  }
+
+  handleChange(eventType, { point, pos, figure }) {
+    const { state, unfinishedFigure } = this.state;
+    const { onChange } = this.props;
+
+    switch (eventType) {
+      case 'add':
+        if (state === 'drawing') {
+          let newState = unfinishedFigure.points;
+          newState = update(newState, { $push: [point] });
+
+          this.setState({
+            unfinishedFigure: update(unfinishedFigure, {
+              points: {
+                $set: newState,
+              },
+            }),
+          });
+        } else {
+          onChange(
+            'replace',
+            update(figure, { points: { $splice: [[pos, 0, point]] } })
+          );
+        }
+        break;
+
+      case 'end':
+        const f = unfinishedFigure;
+        onChange('new', f);
+        this.setState({
+          unfinishedFigure: null,
+        });
+        break;
+
+      case 'move':
+        onChange(
+          'replace',
+          update(figure, { points: { $splice: [[pos, 1, point]] } })
+        );
+        break;
+
+      case 'remove':
+        onChange(
+          'replace',
+          update(figure, { points: { $splice: [[pos, 1]] } })
+        );
+        break;
+    }
+  }
+
+  handleClick(e) {
+    const { state } = this.state;
+    if (skipNextClickEvent) {
+      // a hack, for whatever reason it is really hard to stop event propagation in leaflet
+      skipNextClickEvent = false;
+      return;
+    }
+
+    if (state === 'drawing') {
+      this.handleChange('add', { point: convertPoint(e.latlng) });
+    }
+
+    if (state === 'editing') {
+      this.setState({ selectedFigure: null });
+    }
+  }
+
   render() {
     const { url, figures, onChange } = this.props;
     const {
@@ -94,52 +167,6 @@ export default class Canvas extends Component {
       return null;
     }
 
-    const handleChange = (eventType, { point, pos, figure }) => {
-      switch (eventType) {
-        case 'add':
-          if (state === 'drawing') {
-            let newState = unfinishedFigure.points;
-            newState = update(newState, { $push: [point] });
-
-            this.setState({
-              unfinishedFigure: update(unfinishedFigure, {
-                points: {
-                  $set: newState,
-                },
-              }),
-            });
-          } else {
-            onChange(
-              'replace',
-              update(figure, { points: { $splice: [[pos, 0, point]] } })
-            );
-          }
-          break;
-
-        case 'end':
-          const f = unfinishedFigure;
-          onChange('new', f);
-          this.setState({
-            unfinishedFigure: null,
-          });
-          break;
-
-        case 'move':
-          onChange(
-            'replace',
-            update(figure, { points: { $splice: [[pos, 1, point]] } })
-          );
-          break;
-
-        case 'remove':
-          onChange(
-            'replace',
-            update(figure, { points: { $splice: [[pos, 1]] } })
-          );
-          break;
-      }
-    };
-
     const calcDistance = (p1, p2) => {
       const map = this.mapRef.current.leafletElement;
       return map.latLngToLayerPoint(p1).distanceTo(map.latLngToLayerPoint(p2));
@@ -153,7 +180,7 @@ export default class Canvas extends Component {
             finished: false,
             editing: false,
             interactive: false,
-            onChange: handleChange,
+            onChange: this.handleChange,
             calcDistance,
           }}
         />
@@ -170,7 +197,7 @@ export default class Canvas extends Component {
           interactive: state !== 'drawing',
           onSelect: () =>
             this.setState({ selectedFigure: f, state: 'editing' }),
-          onChange: handleChange,
+          onChange: this.handleChange,
           calcDistance,
         }}
       />
@@ -182,7 +209,7 @@ export default class Canvas extends Component {
         onKeyDown={key => {
           if (key === 'f' && state === 'drawing') {
             if (unfinishedFigure.points.length >= 3) {
-              handleChange('end', {});
+              this.handleChange('end', {});
             }
           } else if (state === 'editing') {
             onChange('delete', selectedFigure);
@@ -207,21 +234,7 @@ export default class Canvas extends Component {
           zoomAnimation={false}
           zoomSnap={0.1}
           attributionControl={false}
-          onClick={e => {
-            if (skipNextClickEvent) {
-              // a hack, for whatever reason it is really hard to stop event propagation in leaflet
-              skipNextClickEvent = false;
-              return;
-            }
-
-            if (state === 'drawing') {
-              handleChange('add', { point: convertPoint(e.latlng) });
-            }
-
-            if (state === 'editing') {
-              this.setState({ selectedFigure: null });
-            }
-          }}
+          onClick={this.handleClick}
           onZoom={e => this.setState({ zoom: e.target.getZoom() })}
           ref={this.mapRef}
         >

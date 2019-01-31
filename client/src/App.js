@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Grid, Header, List, Label } from 'semantic-ui-react';
+import { Grid, Header, List, Label, Icon } from 'semantic-ui-react';
 import Hotkeys from 'react-hot-keys';
 import update from 'immutability-helper';
 
@@ -26,7 +26,27 @@ const colors = [
 ];
 const labels = ['cat', 'dog', 'car', 'tree', 'another one'];
 
-function ListItem({ shortcut, label, onSelect, color, selected = false }) {
+function ListItem({
+  shortcut,
+  label,
+  onSelect,
+  onToggle,
+  color,
+  selected = false,
+  isToggled,
+}) {
+  const icon = onToggle ? (
+    <Icon
+      link
+      name={isToggled ? 'eye' : 'eye slash'}
+      style={{ float: 'right' }}
+      onClick={e => {
+        onToggle(label);
+        e.stopPropagation();
+      }}
+    />
+  ) : null;
+
   return (
     <List.Item onClick={onSelect} active={selected} key={label}>
       <Hotkeys keyName={shortcut} onKeyDown={onSelect}>
@@ -34,6 +54,7 @@ function ListItem({ shortcut, label, onSelect, color, selected = false }) {
           {shortcut}
         </Label>
         {label}
+        {icon}
       </Hotkeys>
     </List.Item>
   );
@@ -45,9 +66,11 @@ class App extends Component {
     this.state = {
       selected: null,
       polygons: {}, // mapping from label name to a list of polygon structures
+      toggles: {},
       reassigning: false,
     };
     labels.map(label => (this.state.polygons[label] = []));
+    labels.map(label => (this.state.toggles[label] = true));
 
     this.handleChange = this.handleChange.bind(this);
     this.canvasRef = React.createRef();
@@ -93,11 +116,13 @@ class App extends Component {
   }
 
   render() {
-    const { polygons, selected, reassigning } = this.state;
+    const { polygons, selected, reassigning, toggles } = this.state;
     const figures = [];
     labels.map((label, i) =>
-      polygons[label].map(poly =>
-        figures.push({ color: colors[i], points: poly.points, id: poly.id })
+      polygons[label].map(
+        poly =>
+          toggles[label] &&
+          figures.push({ color: colors[i], points: poly.points, id: poly.id })
       )
     );
 
@@ -121,6 +146,11 @@ class App extends Component {
           title: 'Labeling',
           selected,
           onSelect: selected => this.setState({ selected }),
+          toggles,
+          onToggle: label =>
+            this.setState({
+              toggles: update(toggles, { [label]: { $set: !toggles[label] } }),
+            }),
         };
 
     return (
@@ -149,7 +179,7 @@ class App extends Component {
 
 class Sidebar extends Component {
   render() {
-    const { title, onSelect, labels, selected } = this.props;
+    const { title, onSelect, labels, selected, toggles, onToggle } = this.props;
     return (
       <div style={{ padding: '1em 0' }}>
         <Header size="large" align="center">
@@ -163,6 +193,8 @@ class Sidebar extends Component {
               color: colors[i],
               onSelect: () => onSelect(label),
               selected: selected === label,
+              onToggle: onToggle,
+              isToggled: toggles && toggles[label],
             })
           )}
           <Hotkeys keyName="esc" onKeyDown={() => onSelect(null)} />

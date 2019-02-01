@@ -282,6 +282,7 @@ class Figure extends Component {
     super(props);
     this.state = {
       dragging: false,
+      draggedPoint: null,
     };
   }
   // abstract
@@ -296,11 +297,18 @@ class Figure extends Component {
   onPointMoved(point, i) {}
 
   // abstract
-  makeExtraElements() {}
+  makeExtraElements() {
+    return null;
+  }
 
   // abstract
   leafletComponent() {
     return Polygon;
+  }
+
+  // abstract
+  getRenderPoints(points) {
+    return points;
   }
 
   makeGuides() {
@@ -322,7 +330,9 @@ class Figure extends Component {
     const { id, points, color } = figure;
     const { editing, finished, interactive, onSelect } = options;
 
-    const vertices = points.map((pos, i) => (
+    const renderPoints = this.getRenderPoints(points);
+
+    const vertices = renderPoints.map((pos, i) => (
       <CircleMarker
         key={id + '-' + i}
         color={color}
@@ -349,7 +359,7 @@ class Figure extends Component {
     return (
       <Fragment key={id}>
         <PolyComp
-          positions={points}
+          positions={renderPoints}
           color={color}
           weight={3}
           fill={true}
@@ -373,7 +383,6 @@ class Figure extends Component {
 class PolygonFigure extends Figure {
   constructor(props) {
     super(props);
-    this.state.draggedPoint = null;
 
     this.onPointClick = this.onPointClick.bind(this);
   }
@@ -467,6 +476,58 @@ class PolygonFigure extends Figure {
       }
       return false;
     }
+  }
+}
+
+class BBoxFigure extends Figure {
+  calculateGuides() {
+    const { figure, options } = this.props;
+    const { points } = figure;
+    const { newPoint, finished } = options;
+    const { draggedPoint } = this.state;
+
+    if (draggedPoint) {
+      const renderPoints = this.getRenderPoints(points);
+      const { point, index } = draggedPoint;
+      const oppPoint = renderPoints[(index + 2) % renderPoints.length];
+      const sidePoint1 = { lat: oppPoint.lat, lng: point.lng };
+      const sidePoint2 = { lat: point.lat, lng: oppPoint.lng };
+      return [
+        [point, sidePoint1],
+        [sidePoint1, oppPoint],
+        [point, sidePoint2],
+        [sidePoint2, oppPoint],
+      ];
+    }
+
+    if (!finished && points.length > 0) {
+      const renderPoints = this.getRenderPoints([points[0], newPoint]);
+      return [
+        [renderPoints[0], renderPoints[1]],
+        [renderPoints[1], renderPoints[2]],
+        [renderPoints[2], renderPoints[3]],
+        [renderPoints[3], renderPoints[0]],
+      ];
+    }
+
+    return [];
+  }
+
+  getRenderPoints(points) {
+    const [p1, p2] = points;
+    if (!p1) {
+      return [];
+    }
+    if (!p2) {
+      return [p1];
+    }
+
+    return [
+      { lat: p1.lat, lng: p1.lng },
+      { lat: p1.lat, lng: p2.lng },
+      { lat: p2.lat, lng: p2.lng },
+      { lat: p2.lat, lng: p1.lng },
+    ];
   }
 }
 

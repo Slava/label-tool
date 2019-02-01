@@ -29,6 +29,7 @@ export default class Canvas extends Component {
       // state: editing/drawing is derived from the props.color
       unfinishedFigure: null,
       selectedFigure: null,
+      cursorPos: { lat: 0, lng: 0 },
     };
     this.prevSelectedFigure = null;
 
@@ -171,6 +172,7 @@ export default class Canvas extends Component {
       width,
       unfinishedFigure,
       selectedFigure,
+      cursorPos,
     } = this.state;
 
     const drawing = !!color;
@@ -198,6 +200,7 @@ export default class Canvas extends Component {
           interactive: false,
           onChange: this.handleChange,
           calcDistance,
+          newPoint: cursorPos,
         }}
       />
     ) : null;
@@ -221,16 +224,18 @@ export default class Canvas extends Component {
       <Hotkeys
         keyName="backspace,del,c,f"
         onKeyDown={key => {
-          if (key === 'f' && drawing) {
-            if (unfinishedFigure.points.length >= 3) {
-              this.handleChange('end', {});
+          if (drawing) {
+            if (key === 'f') {
+              if (unfinishedFigure.points.length >= 3) {
+                this.handleChange('end', {});
+              }
             }
-          } else if (drawing) {
+          } else {
             if (key === 'c') {
               if (selectedFigure) {
                 onReassignment();
               }
-            } else {
+            } else if (key === 'backspace' || key === 'del') {
               onChange('delete', selectedFigure);
             }
           }
@@ -257,6 +262,7 @@ export default class Canvas extends Component {
           attributionControl={false}
           onClick={this.handleClick}
           onZoom={e => this.setState({ zoom: e.target.getZoom() })}
+          onMousemove={e => this.setState({ cursorPos: e.latlng })}
           ref={this.mapRef}
         >
           <ImageOverlay url={url} bounds={bounds} />
@@ -283,12 +289,14 @@ class Figure extends Component {
     const { id, points, color } = figure;
     const {
       editing,
+      newPoint,
       finished,
       interactive,
       calcDistance,
       onChange,
       onSelect,
     } = options;
+
     const { dragging, guides } = this.state;
 
     const vertices = points.map((pos, i) => (
@@ -354,15 +362,21 @@ class Figure extends Component {
       finished && editing && !dragging ? midPoints : []
     );
 
-    const guideLines = guides.map((pos, i) => (
-      <Polyline
-        key={i}
-        positions={pos}
-        color={color}
-        opacity={0.7}
-        dashArray="4"
-      />
-    ));
+    const additionalGuides =
+      !finished && points.length > 0
+        ? [[points[points.length - 1], newPoint]]
+        : [];
+    const guideLines = additionalGuides
+      .concat(guides)
+      .map((pos, i) => (
+        <Polyline
+          key={i}
+          positions={pos}
+          color={color}
+          opacity={0.7}
+          dashArray="4"
+        />
+      ));
 
     const PolyComp = finished ? Polygon : Polyline;
 

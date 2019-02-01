@@ -132,6 +132,9 @@ export default class Canvas extends Component {
           update(figure, { points: { $splice: [[pos, 1]] } })
         );
         break;
+
+      default:
+        throw new Error('unknown event type ' + eventType);
     }
   }
 

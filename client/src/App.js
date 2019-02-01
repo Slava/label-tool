@@ -1,13 +1,5 @@
 import React, { Component } from 'react';
-import {
-  Grid,
-  Header,
-  List,
-  Label,
-  Icon,
-  Segment,
-  Table,
-} from 'semantic-ui-react';
+import { Header, List, Label, Icon, Segment, Table } from 'semantic-ui-react';
 import Hotkeys from 'react-hot-keys';
 import update from 'immutability-helper';
 
@@ -71,17 +63,20 @@ function ListItem({
 class App extends Component {
   constructor(props) {
     super(props);
+
+    const polygons = {};
+    const toggles = {};
+    labels.map(label => (polygons[label] = []));
+    labels.map(label => (toggles[label] = true));
     this.state = {
       selected: null,
-      polygons: {}, // mapping from label name to a list of polygon structures
-      toggles: {},
+      polygons, // mapping from label name to a list of polygon structures
+      toggles,
 
       // UI
       reassigning: false,
       hotkeysPanel: false,
     };
-    labels.map(label => (this.state.polygons[label] = []));
-    labels.map(label => (this.state.toggles[label] = true));
 
     this.handleChange = this.handleChange.bind(this);
     this.canvasRef = React.createRef();
@@ -124,6 +119,9 @@ class App extends Component {
           }),
         }));
         break;
+
+      default:
+        throw new Error('unknown event type ' + eventType);
     }
   }
 
@@ -271,7 +269,7 @@ function HotkeysPanel({ labels, onClose }) {
 
           <Table.Body>
             {labels.map((label, i) => (
-              <Table.Row>
+              <Table.Row key={label}>
                 <Table.Cell>{label}</Table.Cell>
                 <Table.Cell>{i}</Table.Cell>
               </Table.Row>

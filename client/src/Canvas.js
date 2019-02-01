@@ -261,6 +261,7 @@ export default class Canvas extends Component {
           center={[height / 2, width / 2]}
           zoomAnimation={false}
           zoomSnap={0.1}
+          keyboard={false}
           attributionControl={false}
           onClick={this.handleClick}
           onZoom={e => this.setState({ zoom: e.target.getZoom() })}

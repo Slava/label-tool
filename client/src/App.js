@@ -24,7 +24,15 @@ const colors = [
   'grey',
   'black',
 ];
-const labels = ['cat', 'dog', 'car', 'tree', 'another one'];
+
+const labels = [
+  { name: 'cat', type: 'bbox' },
+  { name: 'dog', type: 'bbox' },
+  { name: 'car', type: 'polygon' },
+  { name: 'tree', type: 'polygon' },
+  { name: 'house', type: 'bbox' },
+  { name: 'person', type: 'polygon' },
+];
 
 function ListItem({
   shortcut,
@@ -60,17 +68,25 @@ function ListItem({
   );
 }
 
+/*
+ type Figure = {
+   type: 'bbox' | 'polygon';
+   points: [{ lat: Number, lng: Number }];
+   ?color: Color;
+ };
+*/
+
 class App extends Component {
   constructor(props) {
     super(props);
 
-    const polygons = {};
+    const figures = {};
     const toggles = {};
-    labels.map(label => (polygons[label] = []));
-    labels.map(label => (toggles[label] = true));
+    labels.map(label => (figures[label.name] = []));
+    labels.map(label => (toggles[label.name] = true));
     this.state = {
       selected: null,
-      polygons, // mapping from label name to a list of polygon structures
+      figures, // mapping from label name to a list of Figure structures
       toggles,
 
       // UI
@@ -85,14 +101,14 @@ class App extends Component {
   handleChange(eventType, figure) {
     if (!figure.color) return;
     const label = labels[colors.indexOf(figure.color)];
-    const { polygons } = this.state;
-    const idx = polygons[label].findIndex(f => f.id === figure.id);
+    const { figures } = this.state;
+    const idx = figures[label.name].findIndex(f => f.id === figure.id);
 
     switch (eventType) {
       case 'new':
         this.setState(state => ({
-          polygons: update(state.polygons, {
-            [label]: {
+          figures: update(state.figures, {
+            [label.name]: {
               $push: [{ id: figure.id || genId(), points: figure.points }],
             },
           }),
@@ -102,8 +118,8 @@ class App extends Component {
 
       case 'replace':
         this.setState(state => ({
-          polygons: update(state.polygons, {
-            [label]: {
+          figures: update(state.figures, {
+            [label.name]: {
               $splice: [[idx, 1, { id: figure.id, points: figure.points }]],
             },
           }),
@@ -112,8 +128,8 @@ class App extends Component {
 
       case 'delete':
         this.setState(state => ({
-          polygons: update(state.polygons, {
-            [label]: {
+          figures: update(state.figures, {
+            [label.name]: {
               $splice: [[idx, 1]],
             },
           }),
@@ -127,18 +143,22 @@ class App extends Component {
 
   render() {
     const {
-      polygons,
+      figures,
       selected,
       reassigning,
       toggles,
       hotkeysPanel,
     } = this.state;
-    const figures = [];
+    const allFigures = [];
     labels.map((label, i) =>
-      polygons[label].map(
+      figures[label.name].map(
         poly =>
-          toggles[label] &&
-          figures.push({ color: colors[i], points: poly.points, id: poly.id })
+          toggles[label.name] &&
+          allFigures.push({
+            color: colors[i],
+            points: poly.points,
+            id: poly.id,
+          })
       )
     );
 
@@ -148,7 +168,8 @@ class App extends Component {
           selected: null,
           onSelect: selected => {
             const figure = this.canvasRef.current.getSelectedFigure();
-            const newColor = colors[labels.indexOf(selected)];
+            const newColor =
+              colors[labels.findIndex(label => label.name === selected)];
             if (figure && figure.color !== newColor) {
               this.handleChange('delete', figure);
               figure.color = newColor;
@@ -163,16 +184,18 @@ class App extends Component {
           selected,
           onSelect: selected => this.setState({ selected }),
           toggles,
-          onToggle: label =>
+          onToggle: labelName =>
             this.setState({
-              toggles: update(toggles, { [label]: { $set: !toggles[label] } }),
+              toggles: update(toggles, {
+                [labelName]: { $set: !toggles[labelName] },
+              }),
             }),
           openHotkeys: () => this.setState({ hotkeysPanel: true }),
         };
 
     const hotkeysPanelDOM = hotkeysPanel ? (
       <HotkeysPanel
-        labels={labels}
+        labels={labels.map(label => label.name)}
         onClose={() => this.setState({ hotkeysPanel: false })}
       />
     ) : null;
@@ -180,15 +203,19 @@ class App extends Component {
     return (
       <div style={{ display: 'flex' }}>
         <Sidebar
-          labels={labels}
+          labels={labels.map(label => label.name)}
           {...sidebarProps}
           style={{ flex: 1, maxWidth: 300 }}
         />
         {hotkeysPanelDOM}
         <Canvas
           url="http://kempe.net/images/newspaper-big.jpg"
-          figures={figures}
-          color={selected ? colors[labels.indexOf(selected)] : null}
+          figures={allFigures}
+          color={
+            selected
+              ? colors[labels.findIndex(label => label.name === selected)]
+              : null
+          }
           onChange={this.handleChange}
           onReassignment={() => this.setState({ reassigning: true })}
           onSelectionChange={figure =>

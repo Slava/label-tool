@@ -192,7 +192,7 @@ export default class Canvas extends Component {
     };
 
     const unfinishedDrawingDOM = drawing ? (
-      <Figure
+      <PolygonFigure
         figure={unfinishedFigure}
         options={{
           finished: false,
@@ -206,7 +206,7 @@ export default class Canvas extends Component {
     ) : null;
 
     const figuresDOM = figures.map((f, i) => (
-      <Figure
+      <PolygonFigure
         key={f.id}
         figure={f}
         options={{
@@ -236,7 +236,9 @@ export default class Canvas extends Component {
                 onReassignment();
               }
             } else if (key === 'backspace' || key === 'del') {
-              onChange('delete', selectedFigure);
+              if (selectedFigure) {
+                onChange('delete', selectedFigure);
+              }
             }
           }
         }}
@@ -280,24 +282,45 @@ class Figure extends Component {
     super(props);
     this.state = {
       dragging: false,
-      guides: [],
     };
+  }
+  // abstract
+  calculateGuides() {
+    return [];
+  }
+
+  // abstract
+  onPointClick(i) {}
+
+  // abstract
+  onPointMoved(point, i) {}
+
+  // abstract
+  makeExtraElements() {}
+
+  // abstract
+  leafletComponent() {
+    return Polygon;
+  }
+
+  makeGuides() {
+    const guides = this.calculateGuides();
+    const { color } = this.props.figure;
+    return guides.map((pos, i) => (
+      <Polyline
+        key={i}
+        positions={pos}
+        color={color}
+        opacity={0.7}
+        dashArray="4"
+      />
+    ));
   }
 
   render() {
     const { figure, options } = this.props;
     const { id, points, color } = figure;
-    const {
-      editing,
-      newPoint,
-      finished,
-      interactive,
-      calcDistance,
-      onChange,
-      onSelect,
-    } = options;
-
-    const { dragging, guides } = this.state;
+    const { editing, finished, interactive, onSelect } = options;
 
     const vertices = points.map((pos, i) => (
       <CircleMarker
@@ -305,41 +328,97 @@ class Figure extends Component {
         color={color}
         center={pos}
         radius={5}
-        onClick={e => {
-          if (!finished && i === 0) {
-            if (points.length >= 3) {
-              onChange('end', {});
-            }
-            skipNextClickEvent = true;
-            return false;
-          }
-
-          if (finished && editing) {
-            if (points.length > 3) {
-              onChange('remove', { pos: i, figure });
-            }
-            return false;
-          }
-        }}
+        onClick={() => this.onPointClick(i)}
         draggable={editing}
         onDrag={e => {
           this.setState({
-            guides: [
-              [
-                points[(i - 1 + points.length) % points.length],
-                e.target.getLatLng(),
-              ],
-              [points[(i + 1) % points.length], e.target.getLatLng()],
-            ],
+            draggedPoint: { point: e.target.getLatLng(), index: i },
           });
         }}
         onDragstart={e => this.setState({ dragging: true })}
         onDragend={e => {
-          onChange('move', { point: e.target.getLatLng(), pos: i, figure });
-          this.setState({ dragging: false, guides: [] });
+          this.onPointMoved(e.target.getLatLng(), i);
+          this.setState({ dragging: false, draggedPoint: null });
         }}
       />
     ));
+
+    const guideLines = this.makeGuides();
+    const PolyComp = this.leafletComponent();
+
+    return (
+      <Fragment key={id}>
+        <PolyComp
+          positions={points}
+          color={color}
+          weight={3}
+          fill={true}
+          fillColor={color}
+          interactive={interactive}
+          onClick={() => {
+            if (interactive) {
+              onSelect();
+              skipNextClickEvent = true;
+            }
+          }}
+        />
+        {!finished || editing ? vertices : null}
+        {guideLines}
+        {this.makeExtraElements()}
+      </Fragment>
+    );
+  }
+}
+
+class PolygonFigure extends Figure {
+  constructor(props) {
+    super(props);
+    this.state.draggedPoint = null;
+
+    this.onPointClick = this.onPointClick.bind(this);
+  }
+
+  leafletComponent() {
+    const {
+      options: { finished },
+    } = this.props;
+    return finished ? Polygon : Polyline;
+  }
+
+  calculateGuides() {
+    const { figure, options } = this.props;
+    const { points } = figure;
+    const { newPoint, finished } = options;
+    const { draggedPoint } = this.state;
+
+    const guides = [];
+    if (draggedPoint) {
+      const { point, index } = draggedPoint;
+      const { length } = points;
+      guides.push(
+        [point, points[(index + 1) % length]],
+        [point, points[(index - 1 + length) % length]]
+      );
+    }
+
+    const additionalGuides =
+      !finished && points.length > 0
+        ? [[points[points.length - 1], newPoint]]
+        : [];
+
+    return guides.concat(additionalGuides);
+  }
+
+  makeExtraElements() {
+    const { figure, options } = this.props;
+    const { id, points } = figure;
+    const { editing, finished, calcDistance, onChange } = options;
+
+    const { dragging } = this.state;
+
+    if (!finished || !editing || dragging) {
+      return [];
+    }
 
     const midPoints = points
       .map((pos, i) => [pos, points[(i + 1) % points.length], i])
@@ -358,48 +437,36 @@ class Figure extends Component {
         />
       ));
 
-    const allCircles = (!finished || editing ? vertices : []).concat(
-      finished && editing && !dragging ? midPoints : []
-    );
+    return midPoints;
+  }
 
-    const additionalGuides =
-      !finished && points.length > 0
-        ? [[points[points.length - 1], newPoint]]
-        : [];
-    const guideLines = additionalGuides
-      .concat(guides)
-      .map((pos, i) => (
-        <Polyline
-          key={i}
-          positions={pos}
-          color={color}
-          opacity={0.7}
-          dashArray="4"
-        />
-      ));
+  onPointMoved(point, index) {
+    const {
+      figure,
+      options: { onChange },
+    } = this.props;
+    onChange('move', { point, pos: index, figure });
+  }
 
-    const PolyComp = finished ? Polygon : Polyline;
+  onPointClick(i) {
+    const { figure, options } = this.props;
+    const { points } = figure;
+    const { finished, editing, onChange } = options;
 
-    return (
-      <Fragment key={id}>
-        <PolyComp
-          positions={points}
-          color={color}
-          weight={3}
-          fill={true}
-          fillColor={color}
-          interactive={interactive}
-          onClick={() => {
-            if (interactive) {
-              onSelect();
-              skipNextClickEvent = true;
-            }
-          }}
-        />
-        {allCircles}
-        {guideLines}
-      </Fragment>
-    );
+    if (!finished && i === 0) {
+      if (points.length >= 3) {
+        onChange('end', {});
+      }
+      skipNextClickEvent = true;
+      return false;
+    }
+
+    if (finished && editing) {
+      if (points.length > 3) {
+        onChange('remove', { pos: i, figure });
+      }
+      return false;
+    }
   }
 }
 

@@ -26,7 +26,7 @@ export default class Canvas extends Component {
       zoom: -1,
       height: null,
       width: null,
-      state: 'editing', // enum { editing, drawing }
+      // state: editing/drawing is derived from the props.color
       unfinishedFigure: null,
       selectedFigure: null,
     };
@@ -41,15 +41,13 @@ export default class Canvas extends Component {
     this.calcBounds(this.props.url);
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (this.props.url !== nextProps.url) {
-      this.calcBounds(nextProps.url);
+  componentDidUpdate(prevProps) {
+    if (this.props.url !== prevProps.url) {
+      this.calcBounds(this.props.url);
     }
   }
 
   static getDerivedStateFromProps(props, state) {
-    const st = props.color ? 'drawing' : 'editing';
-
     if (props.color !== state.lastColor && props.color) {
       return {
         unfinishedFigure: {
@@ -58,12 +56,10 @@ export default class Canvas extends Component {
           points: [],
         },
         lastColor: props.color,
-        state: 'drawing',
       };
     }
 
     return {
-      state: st,
       lastColor: props.color,
     };
   }
@@ -87,12 +83,13 @@ export default class Canvas extends Component {
   }
 
   handleChange(eventType, { point, pos, figure }) {
-    const { state, unfinishedFigure } = this.state;
-    const { onChange } = this.props;
+    const { unfinishedFigure } = this.state;
+    const { onChange, color } = this.props;
+    const drawing = !!color;
 
     switch (eventType) {
       case 'add':
-        if (state === 'drawing') {
+        if (drawing) {
           let newState = unfinishedFigure.points;
           newState = update(newState, { $push: [point] });
 
@@ -139,18 +136,20 @@ export default class Canvas extends Component {
   }
 
   handleClick(e) {
-    const { state } = this.state;
+    const { color } = this.props;
+    const drawing = !!color;
+
     if (skipNextClickEvent) {
       // a hack, for whatever reason it is really hard to stop event propagation in leaflet
       skipNextClickEvent = false;
       return;
     }
 
-    if (state === 'drawing') {
+    if (drawing) {
       this.handleChange('add', { point: convertPoint(e.latlng) });
     }
 
-    if (state === 'editing') {
+    if (!drawing) {
       this.setState({ selectedFigure: null });
     }
   }
@@ -158,6 +157,7 @@ export default class Canvas extends Component {
   render() {
     const {
       url,
+      color,
       figures,
       onChange,
       onReassignment,
@@ -169,10 +169,11 @@ export default class Canvas extends Component {
       zoom,
       height,
       width,
-      state,
       unfinishedFigure,
       selectedFigure,
     } = this.state;
+
+    const drawing = !!color;
 
     if (!bounds) {
       return null;
@@ -188,31 +189,28 @@ export default class Canvas extends Component {
       return map.latLngToLayerPoint(p1).distanceTo(map.latLngToLayerPoint(p2));
     };
 
-    const unfinishedDrawingDOM =
-      state === 'drawing' ? (
-        <Figure
-          figure={unfinishedFigure}
-          options={{
-            finished: false,
-            editing: false,
-            interactive: false,
-            onChange: this.handleChange,
-            calcDistance,
-          }}
-        />
-      ) : null;
+    const unfinishedDrawingDOM = drawing ? (
+      <Figure
+        figure={unfinishedFigure}
+        options={{
+          finished: false,
+          editing: false,
+          interactive: false,
+          onChange: this.handleChange,
+          calcDistance,
+        }}
+      />
+    ) : null;
 
     const figuresDOM = figures.map((f, i) => (
       <Figure
         key={f.id}
         figure={f}
         options={{
-          editing:
-            selectedFigure && selectedFigure.id === f.id && state === 'editing',
+          editing: selectedFigure && selectedFigure.id === f.id && !drawing,
           finished: true,
-          interactive: state !== 'drawing',
-          onSelect: () =>
-            this.setState({ selectedFigure: f, state: 'editing' }),
+          interactive: !drawing,
+          onSelect: () => this.setState({ selectedFigure: f }),
           onChange: this.handleChange,
           calcDistance,
         }}
@@ -223,11 +221,11 @@ export default class Canvas extends Component {
       <Hotkeys
         keyName="backspace,del,c,f"
         onKeyDown={key => {
-          if (key === 'f' && state === 'drawing') {
+          if (key === 'f' && drawing) {
             if (unfinishedFigure.points.length >= 3) {
               this.handleChange('end', {});
             }
-          } else if (state === 'editing') {
+          } else if (drawing) {
             if (key === 'c') {
               if (selectedFigure) {
                 onReassignment();
@@ -243,7 +241,7 @@ export default class Canvas extends Component {
     return (
       <div
         style={{
-          cursor: state === 'drawing' ? 'crosshair' : 'grab',
+          cursor: drawing ? 'crosshair' : 'grab',
           height: '100%',
           ...style,
         }}
@@ -276,7 +274,7 @@ class Figure extends Component {
     super(props);
     this.state = {
       dragging: false,
-      guides: null,
+      guides: [],
     };
   }
 
@@ -330,7 +328,7 @@ class Figure extends Component {
         onDragstart={e => this.setState({ dragging: true })}
         onDragend={e => {
           onChange('move', { point: e.target.getLatLng(), pos: i, figure });
-          this.setState({ dragging: false, guides: null });
+          this.setState({ dragging: false, guides: [] });
         }}
       />
     ));
@@ -356,17 +354,15 @@ class Figure extends Component {
       finished && editing && !dragging ? midPoints : []
     );
 
-    const guideLines = guides
-      ? guides.map((pos, i) => (
-          <Polyline
-            key={i}
-            positions={pos}
-            color={color}
-            opacity={0.7}
-            dashArray="4"
-          />
-        ))
-      : null;
+    const guideLines = guides.map((pos, i) => (
+      <Polyline
+        key={i}
+        positions={pos}
+        color={color}
+        opacity={0.7}
+        dashArray="4"
+      />
+    ));
 
     const PolyComp = finished ? Polygon : Polyline;
 

@@ -250,7 +250,7 @@ export default class Canvas extends Component {
           } else {
             if (key === 'c') {
               if (selectedFigure) {
-                onReassignment();
+                onReassignment(selectedFigure.type);
               }
             } else if (key === 'backspace' || key === 'del') {
               if (selectedFigure) {

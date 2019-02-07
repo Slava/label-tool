@@ -34,40 +34,6 @@ const labels = [
   { name: 'person', type: 'polygon' },
 ];
 
-function ListItem({
-  shortcut,
-  label,
-  onSelect,
-  onToggle,
-  color,
-  selected = false,
-  isToggled,
-}) {
-  const icon = onToggle ? (
-    <Icon
-      link
-      name={isToggled ? 'eye' : 'eye slash'}
-      style={{ float: 'right' }}
-      onClick={e => {
-        onToggle(label);
-        e.stopPropagation();
-      }}
-    />
-  ) : null;
-
-  return (
-    <List.Item onClick={onSelect} active={selected} key={label}>
-      <Hotkeys keyName={shortcut} onKeyDown={onSelect}>
-        <Label color={color} horizontal>
-          {shortcut}
-        </Label>
-        {label}
-        {icon}
-      </Hotkeys>
-    </List.Item>
-  );
-}
-
 /*
  type Figure = {
    type: 'bbox' | 'polygon';
@@ -90,7 +56,7 @@ class App extends Component {
       toggles,
 
       // UI
-      reassigning: false,
+      reassigning: { status: false, type: null },
       hotkeysPanel: false,
     };
 
@@ -175,7 +141,7 @@ class App extends Component {
       )
     );
 
-    const sidebarProps = reassigning
+    const sidebarProps = reassigning.status
       ? {
           title: 'Select the new label',
           selected: null,
@@ -189,18 +155,19 @@ class App extends Component {
               this.handleChange('new', figure);
             }
 
-            this.setState({ reassigning: false });
+            this.setState({ reassigning: { status: false, type: null } });
           },
+          filter: label => label.type === reassigning.type,
         }
       : {
           title: 'Labeling',
           selected,
           onSelect: selected => this.setState({ selected }),
           toggles,
-          onToggle: labelName =>
+          onToggle: label =>
             this.setState({
               toggles: update(toggles, {
-                [labelName]: { $set: !toggles[labelName] },
+                [label.name]: { $set: !toggles[label.name] },
               }),
             }),
           openHotkeys: () => this.setState({ hotkeysPanel: true }),
@@ -220,7 +187,7 @@ class App extends Component {
     return (
       <div style={{ display: 'flex' }}>
         <Sidebar
-          labels={labels.map(label => label.name)}
+          labels={labels}
           {...sidebarProps}
           style={{ flex: 1, maxWidth: 300 }}
         />
@@ -231,9 +198,12 @@ class App extends Component {
           color={color}
           type={type}
           onChange={this.handleChange}
-          onReassignment={() => this.setState({ reassigning: true })}
+          onReassignment={type =>
+            this.setState({ reassigning: { status: true, type } })
+          }
           onSelectionChange={figure =>
-            figure || this.setState({ reassigning: false })
+            figure ||
+            this.setState({ reassigning: { status: false, type: null } })
           }
           ref={this.canvasRef}
           style={{ flex: 4 }}
@@ -253,6 +223,7 @@ class Sidebar extends Component {
       selected,
       toggles,
       onToggle,
+      filter,
       style,
       openHotkeys,
     } = this.props;
@@ -278,10 +249,11 @@ class Sidebar extends Component {
               shortcut: shortcuts[i],
               label,
               color: colors[i],
-              onSelect: () => onSelect(label),
-              selected: selected === label,
+              onSelect: () => onSelect(label.name),
+              selected: selected === label.name,
+              disabled: filter ? !filter(label) : false,
               onToggle: onToggle,
-              isToggled: toggles && toggles[label],
+              isToggled: toggles && toggles[label.name],
             })
           )}
           <Hotkeys keyName="esc" onKeyDown={() => onSelect(null)} />
@@ -289,6 +261,54 @@ class Sidebar extends Component {
       </div>
     );
   }
+}
+
+function ListItem({
+  shortcut,
+  label,
+  onSelect,
+  onToggle,
+  color,
+  selected = false,
+  disabled = false,
+  isToggled = false,
+}) {
+  const icons = [];
+
+  const iconType =
+    label.type === 'bbox' ? 'object ungroup outline' : 'pencil alternate';
+  icons.push(<Icon key="type-icon" name={iconType} style={{ opacity: 0.5 }} />);
+  if (onToggle) {
+    icons.push(
+      <Icon
+        key="visibility-icon"
+        link
+        name={isToggled ? 'eye' : 'eye slash'}
+        onClick={e => {
+          onToggle(label);
+          e.stopPropagation();
+        }}
+      />
+    );
+  }
+
+  return (
+    <List.Item
+      onClick={onSelect}
+      disabled={disabled}
+      active={selected}
+      key={label.name}
+      style={{ fontSize: '1.3em' }}
+    >
+      <Hotkeys keyName={shortcut} onKeyDown={() => !disabled && onSelect()}>
+        <Label color={color} horizontal>
+          {shortcut}
+        </Label>
+        {label.name}
+        <span style={{ float: 'right' }}>{icons}</span>
+      </Hotkeys>
+    </List.Item>
+  );
 }
 
 function HotkeysPanel({ labels, onClose }) {

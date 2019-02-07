@@ -88,7 +88,7 @@ class Figure extends Component {
           weight={3}
           fill={true}
           fillColor={color}
-          interactive={interactive}
+          interactive={true} // always set interactive to true, to avoid bugs in leaflet-react
           onClick={() => {
             if (interactive) {
               onSelect();

@@ -39,8 +39,16 @@ export default class Canvas extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (this.props.url !== prevProps.url) {
-      this.calcBounds(this.props.url);
+    const { url, onSelectionChange } = this.props;
+    const { selectedFigure } = this.state;
+
+    if (url !== prevProps.url) {
+      this.calcBounds(url);
+    }
+
+    if (this.prevSelectedFigure !== selectedFigure && onSelectionChange) {
+      this.prevSelectedFigure = selectedFigure;
+      onSelectionChange(selectedFigure);
     }
   }
 
@@ -182,15 +190,7 @@ export default class Canvas extends Component {
   }
 
   render() {
-    const {
-      url,
-      color,
-      figures,
-      onChange,
-      onReassignment,
-      onSelectionChange,
-      style,
-    } = this.props;
+    const { url, color, figures, onChange, onReassignment, style } = this.props;
     const {
       bounds,
       zoom,
@@ -205,11 +205,6 @@ export default class Canvas extends Component {
 
     if (!bounds) {
       return null;
-    }
-
-    if (this.prevSelectedFigure !== selectedFigure && onSelectionChange) {
-      this.prevSelectedFigure = selectedFigure;
-      onSelectionChange(selectedFigure);
     }
 
     const calcDistance = (p1, p2) => {

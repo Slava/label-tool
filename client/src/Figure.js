@@ -253,6 +253,25 @@ export class BBoxFigure extends Figure {
       { lat: p2.lat, lng: p1.lng },
     ];
   }
+
+  onPointMoved(point, index) {
+    const {
+      figure,
+      options: { onChange },
+    } = this.props;
+    if (index === 0 || index === 2) {
+      onChange('move', { point, pos: index / 2, figure });
+    } else {
+      const [p1, p2] = figure.points;
+
+      const points =
+        index === 1
+          ? [{ lat: point.lat, lng: p1.lng }, { lat: p2.lat, lng: point.lng }]
+          : [{ lat: p1.lat, lng: point.lng }, { lat: point.lat, lng: p2.lng }];
+
+      onChange('replace', { points, figure });
+    }
+  }
 }
 
 function midPoint(p1, p2) {

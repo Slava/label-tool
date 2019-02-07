@@ -80,7 +80,7 @@ export default class Canvas extends Component {
     return selectedFigure;
   }
 
-  handleChange(eventType, { point, pos, figure }) {
+  handleChange(eventType, { point, pos, figure, points }) {
     const { unfinishedFigure } = this.state;
     const { onChange, color } = this.props;
     const drawing = !!color;
@@ -91,13 +91,24 @@ export default class Canvas extends Component {
           let newState = unfinishedFigure.points;
           newState = update(newState, { $push: [point] });
 
-          this.setState({
-            unfinishedFigure: update(unfinishedFigure, {
-              points: {
-                $set: newState,
-              },
-            }),
-          });
+          this.setState(
+            {
+              unfinishedFigure: update(unfinishedFigure, {
+                points: {
+                  $set: newState,
+                },
+              }),
+            },
+            () => {
+              const { unfinishedFigure } = this.state;
+              if (
+                unfinishedFigure.type === 'bbox' &&
+                unfinishedFigure.points.length >= 2
+              ) {
+                this.handleChange('end', {});
+              }
+            }
+          );
         } else {
           onChange(
             'replace',
@@ -119,6 +130,10 @@ export default class Canvas extends Component {
           'replace',
           update(figure, { points: { $splice: [[pos, 1, point]] } })
         );
+        break;
+
+      case 'replace':
+        onChange('replace', update(figure, { points: { $set: points } }));
         break;
 
       case 'remove':
@@ -145,10 +160,12 @@ export default class Canvas extends Component {
 
     if (drawing) {
       this.handleChange('add', { point: convertPoint(e.latlng) });
+      return;
     }
 
     if (!drawing) {
       this.setState({ selectedFigure: null });
+      return;
     }
   }
 
@@ -228,7 +245,10 @@ export default class Canvas extends Component {
         onKeyDown={key => {
           if (drawing) {
             if (key === 'f') {
-              if (unfinishedFigure.points.length >= 3) {
+              if (
+                unfinishedFigure.type === 'polygon' &&
+                unfinishedFigure.points.length >= 3
+              ) {
                 this.handleChange('end', {});
               }
             }

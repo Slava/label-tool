@@ -109,7 +109,13 @@ class App extends Component {
         this.setState(state => ({
           figures: update(state.figures, {
             [label.name]: {
-              $push: [{ id: figure.id || genId(), points: figure.points }],
+              $push: [
+                {
+                  id: figure.id || genId(),
+                  type: figure.type,
+                  points: figure.points,
+                },
+              ],
             },
           }),
           selected: null, // deselect the label after the figure is finished
@@ -120,7 +126,13 @@ class App extends Component {
         this.setState(state => ({
           figures: update(state.figures, {
             [label.name]: {
-              $splice: [[idx, 1, { id: figure.id, points: figure.points }]],
+              $splice: [
+                [
+                  idx,
+                  1,
+                  { id: figure.id, type: figure.type, points: figure.points },
+                ],
+              ],
             },
           }),
         }));
@@ -152,12 +164,13 @@ class App extends Component {
     const allFigures = [];
     labels.map((label, i) =>
       figures[label.name].map(
-        poly =>
+        figure =>
           toggles[label.name] &&
           allFigures.push({
             color: colors[i],
-            points: poly.points,
-            id: poly.id,
+            points: figure.points,
+            id: figure.id,
+            type: figure.type,
           })
       )
     );

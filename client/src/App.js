@@ -200,6 +200,10 @@ class App extends Component {
       />
     ) : null;
 
+    const labelIdx = labels.findIndex(label => label.name === selected);
+    const color = selected ? colors[labelIdx] : null;
+    const type = selected ? labels[labelIdx].type : null;
+
     return (
       <div style={{ display: 'flex' }}>
         <Sidebar
@@ -211,11 +215,8 @@ class App extends Component {
         <Canvas
           url="http://kempe.net/images/newspaper-big.jpg"
           figures={allFigures}
-          color={
-            selected
-              ? colors[labels.findIndex(label => label.name === selected)]
-              : null
-          }
+          color={color}
+          type={type}
           onChange={this.handleChange}
           onReassignment={() => this.setState({ reassigning: true })}
           onSelectionChange={figure =>

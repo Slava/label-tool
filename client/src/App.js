@@ -193,7 +193,7 @@ class App extends Component {
         />
         {hotkeysPanelDOM}
         <Canvas
-          url="http://kempe.net/images/newspaper-big.jpg"
+          url="/uploads/1/1.jpg"
           figures={allFigures}
           color={color}
           type={type}

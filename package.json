@@ -1,0 +1,11 @@
+{
+  "name": "image-labeling-tool",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "concurrently \"cd client && yarn start\" \"cd server && yarn start\""
+  },
+  "dependencies": {
+    "concurrently": "^4.1.0"
+  }
+}

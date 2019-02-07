@@ -1,0 +1,16 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "express": "^4.16.4",
+    "postgrator-cli": "^3.1.0",
+    "sql-template-strings": "^2.2.2",
+    "sqlite": "^3.0.1"
+  },
+  "scripts": {
+    "start": "PORT=3001 node src/index.js"
+  }
+}

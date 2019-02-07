@@ -2,6 +2,7 @@
   "name": "client",
   "version": "0.1.0",
   "private": true,
+  "proxy": "http://localhost:3001",
   "dependencies": {
     "immutability-helper": "^3.0.0",
     "leaflet": "^1.4.0",

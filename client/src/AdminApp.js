@@ -152,13 +152,33 @@ class ProjectPage extends Component {
   }
 }
 
-const DragHandle = sortableHandle(() => <span>::</span>);
+const DragHandle = sortableHandle(() => (
+  <div
+    style={{
+      background:
+        'linear-gradient(180deg,#000,#000 20%,#fff 0,#fff 40%,#000 0,#000 60%,#fff 0,#fff 80%,#000 0,#000)',
+      width: 25,
+      height: 15,
+      opacity: 0.25,
+      cursor: 'move',
+    }}
+  />
+));
 
 const SortableItem = sortableElement(({ value }) => (
-  <Container>
+  <Form
+    size="massive"
+    style={{
+      marginTop: '0.7em',
+      padding: '1em',
+      border: 'solid 1px #efefef',
+      background: 'white',
+      shadow: 'rgb(204, 204, 204) 0px 1px 2px',
+    }}
+  >
     <DragHandle />
     {value.name}
-  </Container>
+  </Form>
 ));
 
 const SortableContainer = sortableContainer(({ children }) => {

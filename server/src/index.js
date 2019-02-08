@@ -15,6 +15,14 @@ async function start() {
     res.json(await projects.getAll(db));
   });
 
+  app.post("/api/projects", async (req, res) => {
+    res.json(await projects.create(db));
+  });
+
+  app.get("/api/projects/:id", async (req, res) => {
+    res.json(await projects.get(db, req.params.id));
+  });
+
   app.get("/uploads/:projectId/:imageName", (req, res) => {
     const { projectId, imageName } = req.params;
     res.sendFile(

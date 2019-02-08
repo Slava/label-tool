@@ -1,32 +1,32 @@
 -- Up
-create table jobs (
+create table Projects (
   id integer primary key autoincrement,
   name text not null,
   form text not null
 );
 
-create table images (
+create table Images (
   id integer primary key autoincrement,
   originalName text not null,
   labelsCount int default 0, /* count of the completed labels */
-  jobsId integer,
-  constraint images_fk_jobsId foreign key (jobsId) references Jobs (id) on delete cascade
+  projectsId integer,
+  constraint images_fk_projectsId foreign key (projectsId) references Projects (id) on delete cascade
 );
 
-create table labels (
+create table Labels (
   id integer primary key autoincrement,
-  jobsId integer,
+  projectsId integer,
   imagesId integer,
   completed boolean default false,
-  constraint labels_fk_jobsId foreign key (jobsId) references Jobs (id) on delete cascade,
+  constraint labels_fk_projectsId foreign key (projectsId) references Projects (id) on delete cascade,
   constraint labels_fk_imagesId foreign key (imagesId) references Images (id) on delete cascade
 );
 
-insert into jobs (name, form) values ('Test Project', '{ "formParts": [ { "type": "polygon", "name": "Car" }, { "type": "bbox", "name": "Windows" } ] }');
-insert into images (originalName, labelsCount, jobsId) values ('tesla.jpg', 0, 1);
+insert into projects (name, form) values ('Test Project', '{ "formParts": [ { "type": "polygon", "name": "Car" }, { "type": "bbox", "name": "Windows" } ] }');
+insert into images (originalName, labelsCount, projectsId) values ('tesla.jpg', 0, 1);
 
 
 -- Down
-drop table jobs;
-drop table images;
-drop table labels;
+drop table Projects;
+drop table Images;
+drop table Labels;

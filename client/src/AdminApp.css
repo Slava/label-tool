@@ -1,0 +1,3 @@
+.form-card input:not(:focus):not(:hover):not(:active) {
+  border-color: white !important;
+}

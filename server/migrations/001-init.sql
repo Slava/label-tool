@@ -22,7 +22,7 @@ create table Labels (
   constraint labels_fk_imagesId foreign key (imagesId) references Images (id) on delete cascade
 );
 
-insert into projects (name, form) values ('Test Project', '{ "formParts": [ { "type": "polygon", "name": "Car" }, { "type": "bbox", "name": "Windows" } ] }');
+insert into projects (name, form) values ('Test Project', '{ "formParts": [ { "type": "polygon", "name": "Car", "id": "nfjxui" }, { "type": "bbox", "name": "Windows", "id": "n3ndi88" } ] }');
 insert into images (originalName, labelsCount, projectsId) values ('tesla.jpg', 0, 1);
 
 

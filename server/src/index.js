@@ -1,4 +1,5 @@
 const express = require("express");
+const bodyParser = require("body-parser");
 const sqlite = require("sqlite");
 
 const path = require("path");
@@ -6,6 +7,9 @@ const path = require("path");
 const projects = require("./queries/projects");
 
 const app = express();
+
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
 async function start() {
   const db = await sqlite.open("./database.sqlite");
@@ -21,6 +25,22 @@ async function start() {
 
   app.get("/api/projects/:id", async (req, res) => {
     res.json(await projects.get(db, req.params.id));
+  });
+
+  app.patch("/api/projects/:id", async (req, res) => {
+    const { project } = req.body;
+    try {
+      await projects.update(db, req.params.id, project);
+    } catch (err) {
+      res.status(400);
+      res.json({
+        message: err.message,
+        code: 400
+      });
+      return;
+    }
+
+    res.json({ success: true });
   });
 
   app.get("/uploads/:projectId/:imageName", (req, res) => {

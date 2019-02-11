@@ -19,9 +19,8 @@ select projects.id, projects.name, projects.form, count(images.id) as imagesCoun
     const [project, ...rest] = await db.all(SQL`
 select *
   from projects
-  where id = ${id};
+ where id = ${id};
 `);
-    console.log(project);
     return { ...project, form: JSON.parse(project.form) };
   },
   create: async db => {
@@ -37,5 +36,23 @@ select * from projects where id = last_insert_rowid();
       ...project,
       form: JSON.parse(project.form)
     };
+  },
+  update: async (db, id, project) => {
+    if (
+      !project.name ||
+      project.name === "" ||
+      !Array.isArray(project.form.formParts)
+    ) {
+      throw new Error("Project must have a non-empty name and a form object.");
+    }
+    if (!id) {
+      throw new Error("Must present a valid id.");
+    }
+
+    await db.all(SQL`
+update projects
+   set name = ${project.name}, form = ${JSON.stringify(project.form)}
+ where id = ${id};
+`);
   }
 };

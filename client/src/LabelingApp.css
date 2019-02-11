@@ -3,10 +3,6 @@
   width: 100%;
 }
 
-#root {
-  height: 100vh;
-}
-
 html,
 body,
 #root > *,

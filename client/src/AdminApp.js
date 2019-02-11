@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Link, Route } from 'react-router-dom';
+
 import {
   Header,
   Card,
@@ -8,7 +9,9 @@ import {
   Grid,
   Button,
   Form,
+  Table,
 } from 'semantic-ui-react';
+
 import {
   sortableContainer,
   sortableElement,
@@ -90,7 +93,7 @@ class AdminApp extends Component {
     );
 
     return (
-      <div>
+      <div style={{ background: '#f7f7f7' }}>
         <Menu inverted>
           <Link to="/admin/">
             <Menu.Item header>Image Labeling</Menu.Item>
@@ -229,9 +232,17 @@ class ProjectPage extends Component {
     }
 
     const items = project.form.formParts;
+    const renderedItems = items.map((value, index) => (
+      <SortableItem
+        key={value.id}
+        index={index}
+        value={value}
+        onChange={this.handleChange}
+      />
+    ));
 
     return (
-      <div className="ui form">
+      <div className="ui form" style={{ paddingBottom: 200 }}>
         <Form.Field
           placeholder="Project name"
           control="input"
@@ -242,14 +253,7 @@ class ProjectPage extends Component {
         <div style={{ padding: '1em 0 110px 0' }}>
           <Header disabled>LABELS</Header>
           <SortableContainer onSortEnd={this.onSortEnd} useDragHandle>
-            {items.map((value, index) => (
-              <SortableItem
-                key={value.id}
-                index={index}
-                value={value}
-                onChange={this.handleChange}
-              />
-            ))}
+            {renderedItems}
           </SortableContainer>
           <Button
             circular
@@ -259,8 +263,10 @@ class ProjectPage extends Component {
             onClick={this.handleNew}
           />
         </div>
-        <div />
-        <Header disabled>IMAGES</Header>
+        <div style={{ padding: '2em 0' }}>
+          <Header disabled>IMAGES</Header>
+          <ProjectImages projectId={projectId} />
+        </div>
       </div>
     );
   }
@@ -334,5 +340,65 @@ const newFormPart = () => {
     type: 'bbox',
   };
 };
+
+class ProjectImages extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      error: null,
+      isLoaded: false,
+      images: [],
+    };
+  }
+
+  async componentDidMount() {
+    const { projectId } = this.props;
+    try {
+      const images = await (await fetch(
+        '/api/projects/' + projectId + '/images/'
+      )).json();
+      this.setState({
+        isLoaded: true,
+        images,
+      });
+    } catch (error) {
+      this.setState({
+        isLoaded: true,
+        error,
+      });
+    }
+  }
+
+  render() {
+    const { error, isLoaded, images } = this.state;
+
+    if (error) {
+      return <div>Error: {error.message}</div>;
+    } else if (!isLoaded) {
+      return <div>Loading...</div>;
+    }
+
+    const renderedRows = images.map(image => (
+      <Table.Row key={image.id}>
+        <Table.Cell>{image.id}</Table.Cell>
+        <Table.Cell>{image.originalName}</Table.Cell>
+        <Table.Cell>?</Table.Cell>
+      </Table.Row>
+    ));
+
+    return (
+      <Table celled>
+        <Table.Header>
+          <Table.Row>
+            <Table.HeaderCell>ID</Table.HeaderCell>
+            <Table.HeaderCell>Image Link</Table.HeaderCell>
+            <Table.HeaderCell>Labeled</Table.HeaderCell>
+          </Table.Row>
+        </Table.Header>
+        <Table.Body>{renderedRows}</Table.Body>
+      </Table>
+    );
+  }
+}
 
 export default AdminApp;

@@ -5,6 +5,7 @@ const sqlite = require("sqlite");
 const path = require("path");
 
 const projects = require("./queries/projects");
+const images = require("./queries/images");
 
 const app = express();
 
@@ -41,6 +42,10 @@ async function start() {
     }
 
     res.json({ success: true });
+  });
+
+  app.get("/api/projects/:id/images", async (req, res) => {
+    res.json(await images.getForProject(db, req.params.id));
   });
 
   app.get("/uploads/:projectId/:imageName", (req, res) => {

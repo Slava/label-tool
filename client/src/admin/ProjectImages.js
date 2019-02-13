@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 
-import { Table } from 'semantic-ui-react';
+import { Table, Loader, Header } from 'semantic-ui-react';
 
 export default class ProjectImages extends Component {
   constructor(props) {
@@ -14,10 +14,15 @@ export default class ProjectImages extends Component {
   }
 
   async componentDidMount() {
+    this.props.refetchRef(this.refetch.bind(this));
+    await this.refetch();
+  }
+
+  async refetch() {
     const { projectId } = this.props;
     try {
       const images = await (await fetch(
-        '/api/projects/' + projectId + '/images/'
+        '/api/images/?projectId=' + projectId
       )).json();
       this.setState({
         isLoaded: true,
@@ -38,7 +43,15 @@ export default class ProjectImages extends Component {
     if (error) {
       return <div>Error: {error.message}</div>;
     } else if (!isLoaded) {
-      return <div>Loading...</div>;
+      return <Loader active inline="centered" />;
+    }
+
+    if (!images.length) {
+      return (
+        <Header className="centered" as="h5">
+          No images, upload images using the form below
+        </Header>
+      );
     }
 
     const renderLabelLinks = image => {
@@ -53,7 +66,7 @@ export default class ProjectImages extends Component {
       <Table.Row key={image.id}>
         <Table.Cell>{image.id}</Table.Cell>
         <Table.Cell>
-          <Link to={image.link}>{image.originalName}</Link>
+          <a href={image.link}>{image.originalName}</a>
         </Table.Cell>
         <Table.Cell>{renderLabelLinks(image)}</Table.Cell>
       </Table.Row>

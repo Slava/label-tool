@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import { Header, Button, Form } from 'semantic-ui-react';
+import { Header, Button, Form, Loader } from 'semantic-ui-react';
 
 import {
   sortableContainer,
@@ -12,6 +12,7 @@ import update from 'immutability-helper';
 import arrayMove from 'array-move';
 
 import ProjectImages from './ProjectImages';
+import UploadImages from './UploadImages';
 
 export default class ProjectPage extends Component {
   constructor(props) {
@@ -127,18 +128,24 @@ export default class ProjectPage extends Component {
     if (error) {
       return <div>Error: {error.message}</div>;
     } else if (!isLoaded) {
-      return <div>Loading...</div>;
+      return <Loader active inline="centered" />;
     }
 
     const items = project.form.formParts;
-    const renderedItems = items.map((value, index) => (
-      <SortableItem
-        key={value.id}
-        index={index}
-        value={value}
-        onChange={this.handleChange}
-      />
-    ));
+    const renderedItems = items.length ? (
+      items.map((value, index) => (
+        <SortableItem
+          key={value.id}
+          index={index}
+          value={value}
+          onChange={this.handleChange}
+        />
+      ))
+    ) : (
+      <Header className="centered" as="h5">
+        No labels, add labels using the plus button below
+      </Header>
+    );
 
     return (
       <div className="ui form" style={{ paddingBottom: 200 }}>
@@ -164,10 +171,17 @@ export default class ProjectPage extends Component {
         </div>
         <div style={{ padding: '2em 0' }}>
           <Header disabled>IMAGES</Header>
-          <ProjectImages projectId={projectId} />
+          <ProjectImages
+            projectId={projectId}
+            refetchRef={f => this.setState({ handleImagesChange: f })}
+          />
         </div>
         <div style={{ padding: '2em 0' }}>
           <Header disabled>UPLOAD IMAGES</Header>
+          <UploadImages
+            projectId={projectId}
+            onChange={this.state.handleImagesChange}
+          />
         </div>
       </div>
     );

@@ -9,8 +9,8 @@ class App extends Component {
     return (
       <Router>
         <Fragment>
-          <Route exact path="/" component={LabelingApp} />
           <Route path="/admin" component={AdminApp} />
+          <Route path="/label/:projectId/:imageId" component={LabelingApp} />
         </Fragment>
       </Router>
     );

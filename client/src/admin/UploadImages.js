@@ -59,12 +59,11 @@ export default class UploadImages extends Component {
 
     this.props.onChange();
 
-    e.target.reset();
+    form.reset();
   }
 
   render() {
     const { urlsText } = this.state;
-    const { projectId } = this.props;
 
     return (
       <Segment>

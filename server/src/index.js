@@ -49,6 +49,10 @@ async function start() {
     res.json(await images.getForProject(db, req.query.projectId));
   });
 
+  app.get('/api/images/:id', async (req, res) => {
+    res.json(await images.get(db, req.params.id));
+  });
+
   app.post('/api/images', async (req, res) => {
     const { projectId, urls } = req.body;
     try {
@@ -75,7 +79,6 @@ async function start() {
           }
           cb(null, path.join(__dirname, '..', 'uploads', projectId));
         } catch (err) {
-          console.log(err.message);
           cb(err);
         }
       },
@@ -85,8 +88,7 @@ async function start() {
           const filename = file.originalname;
           const id = await images.addImageStub(db, projectId, filename);
           const ext = path.extname(filename);
-          const link = `/${projectId}/${id}${ext}`;
-          console.log(id, ext, link);
+          const link = `/uploads/${projectId}/${id}${ext}`;
           await images.updateLink(db, id, link);
           cb(null, `${id}${ext}`);
         } catch (err) {

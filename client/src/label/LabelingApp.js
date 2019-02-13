@@ -1,5 +1,13 @@
 import React, { Component } from 'react';
-import { Header, List, Label, Icon, Segment, Table } from 'semantic-ui-react';
+import {
+  Header,
+  List,
+  Label,
+  Icon,
+  Segment,
+  Table,
+  Loader,
+} from 'semantic-ui-react';
 import Hotkeys from 'react-hot-keys';
 import update from 'immutability-helper';
 
@@ -25,15 +33,6 @@ const colors = [
   'black',
 ];
 
-const labels = [
-  { name: 'cat', type: 'bbox' },
-  { name: 'dog', type: 'bbox' },
-  { name: 'car', type: 'polygon' },
-  { name: 'tree', type: 'polygon' },
-  { name: 'house', type: 'bbox' },
-  { name: 'person', type: 'polygon' },
-];
-
 /*
  type Figure = {
    type: 'bbox' | 'polygon';
@@ -46,6 +45,7 @@ class LabelingApp extends Component {
   constructor(props) {
     super(props);
 
+    const { labels } = props;
     const figures = {};
     const toggles = {};
     labels.map(label => (figures[label.name] = []));
@@ -66,6 +66,7 @@ class LabelingApp extends Component {
 
   handleChange(eventType, figure) {
     if (!figure.color) return;
+    const { labels } = this.props;
     const label = labels[colors.indexOf(figure.color)];
     const { figures } = this.state;
     const idx = figures[label.name].findIndex(f => f.id === figure.id);
@@ -120,6 +121,7 @@ class LabelingApp extends Component {
   }
 
   render() {
+    const { labels, imageUrl } = this.props;
     const {
       figures,
       selected,
@@ -193,7 +195,7 @@ class LabelingApp extends Component {
         />
         {hotkeysPanelDOM}
         <Canvas
-          url="/uploads/1/1.jpg"
+          url={imageUrl}
           figures={allFigures}
           color={color}
           type={type}
@@ -381,4 +383,58 @@ function genId() {
   );
 }
 
-export default LabelingApp;
+class LabelingAppWithFetching extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      project: null,
+      image: null,
+      isLoaded: false,
+      error: null,
+    };
+  }
+
+  async componentDidMount() {
+    const { match } = this.props;
+    const { projectId, imageId } = match.params;
+
+    try {
+      const projectPromise = fetch('/api/projects/' + projectId).then(x =>
+        x.json()
+      );
+      const imagePromise = fetch('/api/images/' + imageId).then(x => x.json());
+
+      const [project, image] = await Promise.all([
+        projectPromise,
+        imagePromise,
+      ]);
+
+      this.setState({
+        isLoaded: true,
+        project,
+        image,
+      });
+    } catch (error) {
+      this.setState({
+        isLoaded: true,
+        error,
+      });
+    }
+  }
+
+  render() {
+    const { project, image, isLoaded, error } = this.state;
+
+    if (error) {
+      return <div>Error: {error.message}</div>;
+    } else if (!isLoaded) {
+      return <Loader active inline="centered" />;
+    }
+
+    return (
+      <LabelingApp labels={project.form.formParts} imageUrl={image.link} />
+    );
+  }
+}
+
+export default LabelingAppWithFetching;

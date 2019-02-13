@@ -33,6 +33,15 @@ where projectsId = ${projectId};
     );
   },
 
+  get: async (db, id) => {
+    const [image, ...rest] = await db.all(SQL`
+select *
+from images
+where images.id = ${id}
+`);
+    return image;
+  },
+
   addImages: async (db, projectId, urls) => {
     const getName = url =>
       path.basename(new URL(url, 'https://base.com').pathname);

@@ -7,6 +7,7 @@ import {
   Segment,
   Table,
   Loader,
+  Button,
 } from 'semantic-ui-react';
 import Hotkeys from 'react-hot-keys';
 import update from 'immutability-helper';
@@ -240,12 +241,19 @@ class Sidebar extends Component {
     ) : null;
 
     return (
-      <div style={{ padding: '1em 0.5em', ...style }}>
-        <Header size="large">
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          padding: '1em 0.5em',
+          ...style,
+        }}
+      >
+        <Header size="large" style={{ flex: '0 0 auto' }}>
           {title}
           {hotkeysButton}
         </Header>
-        <List divided selection>
+        <List divided selection style={{ flex: 1 }}>
           {labels.map((label, i) =>
             ListItem({
               shortcut: shortcuts[i],
@@ -260,6 +268,12 @@ class Sidebar extends Component {
           )}
           <Hotkeys keyName="esc" onKeyDown={() => onSelect(null)} />
         </List>
+        <div style={{ flex: '0 0 auto', display: 'flex' }}>
+          <Button>Back</Button>
+          <span style={{ flex: 1 }} />
+          <Button secondary>Skip</Button>
+          <Button primary>Submit</Button>
+        </div>
       </div>
     );
   }

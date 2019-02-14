@@ -1,19 +1,23 @@
-const SQL = require('sql-template-strings');
+const db = require('./db').getDb();
 const path = require('path');
 
 module.exports = {
-  getForProject: async (db, projectId) => {
-    const images = await db.all(SQL`
+  getForProject: projectId => {
+    const images = db
+      .prepare(
+        `
 select * from (
   select images.id, originalName, link, group_concat(labels.id) as labelsId, group_concat(labels.completed) as labelsCompleted, images.projectsId
   from images
   left join labels
         on labels.projectsId = images.projectsId and labels.imagesId = images.id
-  where images.projectsId = ${projectId}
+  where images.projectsId = ?
   group by images.id
 )
-where projectsId = ${projectId};
-`);
+where projectsId = ?;
+`
+      )
+      .all(projectId, projectId);
 
     return images.map(
       ({ id, originalName, link, labelsId, labelsCompleted }) => {
@@ -33,50 +37,88 @@ where projectsId = ${projectId};
     );
   },
 
-  get: async (db, id) => {
-    const [image, ...rest] = await db.all(SQL`
+  get: id => {
+    const image = db
+      .prepare(
+        `
 select *
 from images
-where images.id = ${id}
-`);
+where images.id = ?;
+`
+      )
+      .get(id);
     return image;
   },
 
-  addImages: async (db, projectId, urls) => {
+  addImages: (projectId, urls) => {
     const getName = url =>
       path.basename(new URL(url, 'https://base.com').pathname);
-    for (const url of urls) {
-      await db.all(SQL`
+
+    const stmt = db.prepare(`
 insert into images(originalName, link, labelsCount, projectsId)
-values (${getName(url)}, ${url}, 0, ${projectId});
+values (?, ?, 0, ?);
 `);
+
+    for (const url of urls) {
+      stmt.run(getName(url), url, projectId);
     }
   },
 
-  addImageStub: async (db, projectId, filename) => {
-    const sql = SQL`
+  addImageStub: (projectId, filename) => {
+    const stmt = db.prepare(`
 insert into images(originalName, link, labelsCount, projectsId)
-values (${filename}, 'stub', 0, ${projectId});
-`;
-    const stmt = await db.prepare(sql.sql);
+values (?, 'stub', 0, ?);
+`);
 
-    return new Promise((resolve, reject) => {
-      const params = [
-        ...sql.values,
-        function(err) {
-          if (err) reject(err);
-          else resolve(this.lastID);
-        },
-      ];
-      stmt.stmt.run.apply(stmt.stmt, params);
-    });
+    const { lastInsertRowid } = stmt.run(filename, projectId);
+    return lastInsertRowid;
   },
 
-  updateLink: async (db, imageId, link) => {
-    await db.all(SQL`
+  updateLink: (imageId, link) => {
+    db.prepare(
+      `
 update images
-   set link = ${link}
- where id = ${imageId};
-`);
+   set link = ?
+ where id = ?;
+`
+    ).all(link, imageId);
+  },
+
+  allocateUnlabeledImage: (projectId, imageId) => {
+    let result = null;
+    db.transaction(() => {
+      if (!imageId) {
+        const unmarkedImage = db
+          .prepare(
+            `
+select images.id
+from images
+left join labels
+on labels.imagesId = images.id
+where images.projectsId = ? and labels.id is null;
+`
+          )
+          .get(projectId);
+
+        imageId = unmarkedImage && unmarkedImage.id;
+      }
+
+      if (!imageId) {
+        result = null;
+      } else {
+        const labelId = db
+          .prepare(
+            `
+insert into labels(projectsId, imagesId, completed, labelData)
+values (?, ?, 0, '{}');
+`
+          )
+          .run(projectId, imageId).lastInsertRowid;
+
+        result = { projectId, imageId };
+      }
+    })();
+
+    return result;
   },
 };

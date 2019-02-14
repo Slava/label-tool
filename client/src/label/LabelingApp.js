@@ -6,7 +6,6 @@ import {
   Icon,
   Segment,
   Table,
-  Loader,
   Button,
 } from 'semantic-ui-react';
 import Hotkeys from 'react-hot-keys';
@@ -397,58 +396,4 @@ function genId() {
   );
 }
 
-class LabelingAppWithFetching extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      project: null,
-      image: null,
-      isLoaded: false,
-      error: null,
-    };
-  }
-
-  async componentDidMount() {
-    const { match } = this.props;
-    const { projectId, imageId } = match.params;
-
-    try {
-      const projectPromise = fetch('/api/projects/' + projectId).then(x =>
-        x.json()
-      );
-      const imagePromise = fetch('/api/images/' + imageId).then(x => x.json());
-
-      const [project, image] = await Promise.all([
-        projectPromise,
-        imagePromise,
-      ]);
-
-      this.setState({
-        isLoaded: true,
-        project,
-        image,
-      });
-    } catch (error) {
-      this.setState({
-        isLoaded: true,
-        error,
-      });
-    }
-  }
-
-  render() {
-    const { project, image, isLoaded, error } = this.state;
-
-    if (error) {
-      return <div>Error: {error.message}</div>;
-    } else if (!isLoaded) {
-      return <Loader active inline="centered" />;
-    }
-
-    return (
-      <LabelingApp labels={project.form.formParts} imageUrl={image.link} />
-    );
-  }
-}
-
-export default LabelingAppWithFetching;
+export default LabelingApp;

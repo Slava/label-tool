@@ -81,7 +81,7 @@ update images
    set link = ?
  where id = ?;
 `
-    ).all(link, imageId);
+    ).run(link, imageId);
   },
 
   allocateUnlabeledImage: (projectId, imageId) => {

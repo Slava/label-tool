@@ -1,4 +1,3 @@
--- Up
 create table Projects (
   id integer primary key autoincrement,
   name text not null,
@@ -30,8 +29,3 @@ insert into labels (projectsId, imagesId, completed, labelData) values (1, 1, 0,
 insert into labels (projectsId, imagesId, completed, labelData) values (1, 1, 0, '{}');
 insert into labels (projectsId, imagesId, completed, labelData) values (1, 1, 0, '{}');
 
-
--- Down
-drop table Projects;
-drop table Images;
-drop table Labels;

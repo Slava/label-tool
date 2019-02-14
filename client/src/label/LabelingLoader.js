@@ -52,6 +52,12 @@ export default class LabelingLoader extends Component {
       }
 
       const { project, image, label } = await (await fetch(url)).json();
+
+      if (!project) {
+        history.replace(`/label/${projectId}/over`);
+        return;
+      }
+
       history.replace(`/label/${project.id}/${image.id}/${label.id}`);
 
       this.setState({

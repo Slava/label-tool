@@ -80,10 +80,8 @@ app.get('/api/getLabelingInfo', (req, res) => {
     if (!imageId || !labelId) {
       const ret = images.allocateUnlabeledImage(projectId, imageId);
       if (!ret) {
-        res.status(400);
         res.json({
-          message: 'no such imageId',
-          code: 400,
+          success: true,
         });
         return;
       }

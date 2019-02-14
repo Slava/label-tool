@@ -121,7 +121,7 @@ class LabelingApp extends Component {
   }
 
   render() {
-    const { labels, imageUrl } = this.props;
+    const { labels, imageUrl, onBack, onSkip, onSubmit } = this.props;
     const {
       figures,
       selected,
@@ -129,6 +129,13 @@ class LabelingApp extends Component {
       toggles,
       hotkeysPanel,
     } = this.state;
+
+    const forwardedProps = {
+      onBack,
+      onSkip,
+      onSubmit,
+    };
+
     const allFigures = [];
     labels.map((label, i) =>
       figures[label.name].map(
@@ -191,6 +198,7 @@ class LabelingApp extends Component {
         <Sidebar
           labels={labels}
           {...sidebarProps}
+          {...forwardedProps}
           style={{ flex: 1, maxWidth: 300 }}
         />
         {hotkeysPanelDOM}
@@ -228,6 +236,9 @@ class Sidebar extends Component {
       filter,
       style,
       openHotkeys,
+      onBack,
+      onSkip,
+      onSubmit,
     } = this.props;
 
     const hotkeysButton = openHotkeys ? (
@@ -268,10 +279,14 @@ class Sidebar extends Component {
           <Hotkeys keyName="esc" onKeyDown={() => onSelect(null)} />
         </List>
         <div style={{ flex: '0 0 auto', display: 'flex' }}>
-          <Button>Back</Button>
+          <Button onClick={onBack}>Back</Button>
           <span style={{ flex: 1 }} />
-          <Button secondary>Skip</Button>
-          <Button primary>Submit</Button>
+          <Button secondary onClick={onSkip}>
+            Skip
+          </Button>
+          <Button primary onClick={onSubmit}>
+            Submit
+          </Button>
         </div>
       </div>
     );

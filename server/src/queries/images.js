@@ -115,7 +115,7 @@ values (?, ?, 0, '{}');
           )
           .run(projectId, imageId).lastInsertRowid;
 
-        result = { projectId, imageId };
+        result = { labelId, imageId };
       }
     })();
 

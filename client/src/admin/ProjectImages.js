@@ -1,7 +1,6 @@
-import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
+import React, { Component, Fragment } from 'react';
 
-import { Table, Loader, Header } from 'semantic-ui-react';
+import { Table, Loader, Header, Checkbox, Icon } from 'semantic-ui-react';
 
 export default class ProjectImages extends Component {
   constructor(props) {
@@ -36,7 +35,19 @@ export default class ProjectImages extends Component {
     }
   }
 
+  handleLabeled(imageId, labeled) {
+    fetch('/api/images/' + imageId, {
+      method: 'PATCH',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ labeled }),
+    });
+  }
+
   render() {
+    const { projectId } = this.props;
     const { error, isLoaded, images } = this.state;
 
     if (error) {
@@ -54,10 +65,22 @@ export default class ProjectImages extends Component {
     }
 
     const renderLabelLinks = image => {
-      if (image.labeled) {
-        return <div>labeled</div>;
-      }
-      return <div>not labeled</div>;
+      return (
+        <div>
+          <Checkbox
+            defaultChecked={!!image.labeled}
+            label="Submitted"
+            onChange={(e, { checked }) => this.handleLabeled(image.id, checked)}
+          />
+          <a
+            target="_blank"
+            style={{ marginLeft: '1em' }}
+            href={`/label/${projectId}/${image.id}`}
+          >
+            Edit labels <Icon name="external alternate" />
+          </a>
+        </div>
+      );
     };
 
     const renderedRows = images.map(image => (

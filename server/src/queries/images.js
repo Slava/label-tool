@@ -114,9 +114,9 @@ where id = ?;
     db.prepare(
       `
 update images
-set labeled = ?, lastEdited = ?
+set labeled = ?
 where id = ?;
 `
-    ).run(labeled ? 1 : 0, +new Date(), imageId);
+    ).run(labeled ? 1 : 0, imageId);
   },
 };

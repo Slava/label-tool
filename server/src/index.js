@@ -109,7 +109,7 @@ app.patch('/api/images/:imageId', (req, res) => {
   if (labelData) {
     images.updateLabel(imageId, labelData);
   }
-  if (labeled) {
+  if (labeled !== undefined) {
     images.updateLabeled(imageId, labeled);
   }
   res.json({

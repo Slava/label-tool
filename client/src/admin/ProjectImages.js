@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 
 import { Table, Loader, Header, Checkbox, Icon } from 'semantic-ui-react';
 
@@ -74,6 +74,7 @@ export default class ProjectImages extends Component {
           />
           <a
             target="_blank"
+            rel="noopener noreferrer"
             style={{ marginLeft: '1em' }}
             href={`/label/${projectId}/${image.id}`}
           >

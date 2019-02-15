@@ -48,8 +48,8 @@ class LabelingApp extends Component {
     const { labels, labelData } = props;
     const figures = {};
     const toggles = {};
-    labels.map(label => (figures[label.name] = []));
-    labels.map(label => (toggles[label.name] = true));
+    labels.map(label => (figures[label.id] = []));
+    labels.map(label => (toggles[label.id] = true));
 
     Object.keys(labelData).forEach(key => {
       figures[key] = (figures[key] || []).concat(labelData[key]);
@@ -80,13 +80,13 @@ class LabelingApp extends Component {
     const { labels } = this.props;
     const label = labels[colors.indexOf(figure.color)];
     const { figures } = this.state;
-    const idx = figures[label.name].findIndex(f => f.id === figure.id);
+    const idx = figures[label.id].findIndex(f => f.id === figure.id);
 
     switch (eventType) {
       case 'new':
         this.setState(state => ({
           figures: update(state.figures, {
-            [label.name]: {
+            [label.id]: {
               $push: [
                 {
                   id: figure.id || genId(),
@@ -103,7 +103,7 @@ class LabelingApp extends Component {
       case 'replace':
         this.setState(state => ({
           figures: update(state.figures, {
-            [label.name]: {
+            [label.id]: {
               $splice: [
                 [
                   idx,
@@ -119,7 +119,7 @@ class LabelingApp extends Component {
       case 'delete':
         this.setState(state => ({
           figures: update(state.figures, {
-            [label.name]: {
+            [label.id]: {
               $splice: [[idx, 1]],
             },
           }),
@@ -149,9 +149,9 @@ class LabelingApp extends Component {
 
     const allFigures = [];
     labels.map((label, i) =>
-      figures[label.name].map(
+      figures[label.id].map(
         figure =>
-          toggles[label.name] &&
+          toggles[label.id] &&
           allFigures.push({
             color: colors[i],
             points: figure.points,
@@ -168,7 +168,7 @@ class LabelingApp extends Component {
           onSelect: selected => {
             const figure = this.canvasRef.current.getSelectedFigure();
             const newColor =
-              colors[labels.findIndex(label => label.name === selected)];
+              colors[labels.findIndex(label => label.id === selected)];
             if (figure && figure.color !== newColor) {
               this.handleChange('delete', figure);
               figure.color = newColor;
@@ -187,7 +187,7 @@ class LabelingApp extends Component {
           onToggle: label =>
             this.setState({
               toggles: update(toggles, {
-                [label.name]: { $set: !toggles[label.name] },
+                [label.id]: { $set: !toggles[label.id] },
               }),
             }),
           openHotkeys: () => this.setState({ hotkeysPanel: true }),
@@ -200,7 +200,7 @@ class LabelingApp extends Component {
       />
     ) : null;
 
-    const labelIdx = labels.findIndex(label => label.name === selected);
+    const labelIdx = labels.findIndex(label => label.id === selected);
     const color = selected ? colors[labelIdx] : null;
     const type = selected ? labels[labelIdx].type : null;
 
@@ -280,11 +280,11 @@ class Sidebar extends Component {
               shortcut: shortcuts[i],
               label,
               color: colors[i],
-              onSelect: () => onSelect(label.name),
-              selected: selected === label.name,
+              onSelect: () => onSelect(label.id),
+              selected: selected === label.id,
               disabled: filter ? !filter(label) : false,
               onToggle: onToggle,
-              isToggled: toggles && toggles[label.name],
+              isToggled: toggles && toggles[label.id],
             })
           )}
           <Hotkeys keyName="esc" onKeyDown={() => onSelect(null)} />
@@ -338,7 +338,7 @@ function ListItem({
       onClick={onSelect}
       disabled={disabled}
       active={selected}
-      key={label.name}
+      key={label.id}
       style={{ fontSize: '1.3em' }}
     >
       <Hotkeys keyName={shortcut} onKeyDown={() => !disabled && onSelect()}>

@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import { Route, BrowserRouter as Router } from 'react-router-dom';
 
+import LabelHome from './label/LabelHome';
 import LabelingLoader from './label/LabelingLoader';
 import OverScreen from './label/OverScreen';
 import AdminApp from './admin/AdminApp';
@@ -10,14 +11,7 @@ class App extends Component {
     return (
       <Router>
         <Fragment>
-          <Route
-            exact
-            path="/"
-            render={({ match, history }) => {
-              if (match.path === '/') history.replace('/admin');
-              return null;
-            }}
-          />
+          <Route exact path="/" component={LabelHome} />
           <Route path="/admin" component={AdminApp} />
           <Route exact path="/label/:projectId" component={LabelingLoader} />
           <Route

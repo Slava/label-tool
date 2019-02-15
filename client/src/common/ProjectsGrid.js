@@ -39,6 +39,7 @@ export default class ProjectsGrid extends Component {
 
   render() {
     const { error, isLoaded, projects } = this.state;
+    const { linkPrefix, newButton } = this.props;
 
     if (error) {
       return <div>Error: {error.message}</div>;
@@ -52,22 +53,24 @@ export default class ProjectsGrid extends Component {
       const desc = `Tags: ${form.formParts.map(part => part.name).join(', ')}`;
       return (
         <Grid.Column key={id}>
-          <Link to={`/admin/${id}`}>
+          <Link to={`${linkPrefix}${id}`}>
             <Card fluid link header={name} meta={info} description={desc} />
           </Link>
         </Grid.Column>
       );
     };
 
+    const renderedButton = newButton ? (
+      <Button style={{ padding: '1.5em' }} onClick={this.onNewProject}>
+        <span style={{ fontSize: '4em' }}>+</span>
+        <div>Make a new project</div>
+      </Button>
+    ) : null;
+
     return (
       <Grid stackable columns={2}>
         {projects.map(renderProjectCard)}
-        <Grid.Column>
-          <Button style={{ padding: '1.5em' }} onClick={this.onNewProject}>
-            <span style={{ fontSize: '4em' }}>+</span>
-            <div>Make a new project</div>
-          </Button>
-        </Grid.Column>
+        <Grid.Column>{newButton}</Grid.Column>
       </Grid>
     );
   }

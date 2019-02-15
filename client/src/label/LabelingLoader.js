@@ -10,7 +10,6 @@ export default class LabelingLoader extends Component {
     this.state = {
       project: null,
       image: null,
-      label: null,
       isLoaded: false,
       error: null,
     };
@@ -21,7 +20,7 @@ export default class LabelingLoader extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (prevProps.match.params.labelId !== this.props.match.params.labelId) {
+    if (prevProps.match.params.imageId !== this.props.match.params.imageId) {
       this.refetch();
     }
   }
@@ -32,11 +31,10 @@ export default class LabelingLoader extends Component {
       error: null,
       project: null,
       image: null,
-      label: null,
     });
 
     const { match, history } = this.props;
-    let { projectId, imageId, labelId } = match.params;
+    let { projectId, imageId } = match.params;
 
     try {
       const a = document.createElement('a');
@@ -46,25 +44,21 @@ export default class LabelingLoader extends Component {
       url.searchParams.append('projectId', projectId);
       if (imageId) {
         url.searchParams.append('imageId', imageId);
-        if (imageId) {
-          url.searchParams.append('labelId', labelId);
-        }
       }
 
-      const { project, image, label } = await (await fetch(url)).json();
+      const { project, image } = await (await fetch(url)).json();
 
       if (!project) {
         history.replace(`/label/${projectId}/over`);
         return;
       }
 
-      history.replace(`/label/${project.id}/${image.id}/${label.id}`);
+      history.replace(`/label/${project.id}/${image.id}`);
 
       this.setState({
         isLoaded: true,
         project,
         image,
-        label,
       });
     } catch (error) {
       this.setState({
@@ -74,9 +68,33 @@ export default class LabelingLoader extends Component {
     }
   }
 
+  async pushUpdate(labelData) {
+    const { imageId } = this.props.match.params;
+    await fetch('/api/images/' + imageId, {
+      method: 'PATCH',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ labelData }),
+    });
+  }
+
+  async markComplete() {
+    const { imageId } = this.props.match.params;
+    await fetch('/api/images/' + imageId, {
+      method: 'PATCH',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ labeled: true }),
+    });
+  }
+
   render() {
     const { history } = this.props;
-    const { project, image, label, isLoaded, error } = this.state;
+    const { project, image, isLoaded, error } = this.state;
 
     if (error) {
       return <div>Error: {error.message}</div>;
@@ -96,14 +114,17 @@ export default class LabelingLoader extends Component {
         history.push(`/label/${project.id}/`);
       },
       onSubmit: () => {
+        this.markComplete();
         history.push(`/label/${project.id}/`);
       },
+      onLabelChange: this.pushUpdate.bind(this),
     };
 
     return (
       <DocumentMeta title={title}>
         <LabelingApp
           labels={project.form.formParts}
+          labelData={image.labelData}
           imageUrl={image.link}
           {...props}
         />

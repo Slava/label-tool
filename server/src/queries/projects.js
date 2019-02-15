@@ -5,10 +5,9 @@ module.exports = {
     const projects = db
       .prepare(
         `
-select projects.id, projects.name, projects.form, count(images.id) as imagesCount, count(labels.id) as labelsCount
+select projects.id, projects.name, projects.form, count(images.id) as imagesCount, sum(images.labeled) as labelsCount
   from projects
          left join images on projects.id = images.projectsId
-         left join labels on projects.id = labels.projectsId
  group by projects.id;
 `
       )

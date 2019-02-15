@@ -6,7 +6,6 @@ const path = require('path');
 
 const projects = require('./queries/projects');
 const images = require('./queries/images');
-const labels = require('./queries/labels');
 
 const app = express();
 
@@ -66,7 +65,7 @@ app.post('/api/images', (req, res) => {
 });
 
 app.get('/api/getLabelingInfo', (req, res) => {
-  let { projectId, imageId, labelId } = req.query;
+  let { projectId, imageId } = req.query;
   if (!projectId) {
     res.status(400);
     res.json({
@@ -77,7 +76,7 @@ app.get('/api/getLabelingInfo', (req, res) => {
   }
 
   try {
-    if (!imageId || !labelId) {
+    if (!imageId) {
       const ret = images.allocateUnlabeledImage(projectId, imageId);
       if (!ret) {
         res.json({
@@ -85,17 +84,15 @@ app.get('/api/getLabelingInfo', (req, res) => {
         });
         return;
       }
-      ({ imageId, labelId } = ret);
+      ({ imageId } = ret);
     }
 
     const project = projects.get(projectId);
     const image = images.get(imageId);
-    const label = labels.get(labelId);
 
     res.json({
       project,
       image,
-      label,
     });
   } catch (err) {
     res.status(400);
@@ -104,6 +101,20 @@ app.get('/api/getLabelingInfo', (req, res) => {
       code: 400,
     });
   }
+});
+
+app.patch('/api/images/:imageId', (req, res) => {
+  const { imageId } = req.params;
+  const { labelData, labeled } = req.body;
+  if (labelData) {
+    images.updateLabel(imageId, labelData);
+  }
+  if (labeled) {
+    images.updateLabeled(imageId, labeled);
+  }
+  res.json({
+    success: true,
+  });
 });
 
 const uploads = multer({

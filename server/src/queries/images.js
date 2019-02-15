@@ -6,35 +6,16 @@ module.exports = {
     const images = db
       .prepare(
         `
-select * from (
-  select images.id, originalName, link, group_concat(labels.id) as labelsId, group_concat(labels.completed) as labelsCompleted, images.projectsId
-  from images
-  left join labels
-        on labels.projectsId = images.projectsId and labels.imagesId = images.id
-  where images.projectsId = ?
-  group by images.id
-)
-where projectsId = ?;
+select images.id, originalName, link, labeled, labelData, projectsId
+from images
+where images.projectsId = ?;
 `
       )
-      .all(projectId, projectId);
-
-    return images.map(
-      ({ id, originalName, link, labelsId, labelsCompleted }) => {
-        const ids = (labelsId || '').split(',');
-        const completed = (labelsCompleted || '').split(',');
-
-        return {
-          id,
-          originalName,
-          link,
-          labels: ids.map((id, i) => ({
-            id: parseInt(id, 10),
-            completed: completed[i] === '1',
-          })),
-        };
-      }
-    );
+      .all(projectId);
+    return images.map(image => ({
+      ...image,
+      labelData: JSON.parse(image.labelData),
+    }));
   },
 
   get: id => {
@@ -47,7 +28,8 @@ where images.id = ?;
 `
       )
       .get(id);
-    return image;
+
+    return { ...image, labelData: JSON.parse(image.labelData) };
   },
 
   addImages: (projectId, urls) => {
@@ -55,8 +37,8 @@ where images.id = ?;
       path.basename(new URL(url, 'https://base.com').pathname);
 
     const stmt = db.prepare(`
-insert into images(originalName, link, labelsCount, projectsId)
-values (?, ?, 0, ?);
+insert into images(originalName, link, labeled, labelData, projectsId)
+values (?, ?, 0, '{ }', ?);
 `);
 
     for (const url of urls) {
@@ -66,8 +48,8 @@ values (?, ?, 0, ?);
 
   addImageStub: (projectId, filename) => {
     const stmt = db.prepare(`
-insert into images(originalName, link, labelsCount, projectsId)
-values (?, 'stub', 0, ?);
+insert into images(originalName, link, labeled, labelData, projectsId)
+values (?, 'stub', 0, '{ }', ?);
 `);
 
     const { lastInsertRowid } = stmt.run(filename, projectId);
@@ -85,20 +67,21 @@ update images
   },
 
   allocateUnlabeledImage: (projectId, imageId) => {
+    // after this period of time we consider the image to be up for labeling again
+    const lastEditedTimeout = 5 * 60 * 1000;
+
     let result = null;
     db.transaction(() => {
       if (!imageId) {
         const unmarkedImage = db
           .prepare(
             `
-select images.id
+select id
 from images
-left join labels
-on labels.imagesId = images.id
-where images.projectsId = ? and labels.id is null;
+where projectsId = ? and labeled = 0 and lastEdited < ?;
 `
           )
-          .get(projectId);
+          .get(projectId, new Date() - lastEditedTimeout);
 
         imageId = unmarkedImage && unmarkedImage.id;
       }
@@ -106,19 +89,34 @@ where images.projectsId = ? and labels.id is null;
       if (!imageId) {
         result = null;
       } else {
-        const labelId = db
-          .prepare(
-            `
-insert into labels(projectsId, imagesId, completed, labelData)
-values (?, ?, 0, '{}');
-`
-          )
-          .run(projectId, imageId).lastInsertRowid;
-
-        result = { labelId, imageId };
+        db.prepare(`update images set lastEdited = ? where id = ?;`).run(
+          +new Date(),
+          imageId
+        );
+        result = { imageId };
       }
     })();
 
     return result;
+  },
+
+  updateLabel: (imageId, labelData) => {
+    db.prepare(
+      `
+update images
+set labelData = ?, lastEdited = ?
+where id = ?;
+`
+    ).run(JSON.stringify(labelData), +new Date(), imageId);
+  },
+
+  updateLabeled: (imageId, labeled) => {
+    db.prepare(
+      `
+update images
+set labeled = ?, lastEdited = ?
+where id = ?;
+`
+    ).run(labeled ? 1 : 0, +new Date(), imageId);
   },
 };

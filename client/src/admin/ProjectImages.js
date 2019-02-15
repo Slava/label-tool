@@ -38,7 +38,6 @@ export default class ProjectImages extends Component {
 
   render() {
     const { error, isLoaded, images } = this.state;
-    const { projectId } = this.props;
 
     if (error) {
       return <div>Error: {error.message}</div>;
@@ -55,11 +54,10 @@ export default class ProjectImages extends Component {
     }
 
     const renderLabelLinks = image => {
-      return image.labels.map(label => (
-        <span key={label.id} style={{ marginLeft: 5 }}>
-          <Link to={`/${projectId}/${label.id}/`}>{label.id}</Link>
-        </span>
-      ));
+      if (image.labeled) {
+        return <div>labeled</div>;
+      }
+      return <div>not labeled</div>;
     };
 
     const renderedRows = images.map(image => (

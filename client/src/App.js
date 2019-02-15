@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { Route, Redirect, BrowserRouter as Router } from 'react-router-dom';
+import { Route, BrowserRouter as Router } from 'react-router-dom';
 
 import LabelingLoader from './label/LabelingLoader';
 import OverScreen from './label/OverScreen';
@@ -10,7 +10,14 @@ class App extends Component {
     return (
       <Router>
         <Fragment>
-          <Redirect from="/" to="/admin" />
+          <Route
+            exact
+            path="/"
+            render={({ match, history }) => {
+              if (match.path === '/') history.replace('/admin');
+              return null;
+            }}
+          />
           <Route path="/admin" component={AdminApp} />
           <Route exact path="/label/:projectId" component={LabelingLoader} />
           <Route
@@ -23,10 +30,6 @@ class App extends Component {
                 <LabelingLoader {...props} />
               )
             }
-          />
-          <Route
-            path="/label/:projectId/:imageId/:labelId"
-            component={LabelingLoader}
           />
         </Fragment>
       </Router>

@@ -45,11 +45,16 @@ class LabelingApp extends Component {
   constructor(props) {
     super(props);
 
-    const { labels } = props;
+    const { labels, labelData } = props;
     const figures = {};
     const toggles = {};
     labels.map(label => (figures[label.name] = []));
     labels.map(label => (toggles[label.name] = true));
+
+    Object.keys(labelData).forEach(key => {
+      figures[key] = (figures[key] || []).concat(labelData[key]);
+    });
+
     this.state = {
       selected: null,
       figures, // mapping from label name to a list of Figure structures
@@ -62,6 +67,12 @@ class LabelingApp extends Component {
 
     this.handleChange = this.handleChange.bind(this);
     this.canvasRef = React.createRef();
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.state.figures !== prevState.figures) {
+      this.props.onLabelChange(this.state.figures);
+    }
   }
 
   handleChange(eventType, figure) {

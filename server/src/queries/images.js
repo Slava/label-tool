@@ -119,4 +119,13 @@ where id = ?;
 `
     ).run(labeled ? 1 : 0, imageId);
   },
+
+  delete: imageId => {
+    db.prepare(
+      `
+delete from images
+where id = ?;
+`
+    ).run(imageId);
+  },
 };

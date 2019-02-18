@@ -64,6 +64,11 @@ app.post('/api/images', (req, res) => {
   res.json({ success: true });
 });
 
+app.delete('/api/images/:id', (req, res) => {
+  images.delete(req.params.id);
+  res.json({ success: true });
+});
+
 app.get('/api/getLabelingInfo', (req, res) => {
   let { projectId, imageId } = req.query;
   if (!projectId) {

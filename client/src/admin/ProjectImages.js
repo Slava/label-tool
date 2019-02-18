@@ -21,6 +21,7 @@ export default class ProjectImages extends Component {
     };
 
     this.handleLabeled = this.handleLabeled.bind(this);
+    this.handleDelete = this.handleDelete.bind(this);
     this.markAllNotLabeled = this.markAllNotLabeled.bind(this);
   }
 
@@ -55,6 +56,7 @@ export default class ProjectImages extends Component {
         $splice: [[idx, 1, { ...state.images[idx], labeled }]],
       }),
     }));
+
     fetch('/api/images/' + imageId, {
       method: 'PATCH',
       headers: {
@@ -62,6 +64,24 @@ export default class ProjectImages extends Component {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ labeled }),
+    });
+  }
+
+  handleDelete(imageId) {
+    const { images } = this.state;
+    const idx = images.findIndex(x => x.id === imageId);
+    this.setState(state => ({
+      images: update(state.images, {
+        $splice: [[idx, 1]],
+      }),
+    }));
+
+    fetch('/api/images/' + imageId, {
+      method: 'DELETE',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
     });
   }
 
@@ -90,20 +110,30 @@ export default class ProjectImages extends Component {
 
     const renderLabelLinks = image => {
       return (
+        <Checkbox
+          checked={!!image.labeled}
+          label="Labeled"
+          onChange={(e, { checked }) => this.handleLabeled(image.id, checked)}
+        />
+      );
+    };
+
+    const renderActions = image => {
+      return (
         <div>
-          <Checkbox
-            checked={!!image.labeled}
-            label="Labeled"
-            onChange={(e, { checked }) => this.handleLabeled(image.id, checked)}
-          />
           <a
             target="_blank"
             rel="noopener noreferrer"
-            style={{ marginLeft: '1em' }}
             href={`/label/${projectId}/${image.id}`}
           >
-            Edit labels <Icon name="external alternate" />
+            <Button icon="pencil" label="Edit" size="tiny" />
           </a>
+          <Button
+            icon="trash"
+            label="Delete"
+            size="tiny"
+            onClick={() => this.handleDelete(image.id)}
+          />
         </div>
       );
     };
@@ -115,6 +145,7 @@ export default class ProjectImages extends Component {
           <a href={image.link}>{image.originalName}</a>
         </Table.Cell>
         <Table.Cell>{renderLabelLinks(image)}</Table.Cell>
+        <Table.Cell>{renderActions(image)}</Table.Cell>
       </Table.Row>
     ));
 
@@ -126,6 +157,7 @@ export default class ProjectImages extends Component {
               <Table.HeaderCell>ID</Table.HeaderCell>
               <Table.HeaderCell>Image Link</Table.HeaderCell>
               <Table.HeaderCell>Label Status</Table.HeaderCell>
+              <Table.HeaderCell>Actions</Table.HeaderCell>
             </Table.Row>
           </Table.Header>
           <Table.Body>{renderedRows}</Table.Body>

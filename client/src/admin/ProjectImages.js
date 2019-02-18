@@ -1,6 +1,15 @@
 import React, { Component } from 'react';
 
-import { Table, Loader, Header, Checkbox, Icon } from 'semantic-ui-react';
+import {
+  Table,
+  Loader,
+  Header,
+  Checkbox,
+  Icon,
+  Button,
+} from 'semantic-ui-react';
+
+import update from 'immutability-helper';
 
 export default class ProjectImages extends Component {
   constructor(props) {
@@ -10,6 +19,9 @@ export default class ProjectImages extends Component {
       isLoaded: false,
       images: [],
     };
+
+    this.handleLabeled = this.handleLabeled.bind(this);
+    this.markAllNotLabeled = this.markAllNotLabeled.bind(this);
   }
 
   async componentDidMount() {
@@ -36,6 +48,13 @@ export default class ProjectImages extends Component {
   }
 
   handleLabeled(imageId, labeled) {
+    const { images } = this.state;
+    const idx = images.findIndex(x => x.id === imageId);
+    this.setState(state => ({
+      images: update(state.images, {
+        $splice: [[idx, 1, { ...state.images[idx], labeled }]],
+      }),
+    }));
     fetch('/api/images/' + imageId, {
       method: 'PATCH',
       headers: {
@@ -44,6 +63,11 @@ export default class ProjectImages extends Component {
       },
       body: JSON.stringify({ labeled }),
     });
+  }
+
+  markAllNotLabeled() {
+    const { images } = this.state;
+    images.forEach(image => this.handleLabeled(image.id, false));
   }
 
   render() {
@@ -68,8 +92,8 @@ export default class ProjectImages extends Component {
       return (
         <div>
           <Checkbox
-            defaultChecked={!!image.labeled}
-            label="Submitted"
+            checked={!!image.labeled}
+            label="Labeled"
             onChange={(e, { checked }) => this.handleLabeled(image.id, checked)}
           />
           <a
@@ -95,16 +119,24 @@ export default class ProjectImages extends Component {
     ));
 
     return (
-      <Table celled>
-        <Table.Header>
-          <Table.Row>
-            <Table.HeaderCell>ID</Table.HeaderCell>
-            <Table.HeaderCell>Image Link</Table.HeaderCell>
-            <Table.HeaderCell>Labeled</Table.HeaderCell>
-          </Table.Row>
-        </Table.Header>
-        <Table.Body>{renderedRows}</Table.Body>
-      </Table>
+      <div>
+        <Table celled>
+          <Table.Header>
+            <Table.Row>
+              <Table.HeaderCell>ID</Table.HeaderCell>
+              <Table.HeaderCell>Image Link</Table.HeaderCell>
+              <Table.HeaderCell>Label Status</Table.HeaderCell>
+            </Table.Row>
+          </Table.Header>
+          <Table.Body>{renderedRows}</Table.Body>
+        </Table>
+        <Button
+          style={{ float: 'right' }}
+          icon="cancel"
+          label="Mark all images as 'Unlabeled'"
+          onClick={this.markAllNotLabeled}
+        />
+      </div>
     );
   }
 }

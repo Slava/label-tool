@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import { Card, Grid, Button, Loader } from 'semantic-ui-react';
+import { Card, Grid, Button, Loader, Header } from 'semantic-ui-react';
 
 export default class ProjectsGrid extends Component {
   constructor(props) {
@@ -39,7 +39,7 @@ export default class ProjectsGrid extends Component {
 
   render() {
     const { error, isLoaded, projects } = this.state;
-    const { linkPrefix, newButton } = this.props;
+    const { linkPrefix, newButton, title } = this.props;
 
     if (error) {
       return <div>Error: {error.message}</div>;
@@ -68,10 +68,13 @@ export default class ProjectsGrid extends Component {
     ) : null;
 
     return (
-      <Grid stackable columns={2}>
-        {projects.map(renderProjectCard)}
-        <Grid.Column>{newButton}</Grid.Column>
-      </Grid>
+      <div>
+        <Header as="h1">{title}</Header>
+        <Grid stackable columns={2}>
+          {projects.map(renderProjectCard)}
+          <Grid.Column>{renderedButton}</Grid.Column>
+        </Grid>
+      </div>
     );
   }
 }

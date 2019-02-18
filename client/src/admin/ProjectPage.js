@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 
 import { Header, Button, Form, Loader } from 'semantic-ui-react';
 
+import DocumentMeta from 'react-document-meta';
+
 import {
   sortableContainer,
   sortableElement,
@@ -148,42 +150,44 @@ export default class ProjectPage extends Component {
     );
 
     return (
-      <div className="ui form" style={{ paddingBottom: 200 }}>
-        <Form.Field
-          placeholder="Project name"
-          control="input"
-          defaultValue={project.name}
-          style={{ fontSize: 24 }}
-          onChange={this.handleNameChange}
-        />
-        <div style={{ padding: '1em 0 110px 0' }}>
-          <Header disabled>LABELS</Header>
-          <SortableContainer onSortEnd={this.onSortEnd} useDragHandle>
-            {renderedItems}
-          </SortableContainer>
-          <Button
-            circular
-            icon="plus"
-            size="massive"
-            style={{ float: 'right', marginTop: '2em' }}
-            onClick={this.handleNew}
+      <DocumentMeta title={`Edit project ${project.name}`}>
+        <div className="ui form" style={{ paddingBottom: 200 }}>
+          <Form.Field
+            placeholder="Project name"
+            control="input"
+            defaultValue={project.name}
+            style={{ fontSize: 24 }}
+            onChange={this.handleNameChange}
           />
+          <div style={{ padding: '1em 0 110px 0' }}>
+            <Header disabled>LABELS</Header>
+            <SortableContainer onSortEnd={this.onSortEnd} useDragHandle>
+              {renderedItems}
+            </SortableContainer>
+            <Button
+              circular
+              icon="plus"
+              size="massive"
+              style={{ float: 'right', marginTop: '2em' }}
+              onClick={this.handleNew}
+            />
+          </div>
+          <div style={{ padding: '2em 0' }}>
+            <Header disabled>IMAGES</Header>
+            <ProjectImages
+              projectId={projectId}
+              refetchRef={f => this.setState({ handleImagesChange: f })}
+            />
+          </div>
+          <div style={{ padding: '2em 0' }}>
+            <Header disabled>UPLOAD IMAGES</Header>
+            <UploadImages
+              projectId={projectId}
+              onChange={this.state.handleImagesChange}
+            />
+          </div>
         </div>
-        <div style={{ padding: '2em 0' }}>
-          <Header disabled>IMAGES</Header>
-          <ProjectImages
-            projectId={projectId}
-            refetchRef={f => this.setState({ handleImagesChange: f })}
-          />
-        </div>
-        <div style={{ padding: '2em 0' }}>
-          <Header disabled>UPLOAD IMAGES</Header>
-          <UploadImages
-            projectId={projectId}
-            onChange={this.state.handleImagesChange}
-          />
-        </div>
-      </div>
+      </DocumentMeta>
     );
   }
 }

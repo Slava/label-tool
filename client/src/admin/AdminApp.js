@@ -9,13 +9,17 @@ import ProjectPage from './ProjectPage';
 class AdminApp extends Component {
   render() {
     return (
-      <Menubar>
+      <Menubar active="admin">
         <Switch>
           <Route
             exact
             path="/admin/"
             render={() => (
-              <ProjectsGrid linkPrefix="/admin/" newButton={true} />
+              <ProjectsGrid
+                linkPrefix="/admin/"
+                title="Edit Projects:"
+                newButton={true}
+              />
             )}
           />
           <Route path="/admin/:projectId" component={ProjectPage} />

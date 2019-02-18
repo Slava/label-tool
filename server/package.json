@@ -5,6 +5,7 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
+    "archiver": "^3.0.0",
     "better-sqlite3": "^5.4.0",
     "body-parser": "^1.18.3",
     "eslint-plugin-prettier": "^3.0.1",

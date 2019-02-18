@@ -1,13 +1,6 @@
 import React, { Component } from 'react';
 
-import {
-  Table,
-  Loader,
-  Header,
-  Checkbox,
-  Icon,
-  Button,
-} from 'semantic-ui-react';
+import { Table, Loader, Header, Checkbox, Button } from 'semantic-ui-react';
 
 import update from 'immutability-helper';
 

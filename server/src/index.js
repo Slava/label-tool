@@ -1,11 +1,14 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const multer = require('multer');
+const archiver = require('archiver');
 
 const path = require('path');
+const fs = require('fs');
 
 const projects = require('./queries/projects');
 const images = require('./queries/images');
+const exporter = require('./exporter');
 
 const app = express();
 
@@ -130,7 +133,8 @@ const uploads = multer({
         if (!projects.get(projectId)) {
           throw new Error('No such projectId.');
         }
-        cb(null, path.join(__dirname, '..', 'uploads', projectId));
+        const dest = path.join(__dirname, '..', 'uploads', projectId);
+        fs.mkdir(dest, () => cb(null, dest));
       } catch (err) {
         cb(err);
       }
@@ -160,6 +164,25 @@ app.get('/uploads/:projectId/:imageName', (req, res) => {
   res.sendFile(
     path.join(__dirname + '/../uploads/', projectId, path.join('/', imageName))
   );
+});
+
+app.get('/api/projects/:projectId/export', (req, res) => {
+  const archive = archiver('zip');
+
+  archive.on('error', err => {
+    res.status(500).send({ error: err.message });
+  });
+
+  res.attachment('project-export.zip');
+
+  archive.pipe(res);
+
+  const { projectId } = req.params;
+  exporter.exportProject(projectId).forEach(({ name, contents }) => {
+    archive.append(contents, { name });
+  });
+
+  archive.finalize();
 });
 
 if (process.env.NODE_ENV === 'production') {

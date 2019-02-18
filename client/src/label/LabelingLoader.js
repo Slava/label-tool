@@ -124,7 +124,7 @@ export default class LabelingLoader extends Component {
       <DocumentMeta title={title}>
         <LabelingApp
           labels={project.form.formParts}
-          labelData={image.labelData}
+          labelData={image.labelData.labels || {}}
           imageUrl={image.link}
           {...props}
         />

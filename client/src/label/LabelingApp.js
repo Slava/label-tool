@@ -73,8 +73,19 @@ class LabelingApp extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (this.state.figures !== prevState.figures) {
-      this.props.onLabelChange(this.state.figures);
+    const { onLabelChange, imageUrl } = this.props;
+    const { figures } = this.state;
+    if (figures !== prevState.figures) {
+      const img = new Image();
+      img.onload = function() {
+        const { height, width } = this;
+        onLabelChange({
+          labels: figures,
+          height,
+          width,
+        });
+      };
+      img.src = imageUrl;
     }
   }
 

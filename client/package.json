@@ -5,6 +5,7 @@
   "proxy": "http://localhost:3001",
   "dependencies": {
     "array-move": "^1.0.0",
+    "http-proxy-middleware": "^0.19.1",
     "immutability-helper": "^3.0.0",
     "leaflet": "^1.4.0",
     "leaflet-path-drag": "^1.1.0",

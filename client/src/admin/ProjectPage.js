@@ -183,6 +183,15 @@ export default class ProjectPage extends Component {
               onChange={this.state.handleImagesChange}
             />
           </div>
+          <div style={{ padding: '2em 0' }}>
+            <Header disabled>Export data</Header>
+            <a href={`/api/projects/${projectId}/export`}>
+              <Button
+                icon="download"
+                label="Download a zip-file with JSON-encoded labels"
+              />
+            </a>
+          </div>
         </div>
       </DocumentMeta>
     );

@@ -184,7 +184,7 @@ export default class ProjectPage extends Component {
             />
           </div>
           <div style={{ padding: '2em 0' }}>
-            <Header disabled>Export data</Header>
+            <Header disabled>EXPORT DATA</Header>
             <a href={`/api/projects/${projectId}/export`}>
               <Button
                 icon="download"

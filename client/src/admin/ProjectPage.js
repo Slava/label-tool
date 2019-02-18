@@ -4,17 +4,14 @@ import { Header, Button, Form, Loader } from 'semantic-ui-react';
 
 import DocumentMeta from 'react-document-meta';
 
-import {
-  sortableContainer,
-  sortableElement,
-  sortableHandle,
-} from 'react-sortable-hoc';
+import { sortableContainer, sortableElement } from 'react-sortable-hoc';
 
 import update from 'immutability-helper';
 import arrayMove from 'array-move';
 
 import ProjectImages from './ProjectImages';
 import UploadImages from './UploadImages';
+import LabelFormItem from './LabelFormItem';
 
 export default class ProjectPage extends Component {
   constructor(props) {
@@ -79,6 +76,7 @@ export default class ProjectPage extends Component {
 
   handleChange(oldValue, newValue) {
     const { project } = this.state;
+    const edit = newValue ? [1, newValue] : [1];
     this.setState({
       project: update(project, {
         form: {
@@ -86,8 +84,7 @@ export default class ProjectPage extends Component {
             $splice: [
               [
                 project.form.formParts.findIndex(x => x.id === oldValue.id),
-                1,
-                newValue,
+                ...edit,
               ],
             ],
           },
@@ -192,59 +189,7 @@ export default class ProjectPage extends Component {
   }
 }
 
-const dragHandleStyle = {
-  background:
-    'linear-gradient(180deg,#000,#000 20%,#fff 0,#fff 40%,#000 0,#000 60%,#fff 0,#fff 80%,#000 0,#000)',
-  width: 25,
-  minWidth: 25,
-  height: 20,
-  opacity: 0.25,
-  cursor: 'move',
-};
-const DragHandle = sortableHandle(({ style }) => (
-  <div style={{ ...dragHandleStyle, ...style }} />
-));
-
-const SortableItem = sortableElement(({ value, onChange }) => {
-  const options = [
-    { key: 'bbox', text: 'Draw a bounding box', value: 'bbox' },
-    { key: 'polygon', text: 'Draw a polygon figure', value: 'polygon' },
-    { key: 'text', text: 'Enter a text label', value: 'text' },
-  ];
-  return (
-    <div
-      style={{
-        marginTop: '0.7em',
-        padding: '1em',
-        border: 'solid 1px #efefef',
-        background: 'white',
-        shadow: 'rgb(204, 204, 204) 0px 1px 2px',
-      }}
-    >
-      <Form className="form-card" style={{ display: 'flex' }}>
-        <DragHandle style={{ flex: 0, marginRight: '0.5em', marginTop: 9 }} />
-        <div style={{ flex: 1 }}>
-          <Form.Field
-            placeholder="Label name"
-            control="input"
-            defaultValue={value.name}
-            style={{ padding: 3, fontSize: 24 }}
-            onChange={e => onChange(value, { ...value, name: e.target.value })}
-          />
-          <Form.Select
-            label="Label type"
-            options={options}
-            defaultValue={value.type}
-            onChange={(e, change) =>
-              onChange(value, { ...value, type: change.value })
-            }
-            style={{ maxWidth: 400 }}
-          />
-        </div>
-      </Form>
-    </div>
-  );
-});
+const SortableItem = sortableElement(LabelFormItem);
 
 const SortableContainer = sortableContainer(({ children }) => {
   return <div>{children}</div>;

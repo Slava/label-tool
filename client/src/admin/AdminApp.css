@@ -1,3 +1,16 @@
-.form-card input:not(:focus):not(:hover):not(:active) {
+.form-card :not(.visible) > input:not(:focus):not(:hover):not(:active) {
   border-color: white !important;
+}
+
+.form-card .form-checkbox input {
+  padding: 0 !important;
+  margin-left: 5px !important;
+}
+
+.form-card .form-checkbox label::before {
+  margin-top: 3px;
+}
+
+.form-card .form-checkbox {
+  padding: 5px;
 }

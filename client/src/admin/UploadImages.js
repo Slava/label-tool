@@ -43,6 +43,7 @@ export default class UploadImages extends Component {
       }),
     });
 
+    this.props.onChange();
     this.setState({ urlsText: '' });
   }
 

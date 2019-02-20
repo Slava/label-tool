@@ -96,9 +96,9 @@ class Figure extends Component {
             }
           }}
         />
-        {!finished || editing ? vertices : null}
         {guideLines}
         {this.makeExtraElements()}
+        {!finished || editing ? vertices : null}
       </Fragment>
     );
   }

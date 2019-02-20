@@ -461,12 +461,14 @@ function ListItem({
 
 function HotkeysPanel({ labels, onClose }) {
   return (
-    <div style={{ height: '100vh' }}>
+    <div
+      style={{ height: '100vh', 'overflow-y': 'auto', 'overflow-x': 'hidden' }}
+    >
       <Header as="h2" attached="top">
         Hotkeys
         <Icon link name="close" style={headerIconStyle} onClick={onClose} />
       </Header>
-      <Segment attached style={{ height: '100%' }}>
+      <Segment attached>
         <Header as="h3"> Labels </Header>
         <Table celled>
           <Table.Header>
@@ -510,6 +512,30 @@ function HotkeysPanel({ labels, onClose }) {
             <Table.Row>
               <Table.Cell>Cancel selection</Table.Cell>
               <Table.Cell>Escape</Table.Cell>
+            </Table.Row>
+          </Table.Body>
+        </Table>
+        <Header as="h3"> Navigation </Header>
+        <Table celled>
+          <Table.Header>
+            <Table.Row>
+              <Table.HeaderCell>Action</Table.HeaderCell>
+              <Table.HeaderCell>Key</Table.HeaderCell>
+            </Table.Row>
+          </Table.Header>
+
+          <Table.Body>
+            <Table.Row>
+              <Table.Cell>Zoom In</Table.Cell>
+              <Table.Cell>+/=</Table.Cell>
+            </Table.Row>
+            <Table.Row>
+              <Table.Cell>Zoom Out</Table.Cell>
+              <Table.Cell>-</Table.Cell>
+            </Table.Row>
+            <Table.Row>
+              <Table.Cell>Move the Image</Table.Cell>
+              <Table.Cell>←→↑↓</Table.Cell>
             </Table.Row>
           </Table.Body>
         </Table>

@@ -16,14 +16,11 @@ export default class Canvas extends Component {
     super(props, context);
 
     this.state = {
-      lastColor: null,
       bounds: null,
       zoom: -1,
       height: null,
       width: null,
-      // state: editing/drawing is derived from the props.color
-      unfinishedFigure: null,
-      selectedFigure: null,
+      selectedFigureId: null,
       cursorPos: { lat: 0, lng: 0 },
     };
     this.prevSelectedFigure = null;
@@ -40,34 +37,16 @@ export default class Canvas extends Component {
 
   componentDidUpdate(prevProps) {
     const { url, onSelectionChange } = this.props;
-    const { selectedFigure } = this.state;
+    const { selectedFigureId } = this.state;
 
     if (url !== prevProps.url) {
       this.calcBounds(url);
     }
 
-    if (this.prevSelectedFigure !== selectedFigure && onSelectionChange) {
-      this.prevSelectedFigure = selectedFigure;
-      onSelectionChange(selectedFigure);
+    if (this.prevSelectedFigureId !== selectedFigureId && onSelectionChange) {
+      this.prevSelectedFigureId = selectedFigureId;
+      onSelectionChange(selectedFigureId);
     }
-  }
-
-  static getDerivedStateFromProps(props, state) {
-    if (props.color !== state.lastColor && props.color) {
-      return {
-        unfinishedFigure: {
-          id: null,
-          color: props.color,
-          type: props.type,
-          points: [],
-        },
-        lastColor: props.color,
-      };
-    }
-
-    return {
-      lastColor: props.color,
-    };
   }
 
   calcBounds(url) {
@@ -84,14 +63,14 @@ export default class Canvas extends Component {
   }
 
   getSelectedFigure() {
-    const { selectedFigure } = this.state;
-    return selectedFigure;
+    const { selectedFigureId } = this.state;
+    const { figures } = this.props;
+    return figures.find(f => f.id === selectedFigureId);
   }
 
   handleChange(eventType, { point, pos, figure, points }) {
-    const { unfinishedFigure } = this.state;
-    const { onChange, color } = this.props;
-    const drawing = !!color;
+    const { onChange, unfinishedFigure } = this.props;
+    const drawing = !!unfinishedFigure;
 
     switch (eventType) {
       case 'add':
@@ -99,23 +78,13 @@ export default class Canvas extends Component {
           let newState = unfinishedFigure.points;
           newState = update(newState, { $push: [point] });
 
-          this.setState(
-            {
-              unfinishedFigure: update(unfinishedFigure, {
-                points: {
-                  $set: newState,
-                },
-              }),
-            },
-            () => {
-              const { unfinishedFigure } = this.state;
-              if (
-                unfinishedFigure.type === 'bbox' &&
-                unfinishedFigure.points.length >= 2
-              ) {
-                this.handleChange('end', {});
-              }
-            }
+          onChange(
+            'unfinished',
+            update(unfinishedFigure, {
+              points: {
+                $set: newState,
+              },
+            })
           );
         } else {
           onChange(
@@ -128,9 +97,6 @@ export default class Canvas extends Component {
       case 'end':
         const f = unfinishedFigure;
         onChange('new', f);
-        this.setState({
-          unfinishedFigure: null,
-        });
         break;
 
       case 'move':
@@ -157,8 +123,8 @@ export default class Canvas extends Component {
   }
 
   handleClick(e) {
-    const { color } = this.props;
-    const drawing = !!color;
+    const { unfinishedFigure } = this.props;
+    const drawing = !!unfinishedFigure;
 
     if (this.skipNextClickEvent) {
       // a hack, for whatever reason it is really hard to stop event propagation in leaflet
@@ -172,7 +138,7 @@ export default class Canvas extends Component {
     }
 
     if (!drawing) {
-      this.setState({ selectedFigure: null });
+      this.setState({ selectedFigureId: null });
       return;
     }
   }
@@ -190,18 +156,24 @@ export default class Canvas extends Component {
   }
 
   render() {
-    const { url, color, figures, onChange, onReassignment, style } = this.props;
+    const {
+      url,
+      figures,
+      unfinishedFigure,
+      onChange,
+      onReassignment,
+      style,
+    } = this.props;
     const {
       bounds,
       zoom,
       height,
       width,
-      unfinishedFigure,
-      selectedFigure,
+      selectedFigureId,
       cursorPos,
     } = this.state;
 
-    const drawing = !!color;
+    const drawing = !!unfinishedFigure;
 
     if (!bounds) {
       return null;
@@ -225,10 +197,10 @@ export default class Canvas extends Component {
 
     const figuresDOM = figures.map((f, i) =>
       this.renderFigure(f, {
-        editing: selectedFigure && selectedFigure.id === f.id && !drawing,
+        editing: selectedFigureId === f.id && !drawing,
         finished: true,
         interactive: !drawing,
-        onSelect: () => this.setState({ selectedFigure: f }),
+        onSelect: () => this.setState({ selectedFigureId: f.id }),
         onChange: this.handleChange,
         calcDistance,
       })
@@ -240,21 +212,19 @@ export default class Canvas extends Component {
         onKeyDown={key => {
           if (drawing) {
             if (key === 'f') {
-              if (
-                unfinishedFigure.type === 'polygon' &&
-                unfinishedFigure.points.length >= 3
-              ) {
+              const { type, points } = unfinishedFigure;
+              if (type === 'polygon' && points.length >= 3) {
                 this.handleChange('end', {});
               }
             }
           } else {
             if (key === 'c') {
-              if (selectedFigure) {
-                onReassignment(selectedFigure.type);
+              if (selectedFigureId) {
+                onReassignment(this.getSelectedFigure().type);
               }
             } else if (key === 'backspace' || key === 'del') {
-              if (selectedFigure) {
-                onChange('delete', selectedFigure);
+              if (selectedFigureId) {
+                onChange('delete', this.getSelectedFigure());
               }
             }
           }

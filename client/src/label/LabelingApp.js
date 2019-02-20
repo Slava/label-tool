@@ -68,6 +68,7 @@ class LabelingApp extends Component {
     };
 
     this.handleChange = this.handleChange.bind(this);
+    this.handleSelected = this.handleSelected.bind(this);
     this.canvasRef = React.createRef();
   }
 
@@ -88,7 +89,35 @@ class LabelingApp extends Component {
     }
   }
 
-  handleChange(eventType, figure) {
+  handleSelected(selected) {
+    if (selected === this.state.selected) return;
+
+    if (!selected) {
+      this.setState({
+        selected,
+        unfinishedFigure: null,
+      });
+      return;
+    }
+
+    const { labels } = this.props;
+
+    const labelIdx = labels.findIndex(label => label.id === selected);
+    const type = labels[labelIdx].type;
+    const color = colors[labelIdx];
+
+    this.setState({
+      selected,
+      unfinishedFigure: {
+        id: null,
+        color,
+        type,
+        points: [],
+      },
+    });
+  }
+
+  handleChange(eventType, figure, newLabelId) {
     if (!figure.color) return;
     const { labels } = this.props;
     const label = labels[colors.indexOf(figure.color)];
@@ -110,6 +139,7 @@ class LabelingApp extends Component {
             },
           }),
           selected: null, // deselect the label after the figure is finished
+          unfinishedFigure: null,
         }));
         break;
 
@@ -139,6 +169,39 @@ class LabelingApp extends Component {
         }));
         break;
 
+      case 'unfinished':
+        this.setState(
+          state => ({ unfinishedFigure: figure }),
+          () => {
+            const { unfinishedFigure } = this.state;
+            const { type, points } = unfinishedFigure;
+            if (type === 'bbox' && points.length >= 2) {
+              this.handleChange('new', unfinishedFigure);
+            }
+          }
+        );
+        break;
+
+      case 'recolor':
+        if (label.id === newLabelId) return;
+        this.setState(state => ({
+          figures: update(state.figures, {
+            [label.id]: {
+              $splice: [[idx, 1]],
+            },
+            [newLabelId]: {
+              $push: [
+                {
+                  id: figure.id,
+                  points: figure.points,
+                  type: figure.type,
+                },
+              ],
+            },
+          }),
+        }));
+        break;
+
       default:
         throw new Error('unknown event type ' + eventType);
     }
@@ -148,6 +211,7 @@ class LabelingApp extends Component {
     const { labels, imageUrl, onBack, onSkip, onSubmit } = this.props;
     const {
       figures,
+      unfinishedFigure,
       selected,
       reassigning,
       toggles,
@@ -181,22 +245,19 @@ class LabelingApp extends Component {
           selected: null,
           onSelect: selected => {
             const figure = this.canvasRef.current.getSelectedFigure();
-            const newColor =
-              colors[labels.findIndex(label => label.id === selected)];
-            if (figure && figure.color !== newColor) {
-              this.handleChange('delete', figure);
-              figure.color = newColor;
-              this.handleChange('new', figure);
+            if (figure) {
+              this.handleChange('recolor', figure, selected);
             }
 
             this.setState({ reassigning: { status: false, type: null } });
           },
           filter: label => label.type === reassigning.type,
+          labelData: figures,
         }
       : {
           title: 'Labeling',
           selected,
-          onSelect: selected => this.setState({ selected }),
+          onSelect: this.handleSelected,
           toggles,
           onToggle: label =>
             this.setState({
@@ -219,13 +280,6 @@ class LabelingApp extends Component {
       />
     ) : null;
 
-    const labelIdx = labels.findIndex(label => label.id === selected);
-    const type = selected ? labels[labelIdx].type : null;
-    const color =
-      selected && (type === 'bbox' || type === 'polygon')
-        ? colors[labelIdx]
-        : null;
-
     return (
       <div style={{ display: 'flex', height: '100vh' }}>
         <Sidebar
@@ -238,14 +292,13 @@ class LabelingApp extends Component {
         <Canvas
           url={imageUrl}
           figures={allFigures}
-          color={color}
-          type={type}
+          unfinishedFigure={unfinishedFigure}
           onChange={this.handleChange}
           onReassignment={type =>
             this.setState({ reassigning: { status: true, type } })
           }
-          onSelectionChange={figure =>
-            figure ||
+          onSelectionChange={figureId =>
+            figureId ||
             this.setState({ reassigning: { status: false, type: null } })
           }
           ref={this.canvasRef}

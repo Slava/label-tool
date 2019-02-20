@@ -59,8 +59,13 @@ class LabelingApp extends Component {
 
     this.state = {
       selected: null,
-      figures, // mapping from label name to a list of Figure structures
       toggles,
+
+      // Data
+      figures, // mapping from label name to a list of Figure structures
+      unfinishedFigure: null,
+      figuresHistory: [],
+      unfinishedFigureHistory: [],
 
       // UI
       reassigning: { status: false, type: null },
@@ -69,6 +74,8 @@ class LabelingApp extends Component {
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSelected = this.handleSelected.bind(this);
+    this.pushState = this.pushState.bind(this);
+    this.popState = this.popState.bind(this);
     this.canvasRef = React.createRef();
   }
 
@@ -89,14 +96,49 @@ class LabelingApp extends Component {
     }
   }
 
+  pushState(stateChange, cb) {
+    this.setState(
+      state => ({
+        figuresHistory: update(state.figuresHistory, {
+          $push: [state.figures],
+        }),
+        unfinishedFigureHistory: update(state.unfinishedFigureHistory, {
+          $push: [state.unfinishedFigure],
+        }),
+        ...stateChange(state),
+      }),
+      cb
+    );
+  }
+
+  popState() {
+    this.setState(state => {
+      let { figuresHistory, unfinishedFigureHistory } = state;
+      if (!figuresHistory.length) {
+        return {};
+      }
+
+      figuresHistory = figuresHistory.slice();
+      unfinishedFigureHistory = unfinishedFigureHistory.slice();
+      const figures = figuresHistory.pop();
+      const unfinishedFigure = unfinishedFigureHistory.pop();
+      return {
+        figures,
+        unfinishedFigure,
+        figuresHistory,
+        unfinishedFigureHistory,
+      };
+    });
+  }
+
   handleSelected(selected) {
     if (selected === this.state.selected) return;
 
     if (!selected) {
-      this.setState({
+      this.pushState(state => ({
         selected,
         unfinishedFigure: null,
-      });
+      }));
       return;
     }
 
@@ -106,7 +148,7 @@ class LabelingApp extends Component {
     const type = labels[labelIdx].type;
     const color = colors[labelIdx];
 
-    this.setState({
+    this.pushState(state => ({
       selected,
       unfinishedFigure: {
         id: null,
@@ -114,7 +156,7 @@ class LabelingApp extends Component {
         type,
         points: [],
       },
-    });
+    }));
   }
 
   handleChange(eventType, figure, newLabelId) {
@@ -126,7 +168,7 @@ class LabelingApp extends Component {
 
     switch (eventType) {
       case 'new':
-        this.setState(state => ({
+        this.pushState(state => ({
           figures: update(state.figures, {
             [label.id]: {
               $push: [
@@ -144,7 +186,7 @@ class LabelingApp extends Component {
         break;
 
       case 'replace':
-        this.setState(state => ({
+        this.pushState(state => ({
           figures: update(state.figures, {
             [label.id]: {
               $splice: [
@@ -160,7 +202,7 @@ class LabelingApp extends Component {
         break;
 
       case 'delete':
-        this.setState(state => ({
+        this.pushState(state => ({
           figures: update(state.figures, {
             [label.id]: {
               $splice: [[idx, 1]],
@@ -170,7 +212,7 @@ class LabelingApp extends Component {
         break;
 
       case 'unfinished':
-        this.setState(
+        this.pushState(
           state => ({ unfinishedFigure: figure }),
           () => {
             const { unfinishedFigure } = this.state;
@@ -184,7 +226,7 @@ class LabelingApp extends Component {
 
       case 'recolor':
         if (label.id === newLabelId) return;
-        this.setState(state => ({
+        this.pushState(state => ({
           figures: update(state.figures, {
             [label.id]: {
               $splice: [[idx, 1]],
@@ -267,9 +309,9 @@ class LabelingApp extends Component {
             }),
           openHotkeys: () => this.setState({ hotkeysPanel: true }),
           onFormChange: (labelId, newValue) =>
-            this.setState({
+            this.pushState(state => ({
               figures: update(figures, { [labelId]: { $set: newValue } }),
-            }),
+            })),
           labelData: figures,
         };
 
@@ -282,28 +324,30 @@ class LabelingApp extends Component {
 
     return (
       <div style={{ display: 'flex', height: '100vh' }}>
-        <Sidebar
-          labels={labels}
-          {...sidebarProps}
-          {...forwardedProps}
-          style={{ flex: 1, maxWidth: 300 }}
-        />
-        {hotkeysPanelDOM}
-        <Canvas
-          url={imageUrl}
-          figures={allFigures}
-          unfinishedFigure={unfinishedFigure}
-          onChange={this.handleChange}
-          onReassignment={type =>
-            this.setState({ reassigning: { status: true, type } })
-          }
-          onSelectionChange={figureId =>
-            figureId ||
-            this.setState({ reassigning: { status: false, type: null } })
-          }
-          ref={this.canvasRef}
-          style={{ flex: 4 }}
-        />
+        <Hotkeys keyName="ctrl+z" onKeyDown={this.popState}>
+          <Sidebar
+            labels={labels}
+            {...sidebarProps}
+            {...forwardedProps}
+            style={{ flex: 1, maxWidth: 300 }}
+          />
+          {hotkeysPanelDOM}
+          <Canvas
+            url={imageUrl}
+            figures={allFigures}
+            unfinishedFigure={unfinishedFigure}
+            onChange={this.handleChange}
+            onReassignment={type =>
+              this.setState({ reassigning: { status: true, type } })
+            }
+            onSelectionChange={figureId =>
+              figureId ||
+              this.setState({ reassigning: { status: false, type: null } })
+            }
+            ref={this.canvasRef}
+            style={{ flex: 4 }}
+          />
+        </Hotkeys>
       </div>
     );
   }

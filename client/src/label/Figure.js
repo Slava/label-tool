@@ -60,8 +60,12 @@ class Figure extends Component {
       <CircleMarker
         key={id + '-' + i}
         color={color}
+        fill={true}
+        fillColor={color}
+        fillRule="nonzero"
+        fillOpacity={1.0}
         center={pos}
-        radius={5}
+        radius={4}
         onClick={() => this.onPointClick(i)}
         draggable={editing}
         onDrag={e => {
@@ -162,8 +166,10 @@ export class PolygonFigure extends Figure {
           color="white"
           center={midPoint(a, b)}
           radius={3}
+          fill={true}
+          fillOpacity={0.5}
           opacity={0.5}
-          onClick={e => {
+          onMousedown={e => {
             onChange('add', { point: midPoint(a, b), pos: i + 1, figure });
             skipNextClick();
           }}

@@ -33,7 +33,7 @@ function renderExtraConfig({ value, onChange }) {
 
     const renderedOptions = options.map((optionText, index) => (
       <div key={index} className="form-checkbox">
-        <Comp checked={false} />
+        <Comp checked={false} tabIndex="-1" />
         <Input
           style={{ top: '-3px' }}
           value={optionText}

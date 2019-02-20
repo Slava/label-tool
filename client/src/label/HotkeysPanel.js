@@ -56,6 +56,10 @@ export default function HotkeysPanel({ labels, onClose }) {
               <Table.Cell>Cancel selection</Table.Cell>
               <Table.Cell>Escape</Table.Cell>
             </Table.Row>
+            <Table.Row>
+              <Table.Cell>Undo the edit</Table.Cell>
+              <Table.Cell>Ctrl+Z</Table.Cell>
+            </Table.Row>
           </Table.Body>
         </Table>
         <Header as="h3"> Navigation </Header>

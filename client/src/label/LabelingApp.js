@@ -4,8 +4,6 @@ import {
   List,
   Label,
   Icon,
-  Segment,
-  Table,
   Button,
   Input,
   Checkbox,
@@ -17,6 +15,7 @@ import update from 'immutability-helper';
 import 'semantic-ui-css/semantic.min.css';
 
 import Canvas from './Canvas';
+import HotkeysPanel from './HotkeysPanel';
 import './LabelingApp.css';
 
 const shortcuts = '1234567890qwe';
@@ -456,91 +455,6 @@ function ListItem({
         {genSublist(label)}
       </Hotkeys>
     </List.Item>
-  );
-}
-
-function HotkeysPanel({ labels, onClose }) {
-  return (
-    <div
-      style={{ height: '100vh', 'overflow-y': 'auto', 'overflow-x': 'hidden' }}
-    >
-      <Header as="h2" attached="top">
-        Hotkeys
-        <Icon link name="close" style={headerIconStyle} onClick={onClose} />
-      </Header>
-      <Segment attached>
-        <Header as="h3"> Labels </Header>
-        <Table celled>
-          <Table.Header>
-            <Table.Row>
-              <Table.HeaderCell>Action</Table.HeaderCell>
-              <Table.HeaderCell>Key</Table.HeaderCell>
-            </Table.Row>
-          </Table.Header>
-
-          <Table.Body>
-            {labels.map((label, i) => (
-              <Table.Row key={label}>
-                <Table.Cell>{label}</Table.Cell>
-                <Table.Cell>{i}</Table.Cell>
-              </Table.Row>
-            ))}
-          </Table.Body>
-        </Table>
-        <Header as="h3"> General </Header>
-        <Table celled>
-          <Table.Header>
-            <Table.Row>
-              <Table.HeaderCell>Action</Table.HeaderCell>
-              <Table.HeaderCell>Key</Table.HeaderCell>
-            </Table.Row>
-          </Table.Header>
-
-          <Table.Body>
-            <Table.Row>
-              <Table.Cell>Complete shape</Table.Cell>
-              <Table.Cell>f</Table.Cell>
-            </Table.Row>
-            <Table.Row>
-              <Table.Cell>Change label</Table.Cell>
-              <Table.Cell>c</Table.Cell>
-            </Table.Row>
-            <Table.Row>
-              <Table.Cell>Delete figure</Table.Cell>
-              <Table.Cell>Delete</Table.Cell>
-            </Table.Row>
-            <Table.Row>
-              <Table.Cell>Cancel selection</Table.Cell>
-              <Table.Cell>Escape</Table.Cell>
-            </Table.Row>
-          </Table.Body>
-        </Table>
-        <Header as="h3"> Navigation </Header>
-        <Table celled>
-          <Table.Header>
-            <Table.Row>
-              <Table.HeaderCell>Action</Table.HeaderCell>
-              <Table.HeaderCell>Key</Table.HeaderCell>
-            </Table.Row>
-          </Table.Header>
-
-          <Table.Body>
-            <Table.Row>
-              <Table.Cell>Zoom In</Table.Cell>
-              <Table.Cell>+/=</Table.Cell>
-            </Table.Row>
-            <Table.Row>
-              <Table.Cell>Zoom Out</Table.Cell>
-              <Table.Cell>-</Table.Cell>
-            </Table.Row>
-            <Table.Row>
-              <Table.Cell>Move the Image</Table.Cell>
-              <Table.Cell>←→↑↓</Table.Cell>
-            </Table.Row>
-          </Table.Body>
-        </Table>
-      </Segment>
-    </div>
   );
 }
 

@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import { Table, Loader, Header, Checkbox, Button } from 'semantic-ui-react';
 
 import update from 'immutability-helper';
+import shallowEqualObjects from 'shallow-equal/objects';
 
 export default class ProjectImages extends Component {
   constructor(props) {
@@ -16,6 +17,17 @@ export default class ProjectImages extends Component {
     this.handleLabeled = this.handleLabeled.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
     this.markAllNotLabeled = this.markAllNotLabeled.bind(this);
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    const { projectId } = this.props;
+    if (
+      projectId === nextProps.projectId &&
+      shallowEqualObjects(this.state, nextState)
+    ) {
+      return false;
+    }
+    return true;
   }
 
   async componentDidMount() {

@@ -33,8 +33,9 @@ function renderExtraConfig({ value, onChange }) {
 
     const renderedOptions = options.map((optionText, index) => (
       <div key={index} className="form-checkbox">
-        <Comp />
+        <Comp checked={false} />
         <Input
+          style={{ top: '-3px' }}
           value={optionText}
           size="small"
           onChange={(e, data) =>
@@ -45,6 +46,7 @@ function renderExtraConfig({ value, onChange }) {
           }
         />
         <Button
+          type="button"
           icon="trash"
           style={{ background: 'transparent' }}
           onClick={() =>
@@ -62,6 +64,7 @@ function renderExtraConfig({ value, onChange }) {
         <Header as="h5">Options:</Header>
         {renderedOptions}
         <Button
+          type="button"
           size="mini"
           circular
           icon="plus"
@@ -126,6 +129,7 @@ export default function LabelFormItem({ value, onChange }) {
         </div>
         <div style={{ flex: '0 0 auto' }}>
           <Button
+            type="button"
             style={{ background: 'transparent', padding: 0 }}
             onClick={() => onChange(value, null)}
           >

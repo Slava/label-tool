@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import { Header, Button, Form, Loader } from 'semantic-ui-react';
+import { Header, Button, Loader, Input } from 'semantic-ui-react';
 
 import DocumentMeta from 'react-document-meta';
 
@@ -148,12 +148,12 @@ export default class ProjectPage extends Component {
 
     return (
       <DocumentMeta title={`Edit project ${project.name}`}>
-        <div className="ui form" style={{ paddingBottom: 200 }}>
-          <Form.Field
+        <div className="ui" style={{ paddingBottom: 200 }}>
+          <Input
             placeholder="Project name"
             control="input"
             defaultValue={project.name}
-            style={{ fontSize: 24 }}
+            style={{ fontSize: 24, width: '100%' }}
             onChange={this.handleNameChange}
           />
           <div style={{ padding: '1em 0 110px 0' }}>

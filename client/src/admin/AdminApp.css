@@ -7,10 +7,6 @@
   margin-left: 5px !important;
 }
 
-.form-card .form-checkbox label::before {
-  margin-top: 3px;
-}
-
 .form-card .form-checkbox {
   padding: 5px;
 }

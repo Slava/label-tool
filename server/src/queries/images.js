@@ -32,7 +32,7 @@ where images.id = ?;
     return { ...image, labelData: JSON.parse(image.labelData) };
   },
 
-  addImages: (projectId, urls) => {
+  addImageUrls: (projectId, urls) => {
     const getName = url =>
       path.basename(new URL(url, 'https://base.com').pathname);
 
@@ -46,13 +46,13 @@ values (?, ?, 0, '{ }', ?);
     }
   },
 
-  addImageStub: (projectId, filename) => {
+  addImageStub: (projectId, filename, localPath) => {
     const stmt = db.prepare(`
-insert into images(originalName, link, labeled, labelData, projectsId)
-values (?, 'stub', 0, '{ }', ?);
+insert into images(originalName, localPath, link, labeled, labelData, projectsId)
+values (?, ?, 'stub', 0, '{ }', ?);
 `);
 
-    const { lastInsertRowid } = stmt.run(filename, projectId);
+    const { lastInsertRowid } = stmt.run(filename, localPath, projectId);
     return lastInsertRowid;
   },
 

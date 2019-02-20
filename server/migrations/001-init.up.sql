@@ -8,6 +8,7 @@ create table Images (
   id integer primary key autoincrement,
   originalName text not null,
   link text not null,
+  localPath text,
   labeled boolean,
   labelData text not null, /* JSON-stringified data, matching the form data in the project */
   lastEdited real default 0.0,

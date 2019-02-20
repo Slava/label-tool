@@ -4,7 +4,7 @@ const multer = require('multer');
 const archiver = require('archiver');
 
 const path = require('path');
-const fs = require('fs');
+const fs = require('fs').promises;
 
 const projects = require('./queries/projects');
 const images = require('./queries/images');
@@ -51,20 +51,56 @@ app.get('/api/images/:id', (req, res) => {
   res.json(images.get(req.params.id));
 });
 
-app.post('/api/images', (req, res) => {
-  const { projectId, urls } = req.body;
-  try {
-    images.addImages(projectId, urls);
-  } catch (err) {
+app.post('/api/images', async (req, res) => {
+  const { projectId, urls, localPath } = req.body;
+  if (urls) {
+    try {
+      images.addImageUrls(projectId, urls);
+    } catch (err) {
+      res.status(400);
+      res.json({
+        message: err.message,
+        code: 400,
+      });
+      return;
+    }
+    res.json({ success: true });
+  } else if (localPath) {
+    try {
+      const files = await fs.readdir(localPath);
+      const isImage = p =>
+        ['.jpg', '.jpeg', '.png'].includes(path.extname(p).toLowerCase());
+      const imagePaths = files.filter(isImage);
+      if (!imagePaths.length) {
+        throw new Error('The specified folder has no image files.');
+      }
+      //images.addImages(projectId, urls);
+      for (const filename of imagePaths) {
+        const id = images.addImageStub(
+          projectId,
+          filename,
+          path.join(localPath, filename)
+        );
+        const ext = path.extname(filename);
+        const link = `/uploads/${projectId}/${id}${ext}`;
+        images.updateLink(id, link);
+      }
+    } catch (err) {
+      res.status(400);
+      res.json({
+        message: err.message,
+        code: 400,
+      });
+      return;
+    }
+    res.json({ success: true });
+  } else {
     res.status(400);
     res.json({
-      message: err.message,
+      message: 'No urls or local path passed',
       code: 400,
     });
-    return;
   }
-
-  res.json({ success: true });
 });
 
 app.delete('/api/images/:id', (req, res) => {
@@ -127,14 +163,17 @@ app.patch('/api/images/:imageId', (req, res) => {
 
 const uploads = multer({
   storage: multer.diskStorage({
-    destination: (req, file, cb) => {
+    destination: async (req, file, cb) => {
       const { projectId } = req.params;
       try {
         if (!projects.get(projectId)) {
           throw new Error('No such projectId.');
         }
         const dest = path.join(__dirname, '..', 'uploads', projectId);
-        fs.mkdir(dest, () => cb(null, dest));
+        try {
+          await fs.mkdir(dest);
+        } catch (err) {}
+        cb(null, dest);
       } catch (err) {
         cb(err);
       }
@@ -143,7 +182,7 @@ const uploads = multer({
       try {
         const { projectId } = req.params;
         const filename = file.originalname;
-        const id = images.addImageStub(projectId, filename);
+        const id = images.addImageStub(projectId, filename, null);
         const ext = path.extname(filename);
         const link = `/uploads/${projectId}/${id}${ext}`;
         images.updateLink(id, link);
@@ -161,9 +200,19 @@ app.post('/api/uploads/:projectId', uploads.array('images'), (req, res) => {
 
 app.get('/uploads/:projectId/:imageName', (req, res) => {
   const { projectId, imageName } = req.params;
-  res.sendFile(
-    path.join(__dirname + '/../uploads/', projectId, path.join('/', imageName))
-  );
+  const imageId = imageName.split('.')[0];
+  const image = images.get(imageId);
+  if (image.localPath) {
+    res.sendFile(image.localPath);
+  } else {
+    res.sendFile(
+      path.join(
+        __dirname + '/../uploads/',
+        projectId,
+        path.join('/', imageName)
+      )
+    );
+  }
 });
 
 app.get('/api/projects/:projectId/export', (req, res) => {

@@ -56,8 +56,13 @@ class Figure extends Component {
 
     const renderPoints = this.getRenderPoints(points);
 
+    const classes = ['vertex'];
+    if (editing) classes.push('editing');
+    if (finished) classes.push('finished');
+
     const vertices = renderPoints.map((pos, i) => (
       <CircleMarker
+        className={classes.concat(!i ? ['first'] : []).join(' ')}
         key={id + '-' + i}
         color={color}
         fill={true}
@@ -163,6 +168,7 @@ export class PolygonFigure extends Figure {
       .map(([a, b, i]) => (
         <CircleMarker
           key={id + '-' + i + '-mid'}
+          className="midpoint"
           color="white"
           center={midPoint(a, b)}
           radius={3}

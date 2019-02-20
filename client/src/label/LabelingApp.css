@@ -18,3 +18,15 @@ body,
 .item.disabled {
   opacity: 0.5;
 }
+
+.vertex.editing.finished {
+  cursor: not-allowed !important;
+}
+
+.midpoint {
+  cursor: copy !important;
+}
+
+.vertex:not(.finished).first {
+  cursor: cell !important;
+}

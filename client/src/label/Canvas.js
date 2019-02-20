@@ -236,7 +236,7 @@ export default class Canvas extends Component {
 
     const hotkeysDOM = (
       <Hotkeys
-        keyName="backspace,del,c,f"
+        keyName="backspace,del,c,f,-,=,left,right,up,down"
         onKeyDown={key => {
           if (drawing) {
             if (key === 'f') {
@@ -257,6 +257,26 @@ export default class Canvas extends Component {
                 onChange('delete', selectedFigure);
               }
             }
+          }
+
+          const map = this.mapRef.current.leafletElement;
+          if (key === 'left') {
+            map.panBy([80, 0]);
+          }
+          if (key === 'right') {
+            map.panBy([-80, 0]);
+          }
+          if (key === 'up') {
+            map.panBy([0, 80]);
+          }
+          if (key === 'down') {
+            map.panBy([0, -80]);
+          }
+          if (key === '=') {
+            map.setZoom(map.getZoom() + 1);
+          }
+          if (key === '-') {
+            map.setZoom(map.getZoom() - 1);
           }
         }}
       />

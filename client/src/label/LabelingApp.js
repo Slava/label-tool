@@ -18,6 +18,8 @@ import Canvas from './Canvas';
 import HotkeysPanel from './HotkeysPanel';
 import './LabelingApp.css';
 
+import { sobelHoriz, sobelVert } from '../image-processing/filtering';
+
 const shortcuts = '1234567890qwe';
 const colors = [
   'red',
@@ -67,7 +69,7 @@ class LabelingApp extends Component {
       figuresHistory: [],
       unfinishedFigureHistory: [],
 
-      // UI
+      // II
       reassigning: { status: false, type: null },
       hotkeysPanel: false,
     };
@@ -77,20 +79,36 @@ class LabelingApp extends Component {
     this.pushState = this.pushState.bind(this);
     this.popState = this.popState.bind(this);
     this.canvasRef = React.createRef();
+
+    this.componentDidUpdate({}, this.state);
   }
 
   componentDidUpdate(prevProps, prevState) {
     const { onLabelChange, imageUrl } = this.props;
-    const { figures } = this.state;
+    const { figures, height, width } = this.state;
+
     if (figures !== prevState.figures) {
+      onLabelChange({
+        labels: figures,
+        height,
+        width,
+      });
+    }
+
+    if (imageUrl !== prevProps.imageUrl) {
       const img = new Image();
+      const setState = this.setState.bind(this);
       img.onload = function() {
         const { height, width } = this;
-        onLabelChange({
-          labels: figures,
-          height,
-          width,
-        });
+        setState({ height, width });
+
+        const sobelH = sobelHoriz(img);
+        //const sobelV = sobelVert(img);
+        console.log(sobelH);
+        document
+          .getElementById('my-canvas')
+          .getContext('2d')
+          .putImageData(sobelH, 0, 0);
       };
       img.src = imageUrl;
     }
@@ -347,6 +365,7 @@ class LabelingApp extends Component {
             ref={this.canvasRef}
             style={{ flex: 4 }}
           />
+          <canvas id="my-canvas" height="500" width="500" />
         </Hotkeys>
       </div>
     );

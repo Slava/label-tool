@@ -49,6 +49,10 @@ class Figure extends Component {
     ));
   }
 
+  hasFill() {
+    return true;
+  }
+
   render() {
     const { figure, options, skipNextClick } = this.props;
     const { id, points, color } = figure;
@@ -95,7 +99,7 @@ class Figure extends Component {
           positions={renderPoints}
           color={color}
           weight={3}
-          fill={true}
+          fill={this.hasFill()}
           fillColor={color}
           interactive={true} // always set interactive to true, to avoid bugs in leaflet-react
           onClick={() => {
@@ -283,6 +287,16 @@ export class BBoxFigure extends Figure {
 
       onChange('replace', { points, figure });
     }
+  }
+}
+
+export class PolylineFigure extends Figure {
+  hasFill() {
+    return false;
+  }
+
+  leafletComponent() {
+    return Polyline;
   }
 }
 

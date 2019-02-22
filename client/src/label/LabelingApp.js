@@ -20,6 +20,8 @@ import './LabelingApp.css';
 
 import { sobelHoriz, sobelVert } from '../image-processing/filtering';
 
+import { computePath } from '../image-processing/LiveWire';
+
 const shortcuts = '1234567890qwe';
 const colors = [
   'red',
@@ -69,7 +71,10 @@ class LabelingApp extends Component {
       figuresHistory: [],
       unfinishedFigureHistory: [],
 
-      // II
+      // Selection algorithm
+      sobel: null,
+
+      // UI
       reassigning: { status: false, type: null },
       hotkeysPanel: false,
     };
@@ -98,17 +103,14 @@ class LabelingApp extends Component {
     if (imageUrl !== prevProps.imageUrl) {
       const img = new Image();
       const setState = this.setState.bind(this);
-      img.onload = function() {
+      img.onload = async function() {
         const { height, width } = this;
         setState({ height, width });
 
-        const sobelH = sobelHoriz(img);
-        //const sobelV = sobelVert(img);
-        console.log(sobelH);
-        document
-          .getElementById('my-canvas')
-          .getContext('2d')
-          .putImageData(sobelH, 0, 0);
+        const scaling = Math.min(1.0, 2000.0 / height);
+        const sobelH = await sobelHoriz(img, scaling);
+        const sobelV = await sobelVert(img, scaling);
+        setState({ sobel: { sobelH, sobelV, scaling } });
       };
       img.src = imageUrl;
     }
@@ -276,6 +278,9 @@ class LabelingApp extends Component {
       reassigning,
       toggles,
       hotkeysPanel,
+      sobel,
+      height,
+      width,
     } = this.state;
 
     const forwardedProps = {
@@ -298,6 +303,25 @@ class LabelingApp extends Component {
           })
       )
     );
+
+    if (allFigures[0] && allFigures[0].points.length > 1 && sobel) {
+      const paths = computePath({
+        points: allFigures[0].points.map(({ lng, lat }) => ({
+          x: lng,
+          y: lat,
+        })),
+        height,
+        width,
+        ...sobel,
+      });
+      paths.forEach((path, i) => {
+        allFigures.push({
+          type: 'line',
+          points: path.map(({ x, y }) => ({ lng: x, lat: y })),
+          color: colors[i + 1],
+        });
+      });
+    }
 
     const sidebarProps = reassigning.status
       ? {
@@ -365,7 +389,6 @@ class LabelingApp extends Component {
             ref={this.canvasRef}
             style={{ flex: 4 }}
           />
-          <canvas id="my-canvas" height="500" width="500" />
         </Hotkeys>
       </div>
     );

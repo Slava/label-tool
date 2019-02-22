@@ -7,7 +7,7 @@ import 'leaflet-path-drag';
 
 import 'leaflet/dist/leaflet.css';
 
-import { BBoxFigure, PolygonFigure } from './Figure';
+import { BBoxFigure, PolygonFigure, PolylineFigure } from './Figure';
 
 const maxZoom = 7;
 let imgRef = new Image();
@@ -144,7 +144,12 @@ export default class Canvas extends Component {
   }
 
   renderFigure(figure, options) {
-    const Comp = figure.type === 'bbox' ? BBoxFigure : PolygonFigure;
+    const Comp =
+      figure.type === 'bbox'
+        ? BBoxFigure
+        : figure.type === 'polygon'
+        ? PolygonFigure
+        : PolylineFigure;
     return (
       <Comp
         key={figure.id}

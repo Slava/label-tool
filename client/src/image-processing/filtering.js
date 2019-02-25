@@ -276,7 +276,8 @@ export async function sobelVert(image, scaleFactor) {
   await makeAsync();
   const glCanvas = render(
     image,
-    [kernels.gaussianBlur, kernels.unsharpen, kernels.sobelVertical],
+    //[kernels.gaussianBlur, kernels.unsharpen, kernels.sobelVertical],
+    [kernels.unsharpen, kernels.sobelVertical],
     scaleFactor
   );
 
@@ -293,7 +294,8 @@ export async function sobelHoriz(image, scaleFactor) {
   await makeAsync();
   const glCanvas = render(
     image,
-    [kernels.gaussianBlur, kernels.unsharpen, kernels.sobelHorizontal],
+    //[kernels.gaussianBlur, kernels.unsharpen, kernels.sobelHorizontal],
+    [kernels.unsharpen, kernels.sobelHorizontal],
     scaleFactor
   );
 
@@ -313,12 +315,12 @@ async function makeAsync() {
 }
 
 export function pointToId(data, x, y) {
-  return y * (data.width * 4) + x * 4;
+  return (data.height - y) * (data.width * 4) + x * 4;
 }
 
 export function idToPoint(data, id) {
   const x = (id % (data.width * 4)) / 4;
-  const y = Math.floor(id / (data.width * 4));
+  const y = data.height - Math.floor(id / (data.width * 4));
   return { x, y };
 }
 

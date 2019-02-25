@@ -107,7 +107,7 @@ class LabelingApp extends Component {
         const { height, width } = this;
         setState({ height, width });
 
-        const scaling = Math.min(1.0, 2000.0 / height);
+        const scaling = Math.min(1.0, 3000.0 / height);
         const sobelH = await sobelHoriz(img, scaling);
         const sobelV = await sobelVert(img, scaling);
         setState({ sobel: { sobelH, sobelV, scaling } });
@@ -305,7 +305,7 @@ class LabelingApp extends Component {
     );
 
     if (allFigures[0] && allFigures[0].points.length > 1 && sobel) {
-      const paths = computePath({
+      const path = computePath({
         points: allFigures[0].points.map(({ lng, lat }) => ({
           x: lng,
           y: lat,
@@ -314,12 +314,10 @@ class LabelingApp extends Component {
         width,
         ...sobel,
       });
-      paths.forEach((path, i) => {
-        allFigures.push({
-          type: 'line',
-          points: path.map(({ x, y }) => ({ lng: x, lat: y })),
-          color: colors[i + 1],
-        });
+      allFigures.push({
+        type: 'line',
+        points: path.map(({ x, y }) => ({ lng: x, lat: y })),
+        color: 'white',
       });
     }
 

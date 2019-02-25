@@ -1,12 +1,6 @@
 import { MinHeap } from './MaxHeap';
 
-export function dijkstra(
-  startingDistances,
-  endSet,
-  distanceFn,
-  neighborsFn,
-  estDistanceFn
-) {
+export function dijkstra(startingDistances, endSet, distanceFn, neighborsFn) {
   const queue = new MinHeap((a, b) => a - b);
   const fromId = new Map();
 
@@ -33,7 +27,6 @@ export function dijkstra(
         : Infinity;
       const delta = distanceFn(id, nid);
       if (dist + delta <= ndist) {
-        const est = estDistanceFn(nid);
         queue.set(nid, dist + delta);
         finalDistances.set(nid, dist + delta);
 
@@ -45,7 +38,6 @@ export function dijkstra(
       }
     });
   }
-  console.log(new Date() - startTime);
 
   return Array.from(endSet).map(id => {
     const path = [];

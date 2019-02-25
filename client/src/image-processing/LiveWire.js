@@ -1,15 +1,16 @@
 import { dijkstra } from './Dijkstra';
-import { readPixel, pointToId, idToPoint } from './filtering';
+const markRadius = 1; // ~9 pixels per mark
+export function computePath({ points, height, width, scaling = 1.0, data }) {
+  function pointToId(x, y) {
+    return (height - y) * (width * 4) + x * 4;
+  }
 
-const markRadius = 3; // ~100 pixels per mark
-export function computePath({
-  points,
-  height,
-  width,
-  sobelH,
-  sobelV,
-  scaling,
-}) {
+  function idToPoint(id) {
+    const x = (id % (width * 4)) / 4;
+    const y = height - Math.floor(id / (width * 4));
+    return { x, y };
+  }
+
   const scaledPoints = points.map(({ x, y }) => ({
     x: Math.floor(x * scaling),
     y: Math.floor(y * scaling),
@@ -29,11 +30,9 @@ export function computePath({
   });
 
   const idsSets = pointsSets.map(
-    ps => new Set(ps.map(({ x, y }) => pointToId(sobelH, x, y)))
+    ps => new Set(ps.map(({ x, y }) => pointToId(x, y)))
   );
 
-  //drawTestCanvas(minPoint, maxPoint, sobelV, 'test-canvas-1');
-  //drawTestCanvas(minPoint, maxPoint, sobelH, 'test-canvas-2');
   let minPoint, maxPoint;
 
   function getPaths(startingSet, startingDistances, endSet) {
@@ -41,14 +40,14 @@ export function computePath({
     maxPoint = { x: -Infinity, y: -Infinity };
 
     for (const id of endSet) {
-      const p = idToPoint(sobelV, id);
+      const p = idToPoint(id);
       minPoint.x = Math.min(minPoint.x, p.x);
       minPoint.y = Math.min(minPoint.y, p.y);
       maxPoint.x = Math.max(maxPoint.x, p.x);
       maxPoint.y = Math.max(maxPoint.y, p.y);
     }
     for (const id of startingSet) {
-      const p = idToPoint(sobelV, id);
+      const p = idToPoint(id);
       minPoint.x = Math.min(minPoint.x, p.x);
       minPoint.y = Math.min(minPoint.y, p.y);
       maxPoint.x = Math.max(maxPoint.x, p.x);
@@ -59,26 +58,58 @@ export function computePath({
     maxPoint.x += 3;
     maxPoint.y += 3;
 
-    const distanceFn = (a, b) => {
-      const pa = idToPoint(sobelV, a);
-      const pb = idToPoint(sobelV, b);
-
-      if (pa.x !== pb.x) {
-        return 256 - sobelV.data[a];
+    function calcCost(a, b, c, d) {
+      let sum = 0;
+      for (let i = 0; i < 3; i++) {
+        const aveA = (data[a + i] + data[b + i]) / 2;
+        const aveB = (data[c + i] + data[d + i]) / 2;
+        const diff = Math.abs(aveA - aveB);
+        sum += diff * diff;
       }
-      return 256 - sobelH.data[a];
+      return sum;
+    }
+
+    const maxCost = 1000000;
+    const distanceFn = (a, b) => {
+      const pa = idToPoint(a);
+      const pb = idToPoint(b);
+
+      if (pa.x === pb.x) {
+        const pl1 = pointToId(pa.x - 1, pa.y);
+        const pl2 = pointToId(pa.x - 1, pb.y);
+        const pr1 = pointToId(pa.x + 1, pa.y);
+        const pr2 = pointToId(pa.x + 1, pb.y);
+        const cost = calcCost(pl1, pl2, pr1, pr2);
+        return maxCost - cost;
+      } else if (pa.y === pb.y) {
+        const pl1 = pointToId(pa.x, pa.y - 1);
+        const pl2 = pointToId(pb.x, pb.y - 1);
+        const pr1 = pointToId(pa.x, pa.y + 1);
+        const pr2 = pointToId(pb.x, pb.y + 1);
+        const cost = calcCost(pl1, pl2, pr1, pr2);
+        return maxCost - cost;
+      } else {
+        const p1 = pointToId(pa.x, pb.y);
+        const p2 = pointToId(pb.x, pa.y);
+        const cost = calcCost(p1, p1, p2, p2);
+        return maxCost - Math.floor(cost / 1.414);
+      }
     };
 
     const neighborsFn = id => {
-      const p = idToPoint(sobelV, id);
-      const points = [
-        { x: p.x + 1, y: p.y },
-        { x: p.x - 1, y: p.y },
-        { x: p.x, y: p.y + 1 },
-        { x: p.x, y: p.y - 1 },
-      ];
+      const p = idToPoint(id);
+      const points = [];
+      for (let i = -1; i <= 1; i++) {
+        for (let j = -1; j <= 1; j++) {
+          if (!i && !j) continue;
+          points.push({
+            x: p.x + i,
+            y: p.y + j,
+          });
+        }
+      }
       const validPoints = points
-        .filter(p => inBounds(p, sobelV.height, sobelV.width))
+        .filter(p => inBounds(p, height, width))
         .filter(
           p =>
             p.x >= minPoint.x &&
@@ -86,7 +117,7 @@ export function computePath({
             p.y >= minPoint.y &&
             p.y <= maxPoint.y
         );
-      return validPoints.map(p => pointToId(sobelV, p.x, p.y));
+      return validPoints.map(p => pointToId(p.x, p.y));
     };
 
     return dijkstra(startingDistances, endSet, distanceFn, neighborsFn);
@@ -106,8 +137,8 @@ export function computePath({
   let minDist = Infinity,
     pathId;
   pathsSets[pathsSets.length - 1].forEach(({ id, distance }) => {
-    minDist = Math.min(minDist, distance);
-    if (minDist === distance) {
+    if (minDist > distance) {
+      minDist = distance;
       pathId = id;
     }
   });
@@ -119,12 +150,15 @@ export function computePath({
         selectedPath = p;
       }
     });
+    if (!selectedPath) {
+      break;
+    }
     totalPath = selectedPath.path.concat(totalPath);
     pathId = selectedPath.path[0];
   }
 
   return totalPath
-    .map(id => idToPoint(sobelV, id))
+    .map(id => idToPoint(id))
     .map(({ x, y }) => ({
       x: x / scaling,
       y: y / scaling,
@@ -133,21 +167,4 @@ export function computePath({
 
 function inBounds(p, height, width) {
   return p.x >= 0 && p.x < width && p.y >= 0 && p.y < height;
-}
-function drawTestCanvas(minPoint, maxPoint, sobel, canvasId) {
-  const canvas = document.getElementById(canvasId);
-  canvas.height = maxPoint.y - minPoint.y;
-  canvas.width = maxPoint.x - minPoint.x;
-  const ctx = canvas.getContext('2d');
-  ctx.fillStyle = 'rgba(0,0,0,255)';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  for (let i = minPoint.x; i <= maxPoint.x; i++) {
-    for (let j = minPoint.y; j <= maxPoint.y; j++) {
-      const id = pointToId(sobel, i, j);
-      let C = sobel.data[id];
-      ctx.fillStyle = 'rgba(' + C + ',' + C + ',' + C + ',255)';
-      ctx.fillRect(i - minPoint.x, canvas.height - (j - minPoint.y), 1, 1);
-    }
-  }
 }

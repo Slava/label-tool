@@ -17,6 +17,5 @@ body .canvas-container {
   position: fixed;
   bottom: 0;
   right: 0;
-  width: 200px;
-  z-index: 5000;
+  z-index: -5000;
 }

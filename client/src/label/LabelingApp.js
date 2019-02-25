@@ -18,8 +18,6 @@ import Canvas from './Canvas';
 import HotkeysPanel from './HotkeysPanel';
 import './LabelingApp.css';
 
-import { sobelHoriz, sobelVert } from '../image-processing/filtering';
-
 import { computePath } from '../image-processing/LiveWire';
 
 const shortcuts = '1234567890qwe';
@@ -107,10 +105,14 @@ class LabelingApp extends Component {
         const { height, width } = this;
         setState({ height, width });
 
-        const scaling = Math.min(1.0, 3000.0 / height);
-        const sobelH = await sobelHoriz(img, scaling);
-        const sobelV = await sobelVert(img, scaling);
-        setState({ sobel: { sobelH, sobelV, scaling } });
+        const scaling = 1.0;
+        const canvas = document.getElementById('test-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.height = height;
+        canvas.width = width;
+        ctx.drawImage(img, 0, 0, width, height);
+        const data = ctx.getImageData(0, 0, width, height).data;
+        setState({ sobel: { data } });
       };
       img.src = imageUrl;
     }
@@ -317,7 +319,7 @@ class LabelingApp extends Component {
       allFigures.push({
         type: 'line',
         points: path.map(({ x, y }) => ({ lng: x, lat: y })),
-        color: 'white',
+        color: 'yellow',
       });
     }
 

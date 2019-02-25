@@ -18,4 +18,5 @@ body .canvas-container {
   bottom: 0;
   right: 0;
   z-index: -5000;
+  opacity: 0;
 }

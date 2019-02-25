@@ -19,6 +19,7 @@ import HotkeysPanel from './HotkeysPanel';
 import './LabelingApp.css';
 
 import { computePath } from '../image-processing/LiveWire';
+import { LineUtil } from 'leaflet';
 
 const shortcuts = '1234567890qwe';
 const colors = [
@@ -70,7 +71,7 @@ class LabelingApp extends Component {
       unfinishedFigureHistory: [],
 
       // Selection algorithm
-      sobel: null,
+      imageData: null,
 
       // UI
       reassigning: { status: false, type: null },
@@ -112,7 +113,7 @@ class LabelingApp extends Component {
         canvas.width = width;
         ctx.drawImage(img, 0, 0, width, height);
         const data = ctx.getImageData(0, 0, width, height).data;
-        setState({ sobel: { data } });
+        setState({ imageData: data });
       };
       img.src = imageUrl;
     }
@@ -280,7 +281,7 @@ class LabelingApp extends Component {
       reassigning,
       toggles,
       hotkeysPanel,
-      sobel,
+      imageData,
       height,
       width,
     } = this.state;
@@ -306,7 +307,7 @@ class LabelingApp extends Component {
       )
     );
 
-    if (allFigures[0] && allFigures[0].points.length > 1 && sobel) {
+    if (allFigures[0] && allFigures[0].points.length > 1 && imageData) {
       const path = computePath({
         points: allFigures[0].points.map(({ lng, lat }) => ({
           x: lng,
@@ -314,11 +315,12 @@ class LabelingApp extends Component {
         })),
         height,
         width,
-        ...sobel,
+        imageData,
       });
+      const simplePath = LineUtil.simplify(path, 0.6);
       allFigures.push({
         type: 'line',
-        points: path.map(({ x, y }) => ({ lng: x, lat: y })),
+        points: simplePath.map(({ x, y }) => ({ lng: x, lat: y })),
         color: 'yellow',
       });
     }

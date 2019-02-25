@@ -1,6 +1,12 @@
 import { dijkstra } from './Dijkstra';
 const markRadius = 1; // ~9 pixels per mark
-export function computePath({ points, height, width, scaling = 1.0, data }) {
+export function computePath({
+  points,
+  height,
+  width,
+  scaling = 1.0,
+  imageData,
+}) {
   function pointToId(x, y) {
     return (height - y) * (width * 4) + x * 4;
   }
@@ -61,8 +67,8 @@ export function computePath({ points, height, width, scaling = 1.0, data }) {
     function calcCost(a, b, c, d) {
       let sum = 0;
       for (let i = 0; i < 3; i++) {
-        const aveA = (data[a + i] + data[b + i]) / 2;
-        const aveB = (data[c + i] + data[d + i]) / 2;
+        const aveA = (imageData[a + i] + imageData[b + i]) / 2;
+        const aveB = (imageData[c + i] + imageData[d + i]) / 2;
         const diff = Math.abs(aveA - aveB);
         sum += diff * diff;
       }

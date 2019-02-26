@@ -10,7 +10,6 @@ export function dijkstra(startingDistances, endSet, distanceFn, neighborsFn) {
     finalDistances.set(id, dist);
   }
 
-  const startTime = new Date();
   const leftSet = new Set(endSet.entries());
   while (!queue.empty() && leftSet.size > 0) {
     const id = queue.minElementId();

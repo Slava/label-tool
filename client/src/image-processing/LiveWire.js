@@ -133,12 +133,14 @@ export function computePath({
   for (const id of idsSets[0]) prevDistances.set(id, 0);
   const pathsSets = [];
 
-  for (let i = 1; i < idsSets.length; i++) {
-    const paths = getPaths(idsSets[i - 1], prevDistances, idsSets[i]);
+  idsSets.forEach((currentSet, i) => {
+    if (!i) return;
+    const prevSet = idsSets[i - 1];
+    const paths = getPaths(prevSet, prevDistances, currentSet);
     pathsSets.push(paths);
     prevDistances = new Map();
     paths.forEach(({ id, distance }) => prevDistances.set(id, distance));
-  }
+  });
 
   let minDist = Infinity,
     pathId;
@@ -149,19 +151,22 @@ export function computePath({
     }
   });
   let totalPath = [];
-  for (let i = pathsSets.length - 1; i >= 0; i--) {
+  pathsSets.reverse();
+  pathsSets.forEach(pathsSet => {
     let selectedPath = null;
-    pathsSets[i].forEach(p => {
+    pathsSet.forEach(p => {
       if (p.id === pathId) {
         selectedPath = p;
       }
     });
+
     if (!selectedPath) {
-      break;
+      return;
     }
+
     totalPath = selectedPath.path.concat(totalPath);
     pathId = selectedPath.path[0];
-  }
+  });
 
   return totalPath
     .map(id => idToPoint(id))

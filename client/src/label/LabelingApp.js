@@ -106,7 +106,6 @@ class LabelingApp extends Component {
         const { height, width } = this;
         setState({ height, width });
 
-        const scaling = 1.0;
         const canvas = document.getElementById('test-canvas');
         const ctx = canvas.getContext('2d');
         canvas.height = height;

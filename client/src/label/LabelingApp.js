@@ -208,19 +208,42 @@ class LabelingApp extends Component {
         break;
 
       case 'replace':
-        this.pushState(state => ({
-          figures: update(state.figures, {
-            [label.id]: {
-              $splice: [
-                [
-                  idx,
-                  1,
-                  { id: figure.id, type: figure.type, points: figure.points },
+        this.pushState(state => {
+          let { tracingOptions } = figure;
+          if (tracingOptions && tracingOptions.enabled) {
+            const { height, width, imageData } = state;
+            const imageInfo = {
+              height,
+              width,
+              imageData,
+            };
+            tracingOptions = {
+              ...tracingOptions,
+              trace: computeTrace(figure.points, imageInfo, tracingOptions),
+            };
+          } else {
+            tracingOptions = { ...tracingOptions, trace: [] };
+          }
+
+          return {
+            figures: update(state.figures, {
+              [label.id]: {
+                $splice: [
+                  [
+                    idx,
+                    1,
+                    {
+                      id: figure.id,
+                      type: figure.type,
+                      points: figure.points,
+                      tracingOptions,
+                    },
+                  ],
                 ],
-              ],
-            },
-          }),
-        }));
+              },
+            }),
+          };
+        });
         break;
 
       case 'delete':
@@ -259,6 +282,7 @@ class LabelingApp extends Component {
                   id: figure.id,
                   points: figure.points,
                   type: figure.type,
+                  tracingOptions: figure.tracingOptions,
                 },
               ],
             },
@@ -280,9 +304,6 @@ class LabelingApp extends Component {
       reassigning,
       toggles,
       hotkeysPanel,
-      imageData,
-      height,
-      width,
     } = this.state;
 
     const forwardedProps = {
@@ -302,27 +323,10 @@ class LabelingApp extends Component {
             points: figure.points,
             id: figure.id,
             type: figure.type,
+            tracingOptions: figure.tracingOptions,
           })
       )
     );
-
-    if (allFigures[0] && allFigures[0].points.length > 1 && imageData) {
-      const path = computePath({
-        points: allFigures[0].points.map(({ lng, lat }) => ({
-          x: lng,
-          y: lat,
-        })),
-        height,
-        width,
-        imageData,
-      });
-      const simplePath = LineUtil.simplify(path, 0.6);
-      allFigures.push({
-        type: 'line',
-        points: simplePath.map(({ x, y }) => ({ lng: x, lat: y })),
-        color: 'yellow',
-      });
-    }
 
     const sidebarProps = reassigning.status
       ? {
@@ -431,6 +435,7 @@ class Sidebar extends Component {
           display: 'flex',
           flexDirection: 'column',
           padding: '1em 0.5em',
+          borderRight: '1px solid #ccc',
           ...style,
         }}
       >
@@ -607,6 +612,27 @@ function genId() {
       .toString(36)
       .substring(2, 15)
   );
+}
+
+function computeTrace(
+  points,
+  { height, width, imageData },
+  { smoothing, precision }
+) {
+  points = points.slice();
+  points.push(points[0]);
+  const path = computePath({
+    points: points.map(({ lng, lat }) => ({
+      x: lng,
+      y: lat,
+    })),
+    height,
+    width,
+    imageData,
+    markRadius: precision,
+  });
+  const simplePath = LineUtil.simplify(path, smoothing || 0.6);
+  return simplePath.map(({ x, y }) => ({ lng: x, lat: y }));
 }
 
 export default LabelingApp;

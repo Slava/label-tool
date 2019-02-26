@@ -296,7 +296,7 @@ export class PolylineFigure extends Figure {
   }
 
   leafletComponent() {
-    return Polyline;
+    return Polygon;
   }
 }
 

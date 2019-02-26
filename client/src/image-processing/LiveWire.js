@@ -1,12 +1,7 @@
 import { dijkstra } from './Dijkstra';
-const markRadius = 1; // ~9 pixels per mark
-export function computePath({
-  points,
-  height,
-  width,
-  scaling = 1.0,
-  imageData,
-}) {
+const defaultMarkRadius = 1; // ~9 pixels per mark
+export function computePath({ points, height, width, imageData, markRadius }) {
+  markRadius = markRadius === undefined ? defaultMarkRadius : markRadius;
   function pointToId(x, y) {
     return (height - y) * (width * 4) + x * 4;
   }
@@ -17,17 +12,14 @@ export function computePath({
     return { x, y };
   }
 
-  const scaledPoints = points.map(({ x, y }) => ({
-    x: Math.floor(x * scaling),
-    y: Math.floor(y * scaling),
-  }));
-
-  const pointsSets = scaledPoints.map(({ x, y }) => {
+  const pointsSets = points.map(({ x, y }) => {
+    x = Math.floor(x);
+    y = Math.floor(y);
     const points = [];
     for (let dx = -markRadius; dx <= markRadius; dx++) {
       for (let dy = -markRadius; dy <= markRadius; dy++) {
         const p = { x: x + dx, y: y + dy };
-        if (inBounds(p, height * scaling, width * scaling)) {
+        if (inBounds(p, height, width)) {
           points.push(p);
         }
       }
@@ -168,12 +160,7 @@ export function computePath({
     pathId = selectedPath.path[0];
   });
 
-  return totalPath
-    .map(id => idToPoint(id))
-    .map(({ x, y }) => ({
-      x: x / scaling,
-      y: y / scaling,
-    }));
+  return totalPath.map(id => idToPoint(id));
 }
 
 function inBounds(p, height, width) {

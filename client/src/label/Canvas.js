@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { CRS, LatLngBounds } from 'leaflet';
-import { Map, ImageOverlay } from 'react-leaflet';
+import { Map, ImageOverlay, ZoomControl } from 'react-leaflet';
 import Hotkeys from 'react-hot-keys';
 import update from 'immutability-helper';
 import 'leaflet-path-drag';
@@ -8,6 +8,9 @@ import 'leaflet-path-drag';
 import 'leaflet/dist/leaflet.css';
 
 import { BBoxFigure, PolygonFigure, PolylineFigure } from './Figure';
+import Toolbar from './CanvasToolbar';
+
+const toolbarStyle = { position: 'absolute', top: 0, left: 0, zIndex: 10000 };
 
 const maxZoom = 7;
 let imgRef = new Image();
@@ -257,14 +260,53 @@ export default class Canvas extends Component {
       />
     );
 
+    let renderedToolbar = null;
+    let renderedTrace = null;
+    const selectedFigure = this.getSelectedFigure();
+    if (selectedFigureId && selectedFigure.type === 'polygon') {
+      const options = selectedFigure.tracingOptions || {
+        enabled: false,
+        smoothing: 0.3,
+        precision: 0,
+        trace: [],
+      };
+      const handleChange = (property, value) => {
+        onChange(
+          'replace',
+          update(selectedFigure, {
+            tracingOptions: {
+              $set: update(options, { [property]: { $set: value } }),
+            },
+          })
+        );
+      };
+      renderedToolbar = (
+        <Toolbar style={toolbarStyle} onChange={handleChange} {...options} />
+      );
+
+      const figure = {
+        id: 'trace',
+        type: 'line',
+        points: options.trace,
+        color: 'yellow',
+      };
+      const traceOptions = {
+        editing: false,
+        finished: true,
+      };
+      renderedTrace = <PolylineFigure figure={figure} options={traceOptions} />;
+    }
+
     return (
       <div
         style={{
           cursor: drawing ? 'crosshair' : 'grab',
           height: '100%',
+          position: 'relative',
           ...style,
         }}
       >
+        {renderedToolbar}
         <Map
           crs={CRS.Simple}
           zoom={zoom}
@@ -273,6 +315,7 @@ export default class Canvas extends Component {
           center={[height / 2, width / 2]}
           zoomAnimation={false}
           zoomSnap={0.1}
+          zoomControl={false}
           keyboard={false}
           attributionControl={false}
           onClick={this.handleClick}
@@ -280,9 +323,11 @@ export default class Canvas extends Component {
           onMousemove={e => this.setState({ cursorPos: e.latlng })}
           ref={this.mapRef}
         >
+          <ZoomControl position="bottomright" />
           <ImageOverlay url={url} bounds={bounds} />
           {unfinishedDrawingDOM}
           {figuresDOM}
+          {renderedTrace}
           {hotkeysDOM}
         </Map>
       </div>

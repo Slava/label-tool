@@ -143,7 +143,12 @@ class LabelingApp extends Component {
       figuresHistory = figuresHistory.slice();
       unfinishedFigureHistory = unfinishedFigureHistory.slice();
       const figures = figuresHistory.pop();
-      const unfinishedFigure = unfinishedFigureHistory.pop();
+      let unfinishedFigure = unfinishedFigureHistory.pop();
+
+      if (unfinishedFigure && !unfinishedFigure.points.length) {
+        unfinishedFigure = null;
+      }
+
       return {
         figures,
         unfinishedFigure,

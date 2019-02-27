@@ -263,7 +263,7 @@ export default class Canvas extends Component {
     let renderedToolbar = null;
     let renderedTrace = null;
     const selectedFigure = this.getSelectedFigure();
-    if (selectedFigureId && selectedFigure.type === 'polygon') {
+    if (selectedFigure && selectedFigure.type === 'polygon') {
       const options = selectedFigure.tracingOptions || {
         enabled: false,
         smoothing: 0.3,

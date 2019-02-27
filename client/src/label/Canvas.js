@@ -10,10 +10,26 @@ import 'leaflet/dist/leaflet.css';
 
 import { Icon } from 'semantic-ui-react';
 
-import { BBoxFigure, PolygonFigure, PolylineFigure } from './Figure';
+import { BBoxFigure, PolygonFigure } from './Figure';
 import Toolbar from './CanvasToolbar';
 
 const toolbarStyle = { position: 'absolute', top: 0, left: 0, zIndex: 10000 };
+
+const colorMapping = {
+  red: '#B03060',
+  orange: '#FE9A76',
+  yellow: '#FFD700',
+  olive: '#32CD32',
+  green: '#016936',
+  teal: '#008080',
+  blue: '#0E6EB8',
+  violet: '#EE82EE',
+  purple: '#B413EC',
+  pink: '#FF1493',
+  brown: '#A52A2A',
+  grey: '#A0A0A0',
+  black: '#000000',
+};
 
 const maxZoom = 7;
 let imgRef = new Image();
@@ -150,12 +166,8 @@ export default class Canvas extends Component {
   }
 
   renderFigure(figure, options) {
-    const Comp =
-      figure.type === 'bbox'
-        ? BBoxFigure
-        : figure.type === 'polygon'
-        ? PolygonFigure
-        : PolylineFigure;
+    const Comp = figure.type === 'bbox' ? BBoxFigure : PolygonFigure;
+
     return (
       <Comp
         key={figure.id}
@@ -200,17 +212,25 @@ export default class Canvas extends Component {
           finished: false,
           editing: false,
           interactive: false,
+          color: colorMapping[unfinishedFigure.color],
           onChange: this.handleChange,
           calcDistance,
           newPoint: cursorPos,
         })
       : null;
 
+    const getColor = f =>
+      f.tracingOptions && f.tracingOptions.enabled
+        ? lighten(colorMapping[f.color], 80)
+        : colorMapping[f.color];
     const figuresDOM = figures.map((f, i) =>
       this.renderFigure(f, {
         editing: selectedFigureId === f.id && !drawing,
         finished: true,
         interactive: !drawing,
+        sketch: f.tracingOptions && f.tracingOptions.enabled,
+        color: getColor(f),
+        vertexColor: colorMapping[f.color],
         onSelect: () => this.setState({ selectedFigureId: f.id }),
         onChange: this.handleChange,
         calcDistance,
@@ -291,13 +311,13 @@ export default class Canvas extends Component {
         id: 'trace',
         type: 'line',
         points: options.trace,
-        color: 'yellow',
       };
       const traceOptions = {
         editing: false,
         finished: true,
+        color: colorMapping[selectedFigure.color],
       };
-      renderedTrace = <PolylineFigure figure={figure} options={traceOptions} />;
+      renderedTrace = <PolygonFigure figure={figure} options={traceOptions} />;
     }
 
     return (
@@ -356,4 +376,23 @@ function convertPoint(p) {
     lat: p.lat,
     lng: p.lng,
   };
+}
+
+function lighten(col, amt) {
+  let usePound = false;
+  if (col[0] === '#') {
+    col = col.slice(1);
+    usePound = true;
+  }
+  const num = parseInt(col, 16);
+  let r = (num >> 16) + amt;
+  if (r > 255) r = 255;
+  else if (r < 0) r = 0;
+  let b = ((num >> 8) & 0x00ff) + amt;
+  if (b > 255) b = 255;
+  else if (b < 0) b = 0;
+  let g = (num & 0x0000ff) + amt;
+  if (g > 255) g = 255;
+  else if (g < 0) g = 0;
+  return (usePound ? '#' : '') + (g | (b << 8) | (r << 16)).toString(16);
 }

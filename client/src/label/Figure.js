@@ -37,14 +37,14 @@ class Figure extends Component {
 
   makeGuides() {
     const guides = this.calculateGuides();
-    const { color } = this.props.figure;
+    const { color } = this.props.options;
     return guides.map((pos, i) => (
       <Polyline
         key={i}
         positions={pos}
         color={color}
         opacity={0.7}
-        dashArray="4"
+        dashArray="5"
       />
     ));
   }
@@ -55,10 +55,24 @@ class Figure extends Component {
 
   render() {
     const { figure, options, skipNextClick } = this.props;
-    const { id, points, color } = figure;
-    const { editing, finished, interactive, onSelect } = options;
+    const { id, points } = figure;
+    const {
+      editing,
+      finished,
+      sketch,
+      color,
+      vertexColor,
+      interactive,
+      onSelect,
+    } = options;
 
     const renderPoints = this.getRenderPoints(points);
+
+    const dashArray = editing ? '10' : '1';
+
+    const lineColor = editing && sketch ? color : vertexColor || color;
+    const fillColor = editing && sketch ? 'rgba(0,0,0,0)' : color;
+    const weight = editing && sketch ? 2 : 3;
 
     const classes = ['vertex'];
     if (editing) classes.push('editing');
@@ -68,9 +82,9 @@ class Figure extends Component {
       <CircleMarker
         className={classes.concat(!i ? ['first'] : []).join(' ')}
         key={id + '-' + i}
-        color={color}
+        color={vertexColor || color}
         fill={true}
-        fillColor={color}
+        fillColor={vertexColor || color}
         fillRule="nonzero"
         fillOpacity={1.0}
         center={pos}
@@ -97,11 +111,13 @@ class Figure extends Component {
       <Fragment key={id}>
         <PolyComp
           positions={renderPoints}
-          color={color}
-          weight={3}
+          color={lineColor}
+          weight={weight}
           fill={this.hasFill()}
-          fillColor={color}
-          interactive={true} // always set interactive to true, to avoid bugs in leaflet-react
+          fillColor={fillColor}
+          opacity={sketch ? '0.7' : '1.0'}
+          dashArray={dashArray}
+          interactive={id !== 'trace'} // always set interactive to true, to avoid bugs in leaflet-react
           onClick={() => {
             if (interactive) {
               onSelect();
@@ -287,16 +303,6 @@ export class BBoxFigure extends Figure {
 
       onChange('replace', { points, figure });
     }
-  }
-}
-
-export class PolylineFigure extends Figure {
-  hasFill() {
-    return false;
-  }
-
-  leafletComponent() {
-    return Polygon;
   }
 }
 

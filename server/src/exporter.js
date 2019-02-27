@@ -33,13 +33,17 @@ exports.exportProject = projectId => {
             y = Math.min(y, labelData.height);
             return [x, y];
           }
-          things.forEach(({ points }) => {
+          things.forEach(({ points, tracingOptions }) => {
+            const pts =
+              tracingOptions && tracingOptions.enabled
+                ? tracingOptions.trace
+                : points;
             shapes.push({
               label: name,
               line_color: null,
               fill_color: null,
               points: transform(
-                points.map(({ lng, lat }) => [lng, labelData.height - lat])
+                pts.map(({ lng, lat }) => [lng, labelData.height - lat])
               ).map(sanitize),
             });
           });
@@ -63,7 +67,7 @@ exports.exportProject = projectId => {
 
       return {
         name: path.basename(originalName).replace(/\.[^/.]+$/, '') + '.json',
-        contents: JSON.stringify(out),
+        contents: JSON.stringify(out, null, 2),
       };
     })
     .filter(x => !!x);

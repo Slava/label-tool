@@ -1,11 +1,14 @@
 import React, { Component } from 'react';
 import { CRS, LatLngBounds } from 'leaflet';
 import { Map, ImageOverlay, ZoomControl } from 'react-leaflet';
+import Control from 'react-leaflet-control';
 import Hotkeys from 'react-hot-keys';
 import update from 'immutability-helper';
 import 'leaflet-path-drag';
 
 import 'leaflet/dist/leaflet.css';
+
+import { Icon } from 'semantic-ui-react';
 
 import { BBoxFigure, PolygonFigure, PolylineFigure } from './Figure';
 import Toolbar from './CanvasToolbar';
@@ -324,10 +327,23 @@ export default class Canvas extends Component {
           ref={this.mapRef}
         >
           <ZoomControl position="bottomright" />
+          <Control className="leaflet-bar" position="bottomright">
+            <a
+              role="button"
+              title="Zoom reset"
+              href="#"
+              onClick={() => {
+                const map = this.mapRef.current.leafletElement;
+                map.setView(map.options.center, map.options.zoom);
+              }}
+            >
+              <Icon name="redo" fitted style={{ fontSize: '1.2em' }} />
+            </a>
+          </Control>
           <ImageOverlay url={url} bounds={bounds} />
           {unfinishedDrawingDOM}
-          {figuresDOM}
           {renderedTrace}
+          {figuresDOM}
           {hotkeysDOM}
         </Map>
       </div>

@@ -230,6 +230,7 @@ export class PolygonFigure extends Figure {
       if (points.length > 3) {
         onChange('remove', { pos: i, figure });
       }
+      skipNextClick();
       return false;
     }
   }

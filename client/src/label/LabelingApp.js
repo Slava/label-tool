@@ -116,10 +116,10 @@ class LabelingApp extends Component {
           setState({ imageData: data });
         };
 
-        if (document.readyState === 'complete') {
+        if (document.readyState !== 'loading') {
           resetImage();
         } else {
-          document.addEventListener('load', resetImage);
+          document.addEventListener('DOMContentLoaded', resetImage);
         }
       };
       img.src = imageUrl;

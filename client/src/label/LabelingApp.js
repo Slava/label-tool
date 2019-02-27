@@ -106,13 +106,21 @@ class LabelingApp extends Component {
         const { height, width } = this;
         setState({ height, width });
 
-        const canvas = document.getElementById('test-canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.height = height;
-        canvas.width = width;
-        ctx.drawImage(img, 0, 0, width, height);
-        const data = ctx.getImageData(0, 0, width, height).data;
-        setState({ imageData: data });
+        const resetImage = () => {
+          const canvas = document.getElementById('test-canvas');
+          const ctx = canvas.getContext('2d');
+          canvas.height = height;
+          canvas.width = width;
+          ctx.drawImage(img, 0, 0, width, height);
+          const data = ctx.getImageData(0, 0, width, height).data;
+          setState({ imageData: data });
+        };
+
+        if (document.readyState === 'complete') {
+          resetImage();
+        } else {
+          document.addEventListener('load', resetImage);
+        }
       };
       img.src = imageUrl;
     }

@@ -186,7 +186,7 @@ const uploads = multer({
           const ext = path.extname(filename);
           const name = `_reference${ext}`;
           const referenceLink = `/uploads/${projectId}/${name}`;
-          projects.updateReference(projectId, { referenceLink });
+          projects.updateReference(projectId, referenceLink);
           cb(null, name);
         } else {
           const id = images.addImageStub(projectId, filename, null);

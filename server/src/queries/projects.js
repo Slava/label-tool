@@ -81,4 +81,13 @@ update projects
       id
     );
   },
+  updateReference: (id, referenceLink) => {
+    db.prepare(
+      `
+update projects
+   set referenceLink = ?
+ where id = ?;
+`
+    ).run(referenceLink, id);
+  },
 };

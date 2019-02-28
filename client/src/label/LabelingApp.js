@@ -309,7 +309,14 @@ class LabelingApp extends Component {
   }
 
   render() {
-    const { labels, imageUrl, onBack, onSkip, onSubmit } = this.props;
+    const {
+      labels,
+      imageUrl,
+      reference,
+      onBack,
+      onSkip,
+      onSubmit,
+    } = this.props;
     const {
       figures,
       unfinishedFigure,
@@ -392,21 +399,24 @@ class LabelingApp extends Component {
             style={{ flex: 1, maxWidth: 300 }}
           />
           {hotkeysPanelDOM}
-          <Canvas
-            url={imageUrl}
-            figures={allFigures}
-            unfinishedFigure={unfinishedFigure}
-            onChange={this.handleChange}
-            onReassignment={type =>
-              this.setState({ reassigning: { status: true, type } })
-            }
-            onSelectionChange={figureId =>
-              figureId ||
-              this.setState({ reassigning: { status: false, type: null } })
-            }
-            ref={this.canvasRef}
-            style={{ flex: 4 }}
-          />
+          <div style={{ flex: 4, display: 'flex', flexDirection: 'column' }}>
+            {renderReference(reference)}
+            <Canvas
+              url={imageUrl}
+              figures={allFigures}
+              unfinishedFigure={unfinishedFigure}
+              onChange={this.handleChange}
+              onReassignment={type =>
+                this.setState({ reassigning: { status: true, type } })
+              }
+              onSelectionChange={figureId =>
+                figureId ||
+                this.setState({ reassigning: { status: false, type: null } })
+              }
+              ref={this.canvasRef}
+              style={{ flex: 1 }}
+            />
+          </div>
         </Hotkeys>
       </div>
     );
@@ -613,6 +623,30 @@ function ListItem({
         {genSublist(label)}
       </Hotkeys>
     </List.Item>
+  );
+}
+
+function renderReference({ referenceLink, referenceText }) {
+  if (!referenceText && !referenceLink) return null;
+  const imageStyle = {
+    margin: '0 auto',
+    maxHeight: 250,
+  };
+  const containerStyle = {
+    flex: '0 0 auto',
+    maxHeight: 300,
+    padding: '0 10px',
+    textAlign: 'center',
+    borderBottom: '1px solid #ccc',
+  };
+  const img = referenceLink ? (
+    <img alt="Reference" src={referenceLink} style={imageStyle} />
+  ) : null;
+  return (
+    <div style={containerStyle}>
+      {img}
+      <p>{referenceText}</p>
+    </div>
   );
 }
 

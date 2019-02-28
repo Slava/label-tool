@@ -1,6 +1,13 @@
 import React, { Component } from 'react';
 
-import { Header, Divider, Form, Message, Segment } from 'semantic-ui-react';
+import {
+  Header,
+  Divider,
+  Form,
+  Message,
+  Segment,
+  Button,
+} from 'semantic-ui-react';
 
 export default class UploadReference extends Component {
   constructor(props) {
@@ -53,11 +60,20 @@ export default class UploadReference extends Component {
     let preview = null;
     if (referenceText || referenceLink) {
       const img = referenceLink ? (
-        <img
-          alt="Reference"
-          style={{ width: 'auto', maxWidth: '100%' }}
-          src={referenceLink}
-        />
+        <div style={{ position: 'relative' }}>
+          <img
+            alt="Reference"
+            style={{ width: 'auto', maxWidth: '100%' }}
+            src={referenceLink}
+          />
+          <Button
+            icon="trash"
+            size="tiny"
+            label="Delete"
+            style={{ position: 'absolute', top: 0, right: -125 }}
+            onClick={() => onChange({ referenceText, referenceLink: null })}
+          />
+        </div>
       ) : null;
       preview = (
         <div>

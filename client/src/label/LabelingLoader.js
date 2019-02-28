@@ -120,10 +120,13 @@ export default class LabelingLoader extends Component {
       onLabelChange: this.pushUpdate.bind(this),
     };
 
+    const { referenceLink, referenceText } = project;
+
     return (
       <DocumentMeta title={title}>
         <LabelingApp
           labels={project.form.formParts}
+          reference={{ referenceLink, referenceText }}
           labelData={image.labelData.labels || {}}
           imageUrl={image.link}
           {...props}

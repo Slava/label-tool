@@ -121,6 +121,13 @@ export default class UploadReference extends Component {
             }
           />
         </Form>
+        <Divider />
+        <p>
+          The reference information (image and/or text) will be shown on top of
+          the labeling interface to give the labelers more instruction on how to
+          label or something to compare to (image of the key colors, reference
+          images, etc).
+        </p>
       </Segment>
     );
   }

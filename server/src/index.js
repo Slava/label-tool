@@ -181,9 +181,18 @@ const uploads = multer({
       try {
         const { projectId } = req.params;
         const filename = file.originalname;
-        const id = images.addImageStub(projectId, filename, null);
-        images.updateLink(id, { projectId, filename });
-        cb(null, `${id}${ext}`);
+
+        if (req.reference) {
+          const ext = path.extname(filename);
+          const name = `_reference${ext}`;
+          const referenceLink = `/uploads/${projectId}/${name}`;
+          projects.updateReference(projectId, { referenceLink });
+          cb(null, name);
+        } else {
+          const id = images.addImageStub(projectId, filename, null);
+          const newName = images.updateLink(id, { projectId, filename });
+          cb(null, newName);
+        }
       } catch (err) {
         cb(err);
       }
@@ -195,14 +204,30 @@ app.post('/api/uploads/:projectId', uploads.array('images'), (req, res) => {
   res.json({ success: true });
 });
 
+app.post(
+  '/api/uploads/:projectId/reference',
+  (req, res, next) => {
+    req.reference = true;
+    next();
+  },
+  uploads.single('referenceImage'),
+  (req, res) => {
+    res.json({ success: true });
+  }
+);
+
 app.get('/uploads/:projectId/:imageName', (req, res) => {
   const { projectId, imageName } = req.params;
   const imageId = imageName.split('.')[0];
-  const image = images.get(imageId);
-  if (image.localPath) {
-    res.sendFile(image.localPath);
-  } else if (image.externalLink) {
-    request.get(image.externalLink).pipe(res);
+  if (imageId !== '_reference') {
+    const image = images.get(imageId);
+    if (image.localPath) {
+      res.sendFile(image.localPath);
+      return;
+    } else if (image.externalLink) {
+      request.get(image.externalLink).pipe(res);
+      return;
+    }
   } else {
     res.sendFile(
       path.join(

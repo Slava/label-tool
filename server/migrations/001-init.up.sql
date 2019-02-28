@@ -1,6 +1,8 @@
 create table Projects (
   id integer primary key autoincrement,
   name text not null,
+  referenceText,
+  referenceLink,
   form text not null
 );
 

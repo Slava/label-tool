@@ -68,6 +68,7 @@ update images
  where id = ?;
 `
     ).run(link, imageId);
+    return `${imageId}${ext}`;
   },
 
   allocateUnlabeledImage: (projectId, imageId) => {

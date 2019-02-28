@@ -70,9 +70,15 @@ select * from projects where id = ?;
     db.prepare(
       `
 update projects
-   set name = ?, form = ?
+   set name = ?, form = ?, referenceLink = ?, referenceText = ?
  where id = ?;
 `
-    ).run(project.name, JSON.stringify(project.form), id);
+    ).run(
+      project.name,
+      JSON.stringify(project.form),
+      project.referenceLink,
+      project.referenceText,
+      id
+    );
   },
 };

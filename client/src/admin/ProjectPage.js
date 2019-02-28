@@ -12,6 +12,7 @@ import arrayMove from 'array-move';
 import ProjectImages from './ProjectImages';
 import UploadImages from './UploadImages';
 import LabelFormItem from './LabelFormItem';
+import UploadReference from './UploadReference';
 
 export default class ProjectPage extends Component {
   constructor(props) {
@@ -26,6 +27,7 @@ export default class ProjectPage extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.handleNew = this.handleNew.bind(this);
     this.handleNameChange = this.handleNameChange.bind(this);
+    this.handleReferenceChange = this.handleReferenceChange.bind(this);
   }
 
   async componentDidMount() {
@@ -118,6 +120,20 @@ export default class ProjectPage extends Component {
     });
   }
 
+  handleReferenceChange({ referenceLink, referenceText }) {
+    const { project } = this.state;
+    this.setState({
+      project: update(project, {
+        referenceText: {
+          $set: referenceText,
+        },
+        referenceLink: {
+          $set: referenceLink,
+        },
+      }),
+    });
+  }
+
   render() {
     const { match } = this.props;
     const { projectId } = match.params;
@@ -181,6 +197,14 @@ export default class ProjectPage extends Component {
             <UploadImages
               projectId={projectId}
               onChange={this.state.handleImagesChange}
+            />
+          </div>
+          <div style={{ padding: '2em 0' }}>
+            <Header disabled>REFERENCE INFORMATION</Header>
+            <UploadReference
+              project={project}
+              onChange={this.handleReferenceChange}
+              onUpload={() => this.componentDidMount()}
             />
           </div>
           <div style={{ padding: '2em 0' }}>

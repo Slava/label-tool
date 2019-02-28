@@ -228,15 +228,10 @@ app.get('/uploads/:projectId/:imageName', (req, res) => {
       request.get(image.externalLink).pipe(res);
       return;
     }
-  } else {
-    res.sendFile(
-      path.join(
-        __dirname + '/../uploads/',
-        projectId,
-        path.join('/', imageName)
-      )
-    );
   }
+  res.sendFile(
+    path.join(__dirname + '/../uploads/', projectId, path.join('/', imageName))
+  );
 });
 
 app.get('/api/projects/:projectId/export', (req, res) => {

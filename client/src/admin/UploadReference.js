@@ -1,14 +1,6 @@
 import React, { Component } from 'react';
 
-import {
-  Header,
-  Divider,
-  Button,
-  Input,
-  Form,
-  Message,
-  Segment,
-} from 'semantic-ui-react';
+import { Header, Divider, Form, Message, Segment } from 'semantic-ui-react';
 
 export default class UploadReference extends Component {
   constructor(props) {
@@ -17,21 +9,7 @@ export default class UploadReference extends Component {
       uploadError: null,
     };
 
-    this.handleSubmit = this.handleSubmit.bind(this);
     this.handleFileSubmit = this.handleFileSubmit.bind(this);
-  }
-
-  async handleSubmit() {
-    const resp = await fetch('/api/images/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({}),
-    });
-
-    this.props.onChange();
-    this.setState({ urlsText: '' });
   }
 
   async handleFileSubmit(e) {
@@ -75,7 +53,11 @@ export default class UploadReference extends Component {
     let preview = null;
     if (referenceText || referenceLink) {
       const img = referenceLink ? (
-        <img style={{ width: 'auto', maxWidth: '100%' }} src={referenceLink} />
+        <img
+          alt="Reference"
+          style={{ width: 'auto', maxWidth: '100%' }}
+          src={referenceLink}
+        />
       ) : null;
       preview = (
         <div>

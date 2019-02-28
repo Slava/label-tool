@@ -14,7 +14,8 @@
     "multer": "^1.4.1",
     "nodemon": "^1.18.9",
     "prettier": "^1.16.4",
-    "pretty-quick": "^1.10.0"
+    "pretty-quick": "^1.10.0",
+    "request": "^2.88.0"
   },
   "scripts": {
     "start": "PORT=3001 yarn run nodemon src/index.js",

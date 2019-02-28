@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const multer = require('multer');
 const archiver = require('archiver');
+const request = require('request');
 
 const path = require('path');
 const fs = require('fs').promises;
@@ -81,9 +82,7 @@ app.post('/api/images', async (req, res) => {
           filename,
           path.join(localPath, filename)
         );
-        const ext = path.extname(filename);
-        const link = `/uploads/${projectId}/${id}${ext}`;
-        images.updateLink(id, link);
+        images.updateLink(id, { projectId, filename });
       }
     } catch (err) {
       res.status(400);
@@ -183,9 +182,7 @@ const uploads = multer({
         const { projectId } = req.params;
         const filename = file.originalname;
         const id = images.addImageStub(projectId, filename, null);
-        const ext = path.extname(filename);
-        const link = `/uploads/${projectId}/${id}${ext}`;
-        images.updateLink(id, link);
+        images.updateLink(id, { projectId, filename });
         cb(null, `${id}${ext}`);
       } catch (err) {
         cb(err);
@@ -204,6 +201,8 @@ app.get('/uploads/:projectId/:imageName', (req, res) => {
   const image = images.get(imageId);
   if (image.localPath) {
     res.sendFile(image.localPath);
+  } else if (image.externalLink) {
+    request.get(image.externalLink).pipe(res);
   } else {
     res.sendFile(
       path.join(

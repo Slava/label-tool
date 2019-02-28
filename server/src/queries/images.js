@@ -1,7 +1,7 @@
 const db = require('./db').getDb();
 const path = require('path');
 
-module.exports = {
+const Images = {
   getForProject: projectId => {
     const images = db
       .prepare(
@@ -37,12 +37,14 @@ where images.id = ?;
       path.basename(new URL(url, 'https://base.com').pathname);
 
     const stmt = db.prepare(`
-insert into images(originalName, link, labeled, labelData, projectsId)
-values (?, ?, 0, '{ }', ?);
+insert into images(originalName, link, externalLink, labeled, labelData, projectsId)
+values (?, 'stub', ?, 0, '{ }', ?);
 `);
 
     for (const url of urls) {
-      stmt.run(getName(url), url, projectId);
+      const name = getName(url);
+      const { lastInsertRowid } = stmt.run(name, url, projectId);
+      Images.updateLink(lastInsertRowid, { projectId, filename: name });
     }
   },
 
@@ -56,7 +58,9 @@ values (?, ?, 'stub', 0, '{ }', ?);
     return lastInsertRowid;
   },
 
-  updateLink: (imageId, link) => {
+  updateLink: (imageId, { projectId, filename }) => {
+    const ext = path.extname(filename);
+    const link = `/uploads/${projectId}/${imageId}${ext}`;
     db.prepare(
       `
 update images
@@ -129,3 +133,5 @@ where id = ?;
     ).run(imageId);
   },
 };
+
+module.exports = Images;

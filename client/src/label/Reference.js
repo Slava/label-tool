@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 
 const containerStyle = {
   flex: '0 0 auto',

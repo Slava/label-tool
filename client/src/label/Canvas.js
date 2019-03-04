@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { CRS, LatLngBounds } from 'leaflet';
+import { CRS } from 'leaflet';
 import { Map, ImageOverlay, ZoomControl } from 'react-leaflet';
 import Control from 'react-leaflet-control';
 import Hotkeys from 'react-hot-keys';

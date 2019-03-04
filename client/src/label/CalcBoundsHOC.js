@@ -2,15 +2,13 @@ import React, { Component, forwardRef } from 'react';
 import { CRS, LatLngBounds } from 'leaflet';
 
 export const maxZoom = 7;
-export function withImageLoading(Comp) {
+export function withBounds(Comp) {
   let imgRef = new Image();
   class LoadImage extends Component {
     constructor(props) {
       super(props);
       this.state = {
         bounds: null,
-        height: null,
-        width: null,
       };
     }
 
@@ -28,34 +26,22 @@ export function withImageLoading(Comp) {
 
     calcBounds(url) {
       const crs = CRS.Simple;
-      imgRef.src = url;
-      imgRef.onload = () => {
-        const { height, width } = imgRef;
-        const southWest = crs.unproject(
-          { x: 0, y: imgRef.height },
-          maxZoom - 1
-        );
-        const northEast = crs.unproject({ x: imgRef.width, y: 0 }, maxZoom - 1);
-        const bounds = new LatLngBounds(southWest, northEast);
+      const { height, width } = this.props;
 
-        this.setState({ bounds, height, width });
-      };
+      imgRef.src = url;
+      const southWest = crs.unproject({ x: 0, y: imgRef.height }, maxZoom - 1);
+      const northEast = crs.unproject({ x: imgRef.width, y: 0 }, maxZoom - 1);
+      const bounds = new LatLngBounds(southWest, northEast);
+
+      this.setState({ bounds });
     }
 
     render() {
       const { props, state } = this;
       const { forwardedRef, ...rest } = props;
-      const { bounds, height, width } = state;
+      const { bounds } = state;
       if (!bounds) return null;
-      return (
-        <Comp
-          bounds={bounds}
-          height={height}
-          width={width}
-          ref={forwardedRef}
-          {...rest}
-        />
-      );
+      return <Comp bounds={bounds} ref={forwardedRef} {...rest} />;
     }
   }
 

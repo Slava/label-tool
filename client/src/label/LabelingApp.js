@@ -198,6 +198,8 @@ class LabelingApp extends Component {
       popState,
       figures,
       unfinishedFigure,
+      height,
+      width,
     } = this.props;
     const { selected, reassigning, toggles, hotkeysPanel } = this.state;
 
@@ -278,6 +280,8 @@ class LabelingApp extends Component {
             <Reference {...reference} />
             <Canvas
               url={imageUrl}
+              height={height}
+              width={width}
               figures={allFigures}
               unfinishedFigure={unfinishedFigure}
               onChange={this.handleChange}

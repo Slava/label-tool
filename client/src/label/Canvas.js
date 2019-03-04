@@ -14,7 +14,7 @@ import { BBoxFigure, PolygonFigure } from './Figure';
 import Toolbar from './CanvasToolbar';
 
 import { convertPoint, lighten, colorMapping } from './utils';
-import { withImageLoading, maxZoom } from './ImageLoaderHOC';
+import { withBounds, maxZoom } from './CalcBoundsHOC';
 
 const toolbarStyle = { position: 'absolute', top: 0, left: 0, zIndex: 10000 };
 
@@ -324,4 +324,4 @@ class Canvas extends Component {
   }
 }
 
-export default withImageLoading(Canvas);
+export default withBounds(Canvas);

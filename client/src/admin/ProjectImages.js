@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 
-import { Table, Loader, Header, Checkbox, Button } from 'semantic-ui-react';
+import { Loader, Checkbox, Button, Header, Table } from 'semantic-ui-react';
+
+import { AutoSizer, List } from 'react-virtualized';
 
 import update from 'immutability-helper';
 import shallowEqualObjects from 'shallow-equal/objects';
@@ -41,6 +43,7 @@ export default class ProjectImages extends Component {
       const images = await (await fetch(
         '/api/images/?projectId=' + projectId
       )).json();
+
       this.setState({
         isLoaded: true,
         images,
@@ -113,59 +116,53 @@ export default class ProjectImages extends Component {
       );
     }
 
-    const renderLabelLinks = image => {
-      return (
-        <Checkbox
-          checked={!!image.labeled}
-          label="Labeled"
-          onChange={(e, { checked }) => this.handleLabeled(image.id, checked)}
-        />
-      );
-    };
-
-    const renderActions = image => {
-      return (
-        <div>
-          <a
-            target="_blank"
-            rel="noopener noreferrer"
-            href={`/label/${projectId}/${image.id}`}
-          >
-            <Button icon="pencil" label="Edit" size="tiny" />
-          </a>
-          <Button
-            icon="trash"
-            label="Delete"
-            size="tiny"
-            onClick={() => this.handleDelete(image.id)}
-          />
-        </div>
-      );
-    };
-
-    const renderedRows = images.map(image => (
-      <Table.Row key={image.id}>
-        <Table.Cell>{image.id}</Table.Cell>
-        <Table.Cell>
-          <a href={image.link}>{image.originalName}</a>
-        </Table.Cell>
-        <Table.Cell>{renderLabelLinks(image)}</Table.Cell>
-        <Table.Cell>{renderActions(image)}</Table.Cell>
-      </Table.Row>
-    ));
-
     return (
       <div>
-        <Table celled>
-          <Table.Header>
-            <Table.Row>
-              <Table.HeaderCell>ID</Table.HeaderCell>
-              <Table.HeaderCell>Image Link</Table.HeaderCell>
-              <Table.HeaderCell>Label Status</Table.HeaderCell>
-              <Table.HeaderCell>Actions</Table.HeaderCell>
+        <Table
+          celled
+          style={{ display: 'flex', flexDirection: 'column', height: 600 }}
+        >
+          <Table.Header style={{ flex: '0 0 auto' }}>
+            <Table.Row style={{ display: 'flex', background: '#f9fafb' }}>
+              <Table.HeaderCell style={columnStyles[0]}>ID</Table.HeaderCell>
+              <Table.HeaderCell style={columnStyles[1]}>
+                Image Link
+              </Table.HeaderCell>
+              <Table.HeaderCell style={columnStyles[2]}>
+                Label Status
+              </Table.HeaderCell>
+              <Table.HeaderCell style={columnStyles[3]}>
+                Actions
+              </Table.HeaderCell>
+              {/* extra header cell to even out the width with a fake scrollbar */}
+              <Table.HeaderCell
+                style={{
+                  flex: '0 0 auto',
+                  opacity: 0,
+                  overflowY: 'scroll',
+                  padding: 0,
+                  border: 0,
+                }}
+              />
             </Table.Row>
           </Table.Header>
-          <Table.Body>{renderedRows}</Table.Body>
+          <Table.Body style={{ height: '100%', flex: 1, outline: 0 }}>
+            <AutoSizedList
+              rowHeight={55}
+              rowCount={images.length}
+              rowRenderer={({ index, style, key }) => (
+                <Row
+                  key={key}
+                  style={style}
+                  image={images[index]}
+                  projectId={projectId}
+                  onLabeled={this.handleLabeled}
+                  onDelete={this.handleDelete}
+                />
+              )}
+              overscanRowCount={10}
+            />
+          </Table.Body>
         </Table>
         <Button
           style={{ float: 'right' }}
@@ -177,3 +174,48 @@ export default class ProjectImages extends Component {
     );
   }
 }
+
+const columnStyles = [
+  { flex: '0 0 50px', lineHeight: '32px' },
+  { flex: '1', lineHeight: '32px' },
+  { flex: '0 0 120px', lineHeight: '32px' },
+  { flex: '0 0 250px', lineHeight: '32px' },
+];
+const Row = ({ image, projectId, style, onLabeled, onDelete }) => (
+  <Table.Row style={{ ...style, display: 'flex' }}>
+    <Table.Cell style={columnStyles[0]}>{image.id}</Table.Cell>
+    <Table.Cell style={columnStyles[1]}>
+      <a href={image.link}>{image.originalName}</a>
+    </Table.Cell>
+    <Table.Cell style={columnStyles[2]}>
+      <Checkbox
+        checked={!!image.labeled}
+        label="Labeled"
+        onChange={(e, { checked }) => onLabeled(image.id, checked)}
+      />
+    </Table.Cell>
+    <Table.Cell style={columnStyles[3]}>
+      <div>
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href={`/label/${projectId}/${image.id}`}
+        >
+          <Button icon="pencil" label="Edit" size="tiny" />
+        </a>
+        <Button
+          icon="trash"
+          label="Delete"
+          size="tiny"
+          onClick={() => onDelete(image.id)}
+        />
+      </div>
+    </Table.Cell>
+  </Table.Row>
+);
+
+const AutoSizedList = props => (
+  <AutoSizer>
+    {({ height, width }) => <List height={height} width={width} {...props} />}
+  </AutoSizer>
+);

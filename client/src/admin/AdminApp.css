@@ -10,3 +10,8 @@
 .form-card .form-checkbox {
   padding: 5px;
 }
+
+.ReactVirtualized__Grid ReactVirtualized__List {
+  outline: 0;
+  overflow-y: scroll;
+}

@@ -16,27 +16,12 @@ import 'semantic-ui-css/semantic.min.css';
 
 import Canvas from './Canvas';
 import HotkeysPanel from './HotkeysPanel';
+import Reference from './Reference';
 import './LabelingApp.css';
 
 import { computePath } from '../image-processing/LiveWire';
 import { LineUtil } from 'leaflet';
-
-const shortcuts = '1234567890qwe';
-const colors = [
-  'red',
-  'blue',
-  'green',
-  'violet',
-  'orange',
-  'brown',
-  'yellow',
-  'olive',
-  'teal',
-  'purple',
-  'pink',
-  'grey',
-  'black',
-];
+import { genId, shortcuts, colors } from './utils';
 
 /*
  type Figure = {
@@ -400,7 +385,7 @@ class LabelingApp extends Component {
           />
           {hotkeysPanelDOM}
           <div style={{ flex: 4, display: 'flex', flexDirection: 'column' }}>
-            {renderReference(reference)}
+            <Reference {...reference} />
             <Canvas
               url={imageUrl}
               figures={allFigures}
@@ -623,41 +608,6 @@ function ListItem({
         {genSublist(label)}
       </Hotkeys>
     </List.Item>
-  );
-}
-
-function renderReference({ referenceLink, referenceText }) {
-  if (!referenceText && !referenceLink) return null;
-  const imageStyle = {
-    margin: '0 auto',
-    maxHeight: 250,
-  };
-  const containerStyle = {
-    flex: '0 0 auto',
-    maxHeight: 300,
-    padding: '0 10px',
-    textAlign: 'center',
-    borderBottom: '1px solid #ccc',
-  };
-  const img = referenceLink ? (
-    <img alt="Reference" src={referenceLink} style={imageStyle} />
-  ) : null;
-  return (
-    <div style={containerStyle}>
-      {img}
-      <p>{referenceText}</p>
-    </div>
-  );
-}
-
-function genId() {
-  return (
-    Math.random()
-      .toString(36)
-      .substring(2, 15) +
-    Math.random()
-      .toString(36)
-      .substring(2, 15)
   );
 }
 

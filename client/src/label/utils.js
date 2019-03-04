@@ -39,3 +39,31 @@ export function lighten(col, amt) {
   else if (g < 0) g = 0;
   return (usePound ? '#' : '') + (g | (b << 8) | (r << 16)).toString(16);
 }
+
+export function genId() {
+  return (
+    Math.random()
+      .toString(36)
+      .substring(2, 15) +
+    Math.random()
+      .toString(36)
+      .substring(2, 15)
+  );
+}
+
+export const shortcuts = '1234567890qwe';
+export const colors = [
+  'red',
+  'blue',
+  'green',
+  'violet',
+  'orange',
+  'brown',
+  'yellow',
+  'olive',
+  'teal',
+  'purple',
+  'pink',
+  'grey',
+  'black',
+];

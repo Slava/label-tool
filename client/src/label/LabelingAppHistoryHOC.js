@@ -25,7 +25,8 @@ export function withHistory(Comp) {
     }
 
     componentDidUpdate(prevProps, prevState) {
-      const { onLabelChange, figures, height, width } = this.props;
+      const { onLabelChange, height, width } = this.props;
+      const { figures } = this.state;
 
       if (figures !== prevState.figures) {
         onLabelChange({

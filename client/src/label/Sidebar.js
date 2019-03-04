@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import {
   Header,
   List,
@@ -13,7 +13,7 @@ import { shortcuts, colors } from './utils';
 import Hotkeys from 'react-hot-keys';
 
 const headerIconStyle = { fontSize: '0.8em', float: 'right' };
-export default class Sidebar extends Component {
+export default class Sidebar extends PureComponent {
   render() {
     const {
       title,

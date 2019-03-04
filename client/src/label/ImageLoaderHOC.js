@@ -1,10 +1,10 @@
-import React, { Component } from 'react';
+import React, { Component, forwardRef } from 'react';
 import { CRS, LatLngBounds } from 'leaflet';
 
 export const maxZoom = 7;
 export function withImageLoading(Comp) {
   let imgRef = new Image();
-  return class extends Component {
+  class LoadImage extends Component {
     constructor(props) {
       super(props);
       this.state = {
@@ -44,9 +44,22 @@ export function withImageLoading(Comp) {
 
     render() {
       const { props, state } = this;
+      const { forwardedRef, ...rest } = props;
       const { bounds, height, width } = state;
       if (!bounds) return null;
-      return <Comp bounds={bounds} height={height} width={width} {...props} />;
+      return (
+        <Comp
+          bounds={bounds}
+          height={height}
+          width={width}
+          ref={forwardedRef}
+          {...rest}
+        />
+      );
     }
-  };
+  }
+
+  return forwardRef((props, ref) => (
+    <LoadImage {...props} forwardedRef={ref} />
+  ));
 }

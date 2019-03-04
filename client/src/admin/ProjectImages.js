@@ -117,7 +117,7 @@ export default class ProjectImages extends Component {
     }
 
     return (
-      <div>
+      <div className="project-images">
         <Table
           celled
           style={{ display: 'flex', flexDirection: 'column', height: 600 }}
@@ -176,7 +176,7 @@ export default class ProjectImages extends Component {
 }
 
 const columnStyles = [
-  { flex: '0 0 50px', lineHeight: '32px' },
+  { flex: '0 0 80px', lineHeight: '32px' },
   { flex: '1', lineHeight: '32px' },
   { flex: '0 0 120px', lineHeight: '32px' },
   { flex: '0 0 250px', lineHeight: '32px' },

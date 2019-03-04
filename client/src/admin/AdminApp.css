@@ -11,7 +11,10 @@
   padding: 5px;
 }
 
+.project-images * {
+  outline: none;
+}
+
 .ReactVirtualized__Grid ReactVirtualized__List {
-  outline: 0;
   overflow-y: scroll;
 }

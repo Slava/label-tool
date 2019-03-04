@@ -150,6 +150,7 @@ export default class ProjectImages extends Component {
             <AutoSizedList
               rowHeight={55}
               rowCount={images.length}
+              style={{ overflowY: 'scroll' }}
               rowRenderer={({ index, style, key }) => (
                 <Row
                   key={key}

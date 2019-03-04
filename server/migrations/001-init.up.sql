@@ -19,5 +19,12 @@ create table Images (
   constraint images_fk_projectsId foreign key (projectsId) references Projects (id) on delete cascade
 );
 
+create table MLModels (
+  id integer primary key autoincrement,
+  name text not null,
+  url text not null,
+  type text not null
+);
+
 insert into projects (name, form) values ('Test Project', '{ "formParts": [ { "type": "polygon", "name": "Car", "id": "nfjxui" }, { "type": "bbox", "name": "Windows", "id": "n3ndi88" } ] }');
 insert into images (originalName, link, labeled, labelData, projectsId) values ('tesla.jpg', '/uploads/1/1.jpg', 0, '{ }', 1);

@@ -13,6 +13,7 @@ import ProjectImages from './ProjectImages';
 import UploadImages from './UploadImages';
 import LabelFormItem from './LabelFormItem';
 import UploadReference from './UploadReference';
+import MLAssist from './MLAssist';
 
 export default class ProjectPage extends Component {
   constructor(props) {
@@ -206,6 +207,10 @@ export default class ProjectPage extends Component {
               onChange={this.handleReferenceChange}
               onUpload={() => this.componentDidMount()}
             />
+          </div>
+          <div style={{ padding: '2em 0' }}>
+            <Header disabled>ML ASSISTANCE MODELS</Header>
+            <MLAssist />
           </div>
           <div style={{ padding: '2em 0' }}>
             <Header disabled>EXPORT DATA</Header>

@@ -9,12 +9,27 @@ const fs = require('fs').promises;
 
 const projects = require('./queries/projects');
 const images = require('./queries/images');
+const mlmodels = require('./queries/mlmodels');
 const exporter = require('./exporter');
 
 const app = express();
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+
+app.get('/api/mlmodels', (req, res) => {
+  res.json(mlmodels.getAll());
+});
+
+app.post('/api/mlmodels', (req, res) => {
+  // TODO: sanitize input data
+  const { model } = req.body;
+  const id = mlmodels.create(model);
+  res.json({
+    success: true,
+    id,
+  });
+});
 
 app.get('/api/projects', (req, res) => {
   res.json(projects.getAll());

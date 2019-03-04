@@ -13,35 +13,17 @@ import { Icon } from 'semantic-ui-react';
 import { BBoxFigure, PolygonFigure } from './Figure';
 import Toolbar from './CanvasToolbar';
 
+import { convertPoint, lighten, colorMapping } from './utils';
+import { withImageLoading, maxZoom } from './ImageLoaderHOC';
+
 const toolbarStyle = { position: 'absolute', top: 0, left: 0, zIndex: 10000 };
 
-const colorMapping = {
-  red: '#B03060',
-  orange: '#FE9A76',
-  yellow: '#FFD700',
-  olive: '#32CD32',
-  green: '#016936',
-  teal: '#008080',
-  blue: '#0E6EB8',
-  violet: '#EE82EE',
-  purple: '#B413EC',
-  pink: '#FF1493',
-  brown: '#A52A2A',
-  grey: '#A0A0A0',
-  black: '#000000',
-};
-
-const maxZoom = 7;
-let imgRef = new Image();
-export default class Canvas extends Component {
+class Canvas extends Component {
   constructor(props, context) {
     super(props, context);
 
     this.state = {
-      bounds: null,
       zoom: -1,
-      height: null,
-      width: null,
       selectedFigureId: null,
       cursorPos: { lat: 0, lng: 0 },
     };
@@ -53,35 +35,14 @@ export default class Canvas extends Component {
     this.handleClick = this.handleClick.bind(this);
   }
 
-  componentDidMount() {
-    this.calcBounds(this.props.url);
-  }
-
   componentDidUpdate(prevProps) {
-    const { url, onSelectionChange } = this.props;
+    const { onSelectionChange } = this.props;
     const { selectedFigureId } = this.state;
-
-    if (url !== prevProps.url) {
-      this.calcBounds(url);
-    }
 
     if (this.prevSelectedFigureId !== selectedFigureId && onSelectionChange) {
       this.prevSelectedFigureId = selectedFigureId;
       onSelectionChange(selectedFigureId);
     }
-  }
-
-  calcBounds(url) {
-    const crs = CRS.Simple;
-    imgRef.src = url;
-    imgRef.onload = () => {
-      const { height, width } = imgRef;
-      const southWest = crs.unproject({ x: 0, y: imgRef.height }, maxZoom - 1);
-      const northEast = crs.unproject({ x: imgRef.width, y: 0 }, maxZoom - 1);
-      const bounds = new LatLngBounds(southWest, northEast);
-
-      this.setState({ bounds, height, width });
-    };
   }
 
   getSelectedFigure() {
@@ -181,26 +142,18 @@ export default class Canvas extends Component {
   render() {
     const {
       url,
+      bounds,
+      height,
+      width,
       figures,
       unfinishedFigure,
       onChange,
       onReassignment,
       style,
     } = this.props;
-    const {
-      bounds,
-      zoom,
-      height,
-      width,
-      selectedFigureId,
-      cursorPos,
-    } = this.state;
+    const { zoom, selectedFigureId, cursorPos } = this.state;
 
     const drawing = !!unfinishedFigure;
-
-    if (!bounds) {
-      return null;
-    }
 
     const calcDistance = (p1, p2) => {
       const map = this.mapRef.current.leafletElement;
@@ -371,28 +324,4 @@ export default class Canvas extends Component {
   }
 }
 
-function convertPoint(p) {
-  return {
-    lat: p.lat,
-    lng: p.lng,
-  };
-}
-
-function lighten(col, amt) {
-  let usePound = false;
-  if (col[0] === '#') {
-    col = col.slice(1);
-    usePound = true;
-  }
-  const num = parseInt(col, 16);
-  let r = (num >> 16) + amt;
-  if (r > 255) r = 255;
-  else if (r < 0) r = 0;
-  let b = ((num >> 8) & 0x00ff) + amt;
-  if (b > 255) b = 255;
-  else if (b < 0) b = 0;
-  let g = (num & 0x0000ff) + amt;
-  if (g > 255) g = 255;
-  else if (g < 0) g = 0;
-  return (usePound ? '#' : '') + (g | (b << 8) | (r << 16)).toString(16);
-}
+export default withImageLoading(Canvas);

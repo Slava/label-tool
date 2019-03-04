@@ -19,9 +19,8 @@ import HotkeysPanel from './HotkeysPanel';
 import Reference from './Reference';
 import './LabelingApp.css';
 
-import { computePath } from '../image-processing/LiveWire';
-import { LineUtil } from 'leaflet';
 import { genId, shortcuts, colors } from './utils';
+import { computeTrace } from './tracing';
 
 /*
  type Figure = {
@@ -609,27 +608,6 @@ function ListItem({
       </Hotkeys>
     </List.Item>
   );
-}
-
-function computeTrace(
-  points,
-  { height, width, imageData },
-  { smoothing, precision }
-) {
-  points = points.slice();
-  points.push(points[0]);
-  const path = computePath({
-    points: points.map(({ lng, lat }) => ({
-      x: lng,
-      y: lat,
-    })),
-    height,
-    width,
-    imageData,
-    markRadius: precision,
-  });
-  const simplePath = LineUtil.simplify(path, smoothing || 0.6);
-  return simplePath.map(({ x, y }) => ({ lng: x, lat: y }));
 }
 
 export default LabelingApp;

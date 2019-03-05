@@ -3,8 +3,8 @@ import { Header, Icon, Segment, Table } from 'semantic-ui-react';
 
 const style = {
   height: '100vh',
-  'overflow-y': 'auto',
-  'overflow-x': 'hidden',
+  overflowY: 'auto',
+  overflowX: 'hidden',
   borderRight: '1px solid #ccc',
 };
 const headerIconStyle = { fontSize: '0.8em', float: 'right' };

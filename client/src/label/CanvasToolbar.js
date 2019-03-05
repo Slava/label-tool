@@ -83,7 +83,7 @@ export class MakePredictionToolbar extends Component {
   }
 
   render() {
-    const { style, makePrediction, models } = this.props;
+    const { style, generate, models } = this.props;
     const { model } = this.state;
 
     const selectProps = {
@@ -104,7 +104,7 @@ export class MakePredictionToolbar extends Component {
           <Button
             onClick={() => {
               const m = models.find(m => m.id === model);
-              makePrediction(m);
+              generate(m);
             }}
           >
             Generate

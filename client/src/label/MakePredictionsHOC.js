@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
-import update from 'immutability-helper';
+import { genId } from './utils';
 
 export function withPredictions(Comp) {
-  return class extends Component {
+  return class PredictionsLayer extends Component {
     constructor(props) {
       super(props);
       this.state = {
-        predictions: {},
         models: [],
       };
 
@@ -14,7 +13,7 @@ export function withPredictions(Comp) {
     }
 
     async makePrediction(model) {
-      const { imgB64 } = this.props;
+      const { imgB64, height, width } = this.props;
       const { id } = model;
 
       const req = fetch('/api/mlmodels/' + id, {
@@ -35,13 +34,23 @@ export function withPredictions(Comp) {
       });
 
       const resp = await (await req).json();
-      this.setState({
-        predictions: update(this.state.predictions, {
-          [model.id]: {
-            $set: resp.predictions,
-          },
-        }),
-      });
+
+      if (model.type === 'object_detection') {
+        const preds = [];
+        resp.predictions.forEach(({ det_boxes: [y1, x1, y2, x2] }) => {
+          preds.push({
+            type: 'bbox',
+            color: 'gray',
+            points: [
+              { lng: x1 * width, lat: (1 - y1) * height },
+              { lng: x2 * width, lat: (1 - y2) * height },
+            ],
+            id: genId(),
+            modelId: model.id,
+          });
+        });
+        return preds;
+      }
     }
 
     async componentDidMount() {
@@ -49,23 +58,12 @@ export function withPredictions(Comp) {
       this.setState({ models });
     }
 
-    componentDidUpdate(prevProps, prevState) {
-      const { imgB64 } = this.props;
-
-      if (imgB64 !== prevProps.imgB64) {
-        this.setState({
-          predictions: {},
-        });
-      }
-    }
-
     render() {
       const { props, state } = this;
       const { imgB64, ...passedProps } = props;
-      const { models, predictions } = state;
+      const { models } = state;
       const newProps = {
         models,
-        predictions,
         makePrediction: this.makePrediction,
       };
 

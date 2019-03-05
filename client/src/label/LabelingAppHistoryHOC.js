@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import update from 'immutability-helper';
 
 export function withHistory(Comp) {
-  return class extends Component {
+  return class HistoryLayer extends Component {
     constructor(props) {
       super(props);
 
@@ -10,6 +10,7 @@ export function withHistory(Comp) {
       const figures = {};
 
       labels.map(label => (figures[label.id] = []));
+      figures.__temp = [];
       Object.keys(labelData).forEach(key => {
         figures[key] = (figures[key] || []).concat(labelData[key]);
       });

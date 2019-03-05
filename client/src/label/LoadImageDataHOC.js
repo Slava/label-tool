@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
 export function withLoadImageData(Comp) {
-  return class extends Component {
+  return class LoadImageLayer extends Component {
     constructor(props) {
       super(props);
       this.state = {

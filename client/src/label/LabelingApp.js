@@ -97,8 +97,11 @@ class LabelingApp extends Component {
   handleChange(eventType, figure, newLabelId) {
     if (!figure.color) return;
     const { labels, figures, pushState, height, width, imageData } = this.props;
-    const label = labels[colors.indexOf(figure.color)];
-    const idx = figures[label.id].findIndex(f => f.id === figure.id);
+    const label =
+      figure.color === 'gray'
+        ? { id: '__temp' }
+        : labels[colors.indexOf(figure.color)];
+    const idx = (figures[label.id] || []).findIndex(f => f.id === figure.id);
 
     switch (eventType) {
       case 'new':
@@ -262,6 +265,12 @@ class LabelingApp extends Component {
         }
       });
     });
+    figures.__temp.forEach(figure => {
+      allFigures.push({
+        color: 'gray',
+        ...figure,
+      });
+    });
 
     const sidebarProps = reassigning.status
       ? {
@@ -312,6 +321,7 @@ class LabelingApp extends Component {
       zIndex: 10000,
     };
     const { models, makePrediction } = this.props;
+
     if (selectedFigure && selectedFigure.type === 'polygon') {
       const options = selectedFigure.tracingOptions || {
         enabled: false,
@@ -338,7 +348,10 @@ class LabelingApp extends Component {
         <MakePredictionToolbar
           style={toolbarStyle}
           models={models}
-          makePrediction={makePrediction}
+          generate={async modelId => {
+            const preds = await makePrediction(modelId);
+            preds.forEach(f => this.handleChange('new', f));
+          }}
         />
       );
     }
@@ -379,4 +392,4 @@ class LabelingApp extends Component {
   }
 }
 
-export default withLoadImageData(withPredictions(withHistory(LabelingApp)));
+export default withLoadImageData(withHistory(withPredictions(LabelingApp)));

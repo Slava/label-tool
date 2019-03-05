@@ -3,7 +3,7 @@ import { CRS, LatLngBounds } from 'leaflet';
 
 export const maxZoom = 7;
 export function withBounds(Comp) {
-  class LoadImage extends PureComponent {
+  class CalcBoundsLayer extends PureComponent {
     calcBounds() {
       const crs = CRS.Simple;
       const { height, width } = this.props;
@@ -26,6 +26,6 @@ export function withBounds(Comp) {
   }
 
   return forwardRef((props, ref) => (
-    <LoadImage {...props} forwardedRef={ref} />
+    <CalcBoundsLayer {...props} forwardedRef={ref} />
   ));
 }

@@ -10,7 +10,7 @@ export const colorMapping = {
   purple: '#B413EC',
   pink: '#FF1493',
   brown: '#A52A2A',
-  grey: '#A0A0A0',
+  gray: '#A0A0A0',
   black: '#000000',
 };
 
@@ -64,6 +64,5 @@ export const colors = [
   'teal',
   'purple',
   'pink',
-  'grey',
   'black',
 ];

@@ -7,7 +7,7 @@ import 'semantic-ui-css/semantic.min.css';
 import Canvas from './Canvas';
 import HotkeysPanel from './HotkeysPanel';
 import Sidebar from './Sidebar';
-import Toolbar from './CanvasToolbar';
+import { PathToolbar, MakePredictionToolbar } from './CanvasToolbar';
 import Reference from './Reference';
 import './LabelingApp.css';
 
@@ -305,18 +305,19 @@ class LabelingApp extends Component {
     ) : null;
 
     let toolbarDOM = null;
+    const toolbarStyle = {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      zIndex: 10000,
+    };
+    const { models, makePrediction } = this.props;
     if (selectedFigure && selectedFigure.type === 'polygon') {
       const options = selectedFigure.tracingOptions || {
         enabled: false,
         smoothing: 0.3,
         precision: 0,
         trace: [],
-      };
-      const toolbarStyle = {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        zIndex: 10000,
       };
       const handler = (property, value) => {
         this.handleChange(
@@ -330,7 +331,15 @@ class LabelingApp extends Component {
       };
 
       toolbarDOM = (
-        <Toolbar style={toolbarStyle} onChange={handler} {...options} />
+        <PathToolbar style={toolbarStyle} onChange={handler} {...options} />
+      );
+    } else if (!selectedFigure && models.length > 0) {
+      toolbarDOM = (
+        <MakePredictionToolbar
+          style={toolbarStyle}
+          models={models}
+          makePrediction={makePrediction}
+        />
       );
     }
 

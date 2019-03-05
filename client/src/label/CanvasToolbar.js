@@ -1,5 +1,5 @@
-import React, { PureComponent } from 'react';
-import { Radio, Select } from 'semantic-ui-react';
+import React, { PureComponent, Component } from 'react';
+import { Radio, Select, Button } from 'semantic-ui-react';
 
 const defaultStyle = {
   width: '100%',
@@ -30,7 +30,7 @@ const groupStyle = {
   marginLeft: 20,
 };
 
-export default class CanvasToolbar extends PureComponent {
+export class PathToolbar extends PureComponent {
   render() {
     const { style, enabled, smoothing, precision, onChange } = this.props;
     const disabled = !enabled;
@@ -68,6 +68,47 @@ export default class CanvasToolbar extends PureComponent {
               options={precisionOptions}
             />
           </span>
+        </span>
+      </div>
+    );
+  }
+}
+
+export class MakePredictionToolbar extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      model: props.models[0].id,
+    };
+  }
+
+  render() {
+    const { style, makePrediction, models } = this.props;
+    const { model } = this.state;
+
+    const selectProps = {
+      compact: true,
+      style: selectStyle,
+      onChange: (e, { value }) => this.setState({ model: value }),
+    };
+
+    const options = models.map(({ id, name }) => ({ value: id, text: name }));
+
+    return (
+      <div style={{ ...style, ...defaultStyle }}>
+        <span style={groupStyle}>
+          Generate selections using a model
+          <Select {...selectProps} value={model} options={options} />
+        </span>
+        <span style={groupStyle}>
+          <Button
+            onClick={() => {
+              const m = models.find(m => m.id === model);
+              makePrediction(m);
+            }}
+          >
+            Generate
+          </Button>
         </span>
       </div>
     );

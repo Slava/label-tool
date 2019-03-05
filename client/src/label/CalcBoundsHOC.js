@@ -8,6 +8,8 @@ export function withBounds(Comp) {
       const crs = CRS.Simple;
       const { height, width } = this.props;
 
+      if (!height || !width) return null;
+
       const southWest = crs.unproject({ x: 0, y: height }, maxZoom - 1);
       const northEast = crs.unproject({ x: width, y: 0 }, maxZoom - 1);
       const bounds = new LatLngBounds(southWest, northEast);

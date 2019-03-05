@@ -87,12 +87,17 @@ export class MakePredictionToolbar extends Component {
     const { model } = this.state;
 
     const selectProps = {
-      compact: true,
       style: selectStyle,
       onChange: (e, { value }) => this.setState({ model: value }),
     };
 
     const options = models.map(({ id, name }) => ({ value: id, text: name }));
+    const m = models.find(m => m.id === model);
+
+    const disabled = m.type === 'object_classification';
+    const text = disabled
+      ? 'This model can only be used to generate general tags for text fields.'
+      : null;
 
     return (
       <div style={{ ...style, ...defaultStyle }}>
@@ -101,14 +106,10 @@ export class MakePredictionToolbar extends Component {
           <Select {...selectProps} value={model} options={options} />
         </span>
         <span style={groupStyle}>
-          <Button
-            onClick={() => {
-              const m = models.find(m => m.id === model);
-              generate(m);
-            }}
-          >
+          <Button disabled={disabled} onClick={() => generate(m)}>
             Generate
           </Button>
+          <span>{text}</span>
         </span>
       </div>
     );

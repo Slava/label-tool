@@ -5,9 +5,10 @@ import {
   Label,
   Icon,
   Button,
-  Input,
+  Form,
   Checkbox,
   Radio,
+  Select,
 } from 'semantic-ui-react';
 import { shortcuts, colors } from './utils';
 import Hotkeys from 'react-hot-keys';
@@ -30,6 +31,8 @@ export default class Sidebar extends PureComponent {
       onSubmit,
       labelData,
       onFormChange,
+      models,
+      makePrediction,
     } = this.props;
 
     const hotkeysButton = openHotkeys ? (
@@ -68,6 +71,8 @@ export default class Sidebar extends PureComponent {
               isToggled: toggles && toggles[label.id],
               labelData: labelData[label.id],
               onFormChange,
+              models,
+              makePrediction,
             })
           )}
           <Hotkeys keyName="esc" onKeyDown={() => onSelect(null)} />
@@ -110,6 +115,8 @@ function ListItem({
   isToggled = false,
   labelData,
   onFormChange,
+  models,
+  makePrediction,
 }) {
   const icons = [];
 
@@ -139,15 +146,40 @@ function ListItem({
   function genSublist(label) {
     const sublistStyle = { fontSize: '12px' };
     if (label.type === 'text') {
+      const filteredModels = (models || []).filter(
+        ({ type }) => type === 'object_classification'
+      );
+      const options = filteredModels.map(({ id, name }) => ({
+        value: id,
+        text: name,
+      }));
+      const fillInDOM =
+        filteredModels.length > 0 ? (
+          <div>
+            Fill in using a model prediction:
+            <Select
+              options={options}
+              placeholder="Select a model"
+              onChange={async (e, { value }) => {
+                const m = models.find(({ id }) => id === value);
+                const text = (await makePrediction(m)).join(', ');
+                onFormChange(label.id, [text]);
+              }}
+            />
+          </div>
+        ) : null;
       return (
         <List style={sublistStyle}>
           <List.Item>
-            <Input
-              label={label.prompt}
-              style={{ width: '100%' }}
-              value={labelData[0] || ''}
-              onChange={(e, { value }) => onFormChange(label.id, [value])}
-            />
+            <Form>
+              <Form.Input
+                label={label.prompt}
+                style={{ width: '100%' }}
+                value={labelData[0] || ''}
+                onChange={(e, { value }) => onFormChange(label.id, [value])}
+              />
+              {fillInDOM}
+            </Form>
           </List.Item>
         </List>
       );

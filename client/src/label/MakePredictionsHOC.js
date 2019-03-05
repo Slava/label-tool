@@ -51,6 +51,8 @@ export function withPredictions(Comp) {
         });
         return preds;
       }
+
+      return resp.predictions;
     }
 
     async componentDidMount() {

@@ -228,6 +228,8 @@ class LabelingApp extends Component {
       unfinishedFigure,
       height,
       width,
+      models,
+      makePrediction,
     } = this.props;
     const {
       selected,
@@ -241,6 +243,8 @@ class LabelingApp extends Component {
       onBack,
       onSkip,
       onSubmit,
+      models,
+      makePrediction,
     };
 
     let selectedFigure = null;
@@ -320,7 +324,6 @@ class LabelingApp extends Component {
       left: 0,
       zIndex: 10000,
     };
-    const { models, makePrediction } = this.props;
 
     if (selectedFigure && selectedFigure.type === 'polygon') {
       const options = selectedFigure.tracingOptions || {
@@ -348,9 +351,13 @@ class LabelingApp extends Component {
         <MakePredictionToolbar
           style={toolbarStyle}
           models={models}
-          generate={async modelId => {
-            const preds = await makePrediction(modelId);
-            preds.forEach(f => this.handleChange('new', f));
+          generate={async model => {
+            const preds = await makePrediction(model);
+            if (model.type !== 'object_classification') {
+              preds.forEach(f => this.handleChange('new', f));
+            } else {
+              alert(preds.join(', '));
+            }
           }}
         />
       );

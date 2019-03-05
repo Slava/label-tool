@@ -127,6 +127,7 @@ export default class MLAssist extends Component {
   render() {
     const { error, isLoaded, models, currentValue } = this.state;
     const value = currentValue;
+    const filteredModels = (models || []).filter(({ type }) => type === value);
 
     if (error) {
       return <div>Error: {error.message}</div>;
@@ -175,7 +176,7 @@ export default class MLAssist extends Component {
             </Table.Row>
           </Table.Header>
           <Table.Body>
-            {models.map(({ id, name, url, type }) => (
+            {filteredModels.map(({ id, name, url, type }) => (
               <Table.Row>
                 <Table.Cell>{name}</Table.Cell>
                 <Table.Cell>{url}</Table.Cell>

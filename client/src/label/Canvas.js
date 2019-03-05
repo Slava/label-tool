@@ -11,12 +11,9 @@ import 'leaflet/dist/leaflet.css';
 import { Icon } from 'semantic-ui-react';
 
 import { BBoxFigure, PolygonFigure } from './Figure';
-import Toolbar from './CanvasToolbar';
 
 import { convertPoint, lighten, colorMapping } from './utils';
 import { withBounds, maxZoom } from './CalcBoundsHOC';
-
-const toolbarStyle = { position: 'absolute', top: 0, left: 0, zIndex: 10000 };
 
 class Canvas extends Component {
   constructor(props, context) {
@@ -236,34 +233,16 @@ class Canvas extends Component {
       />
     );
 
-    let renderedToolbar = null;
     let renderedTrace = null;
     const selectedFigure = this.getSelectedFigure();
     if (selectedFigure && selectedFigure.type === 'polygon') {
-      const options = selectedFigure.tracingOptions || {
-        enabled: false,
-        smoothing: 0.3,
-        precision: 0,
-        trace: [],
-      };
-      const handleChange = (property, value) => {
-        onChange(
-          'replace',
-          update(selectedFigure, {
-            tracingOptions: {
-              $set: update(options, { [property]: { $set: value } }),
-            },
-          })
-        );
-      };
-      renderedToolbar = (
-        <Toolbar style={toolbarStyle} onChange={handleChange} {...options} />
-      );
-
+      const trace = selectedFigure.tracingOptions
+        ? selectedFigure.tracingOptions.trace || []
+        : [];
       const figure = {
         id: 'trace',
         type: 'line',
-        points: options.trace,
+        points: trace,
       };
       const traceOptions = {
         editing: false,
@@ -278,11 +257,9 @@ class Canvas extends Component {
         style={{
           cursor: drawing ? 'crosshair' : 'grab',
           height: '100%',
-          position: 'relative',
           ...style,
         }}
       >
-        {renderedToolbar}
         <Map
           crs={CRS.Simple}
           zoom={zoom}

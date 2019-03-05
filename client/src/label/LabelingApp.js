@@ -7,6 +7,7 @@ import 'semantic-ui-css/semantic.min.css';
 import Canvas from './Canvas';
 import HotkeysPanel from './HotkeysPanel';
 import Sidebar from './Sidebar';
+import Toolbar from './CanvasToolbar';
 import Reference from './Reference';
 import './LabelingApp.css';
 
@@ -36,6 +37,8 @@ class LabelingApp extends Component {
       selected: null,
       toggles,
 
+      selectedFigureId: null,
+
       // UI
       reassigning: { status: false, type: null },
       hotkeysPanel: false,
@@ -43,6 +46,7 @@ class LabelingApp extends Component {
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSelected = this.handleSelected.bind(this);
+    this.handleSelectionChange = this.handleSelectionChange.bind(this);
     this.canvasRef = React.createRef();
   }
 
@@ -77,6 +81,17 @@ class LabelingApp extends Component {
       }),
       () => this.setState({ selected })
     );
+  }
+
+  handleSelectionChange(figureId) {
+    if (figureId) {
+      this.setState({ selectedFigureId: figureId });
+    } else {
+      this.setState({
+        reassigning: { status: false, type: null },
+        selectedFigureId: null,
+      });
+    }
   }
 
   handleChange(eventType, figure, newLabelId) {
@@ -211,7 +226,13 @@ class LabelingApp extends Component {
       height,
       width,
     } = this.props;
-    const { selected, reassigning, toggles, hotkeysPanel } = this.state;
+    const {
+      selected,
+      selectedFigureId,
+      reassigning,
+      toggles,
+      hotkeysPanel,
+    } = this.state;
 
     const forwardedProps = {
       onBack,
@@ -219,21 +240,28 @@ class LabelingApp extends Component {
       onSubmit,
     };
 
+    let selectedFigure = null;
     const allFigures = [];
-    labels.map((label, i) =>
-      figures[label.id].map(
-        figure =>
+    labels.forEach((label, i) => {
+      figures[label.id].forEach(figure => {
+        if (
           toggles[label.id] &&
-          (label.type === 'bbox' || label.type === 'polygon') &&
+          (label.type === 'bbox' || label.type === 'polygon')
+        ) {
           allFigures.push({
             color: colors[i],
             points: figure.points,
             id: figure.id,
             type: figure.type,
             tracingOptions: figure.tracingOptions,
-          })
-      )
-    );
+          });
+
+          if (figure.id === selectedFigureId) {
+            selectedFigure = { ...figure, color: colors[i] };
+          }
+        }
+      });
+    });
 
     const sidebarProps = reassigning.status
       ? {
@@ -276,6 +304,36 @@ class LabelingApp extends Component {
       />
     ) : null;
 
+    let toolbarDOM = null;
+    if (selectedFigure && selectedFigure.type === 'polygon') {
+      const options = selectedFigure.tracingOptions || {
+        enabled: false,
+        smoothing: 0.3,
+        precision: 0,
+        trace: [],
+      };
+      const toolbarStyle = {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        zIndex: 10000,
+      };
+      const handler = (property, value) => {
+        this.handleChange(
+          'replace',
+          update(selectedFigure, {
+            tracingOptions: {
+              $set: update(options, { [property]: { $set: value } }),
+            },
+          })
+        );
+      };
+
+      toolbarDOM = (
+        <Toolbar style={toolbarStyle} onChange={handler} {...options} />
+      );
+    }
+
     return (
       <div style={{ display: 'flex', height: '100vh' }}>
         <Hotkeys keyName="ctrl+z" onKeyDown={popState}>
@@ -288,23 +346,23 @@ class LabelingApp extends Component {
           {hotkeysPanelDOM}
           <div style={{ flex: 4, display: 'flex', flexDirection: 'column' }}>
             <Reference {...reference} />
-            <Canvas
-              url={imageUrl}
-              height={height}
-              width={width}
-              figures={allFigures}
-              unfinishedFigure={unfinishedFigure}
-              onChange={this.handleChange}
-              onReassignment={type =>
-                this.setState({ reassigning: { status: true, type } })
-              }
-              onSelectionChange={figureId =>
-                figureId ||
-                this.setState({ reassigning: { status: false, type: null } })
-              }
-              ref={this.canvasRef}
-              style={{ flex: 1 }}
-            />
+            <div style={{ position: 'relative', height: '100%' }}>
+              {toolbarDOM}
+              <Canvas
+                url={imageUrl}
+                height={height}
+                width={width}
+                figures={allFigures}
+                unfinishedFigure={unfinishedFigure}
+                onChange={this.handleChange}
+                onReassignment={type =>
+                  this.setState({ reassigning: { status: true, type } })
+                }
+                onSelectionChange={this.handleSelectionChange}
+                ref={this.canvasRef}
+                style={{ flex: 1 }}
+              />
+            </div>
           </div>
         </Hotkeys>
       </div>

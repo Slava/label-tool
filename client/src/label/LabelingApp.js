@@ -51,10 +51,12 @@ class LabelingApp extends Component {
     const { pushState } = this.props;
 
     if (!selected) {
-      pushState(state => ({
-        selected,
-        unfinishedFigure: null,
-      }));
+      pushState(
+        state => ({
+          unfinishedFigure: null,
+        }),
+        () => this.setState({ selected })
+      );
       return;
     }
 
@@ -64,15 +66,17 @@ class LabelingApp extends Component {
     const type = labels[labelIdx].type;
     const color = colors[labelIdx];
 
-    pushState(state => ({
-      selected,
-      unfinishedFigure: {
-        id: null,
-        color,
-        type,
-        points: [],
-      },
-    }));
+    pushState(
+      state => ({
+        unfinishedFigure: {
+          id: null,
+          color,
+          type,
+          points: [],
+        },
+      }),
+      () => this.setState({ selected })
+    );
   }
 
   handleChange(eventType, figure, newLabelId) {
@@ -83,21 +87,26 @@ class LabelingApp extends Component {
 
     switch (eventType) {
       case 'new':
-        pushState(state => ({
-          figures: update(state.figures, {
-            [label.id]: {
-              $push: [
-                {
-                  id: figure.id || genId(),
-                  type: figure.type,
-                  points: figure.points,
-                },
-              ],
-            },
+        pushState(
+          state => ({
+            figures: update(state.figures, {
+              [label.id]: {
+                $push: [
+                  {
+                    id: figure.id || genId(),
+                    type: figure.type,
+                    points: figure.points,
+                  },
+                ],
+              },
+            }),
+            unfinishedFigure: null,
           }),
-          selected: null, // deselect the label after the figure is finished
-          unfinishedFigure: null,
-        }));
+          () =>
+            this.setState({
+              selected: null,
+            })
+        );
         break;
 
       case 'replace':

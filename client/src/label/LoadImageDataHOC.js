@@ -30,7 +30,10 @@ export function withLoadImageData(Comp) {
             canvas.width = width;
             ctx.drawImage(img, 0, 0, width, height);
             const data = ctx.getImageData(0, 0, width, height).data;
-            setState({ imageData: data });
+            const imgB64 = canvas
+              .toDataURL()
+              .substring('data:image/png;base64,'.length);
+            setState({ imageData: data, imgB64 });
           };
 
           if (document.readyState !== 'loading') {
@@ -45,10 +48,16 @@ export function withLoadImageData(Comp) {
 
     render() {
       const { props, state } = this;
-      const { height, width, imageData } = state;
+      const { height, width, imageData, imgB64 } = state;
 
       return (
-        <Comp height={height} width={width} imageData={imageData} {...props} />
+        <Comp
+          height={height}
+          width={width}
+          imageData={imageData}
+          imgB64={imgB64}
+          {...props}
+        />
       );
     }
   };

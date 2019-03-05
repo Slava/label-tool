@@ -14,6 +14,7 @@ import { genId, colors } from './utils';
 import { computeTrace } from './tracing';
 import { withHistory } from './LabelingAppHistoryHOC';
 import { withLoadImageData } from './LoadImageDataHOC';
+import { withPredictions } from './MakePredictionsHOC';
 
 /*
  type Figure = {
@@ -302,4 +303,4 @@ class LabelingApp extends Component {
   }
 }
 
-export default withLoadImageData(withHistory(LabelingApp));
+export default withLoadImageData(withPredictions(withHistory(LabelingApp)));

@@ -11,6 +11,17 @@ select *
       )
       .all();
   },
+  get: id => {
+    return db
+      .prepare(
+        `
+select *
+  from mlmodels
+ where id = ?;
+`
+      )
+      .all(id)[0];
+  },
   create: model => {
     const id = db
       .prepare(

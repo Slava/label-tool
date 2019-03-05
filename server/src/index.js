@@ -15,7 +15,7 @@ const exporter = require('./exporter');
 const app = express();
 
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '10mb' }));
 
 app.get('/api/mlmodels', (req, res) => {
   res.json(mlmodels.getAll());
@@ -29,6 +29,20 @@ app.post('/api/mlmodels', (req, res) => {
     success: true,
     id,
   });
+});
+
+app.post('/api/mlmodels/:id', (req, res) => {
+  const { id } = req.params;
+  const model = mlmodels.get(id);
+  request
+    .post(model.url, {
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(req.body),
+    })
+    .pipe(res);
 });
 
 app.get('/api/projects', (req, res) => {

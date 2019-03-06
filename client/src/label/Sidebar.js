@@ -44,6 +44,8 @@ export default class Sidebar extends PureComponent {
       />
     ) : null;
 
+    const getSelectHandler = ({ type, id }) =>
+      type === 'bbox' || type === 'polygon' ? () => onSelect(id) : null;
     return (
       <div
         style={{
@@ -64,7 +66,7 @@ export default class Sidebar extends PureComponent {
               shortcut: shortcuts[i],
               label,
               color: colors[i],
-              onSelect: () => onSelect(label.id),
+              onSelect: getSelectHandler(label),
               selected: selected === label.id,
               disabled: filter ? !filter(label) : false,
               onToggle: onToggle,
@@ -234,7 +236,10 @@ function ListItem({
       key={label.id}
       style={{ fontSize: '1.3em' }}
     >
-      <Hotkeys keyName={shortcut} onKeyDown={() => !disabled && onSelect()}>
+      <Hotkeys
+        keyName={shortcut}
+        onKeyDown={() => !disabled && onSelect && onSelect()}
+      >
         <Label color={color} horizontal>
           {shortcut}
         </Label>

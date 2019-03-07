@@ -261,9 +261,7 @@ app.get('/uploads/:projectId/:imageName', (req, res) => {
       return;
     }
   }
-  res.sendFile(
-    path.join(__dirname + '/../uploads/', projectId, path.join('/', imageName))
-  );
+  res.sendFile(path.join(UPLOADS_PATH, projectId, path.join('/', imageName)));
 });
 
 app.get('/api/projects/:projectId/export', (req, res) => {

@@ -56,7 +56,7 @@ function vectorize(start, used, matrix) {
   }
 
   // skip anything too small
-  if (area < n * m * 0.01) {
+  if (area < n * m * 0.002) {
     return null;
   }
 

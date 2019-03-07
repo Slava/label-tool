@@ -20,7 +20,7 @@ body,
 }
 
 .vertex.editing.finished {
-  cursor: not-allowed !important;
+  cursor: move !important;
 }
 
 .midpoint {

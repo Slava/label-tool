@@ -283,11 +283,11 @@ app.get('/api/projects/:projectId/export', (req, res) => {
 });
 
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static('../client/build'));
+  app.use(express.static(path.join(__dirname, '../../client/build')));
   app.get('*', (req, res, next) => {
     if (req.url.startsWith('/api/')) return next();
     if (req.url.startsWith('/uploads/')) return next();
-    res.sendFile(path.join(__dirname + '/../client/build/index.html'));
+    res.sendFile(path.join(__dirname + '/../../client/build/index.html'));
   });
 }
 

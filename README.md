@@ -43,3 +43,4 @@ The following environment variables can be tweaked:
 - `PORT` - the part the app is served on (dev, prod)
 - `API_PORT` - to differentiate the port for the API to run on (should be only used in dev)
 - `UPLOADS_PATH` - absolute path where the app stores uploaded images, defaults to server's folder 'uploads'
+- `DATABASE_FILE_PATH` - absolute path of the file where the app stores the SQLite data. Defaults to `database.sqlite` in the server folder

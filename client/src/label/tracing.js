@@ -23,7 +23,7 @@ export function computeTrace(
   return simplePath.map(({ x, y }) => ({ lng: x, lat: y }));
 }
 
-export function vectorizeSegmentation(imageData) {
+export function vectorizeSegmentation(imageData, scaling) {
   // reduce from nxmx1 to nxm
   imageData = imageData.map(row => row.map(channels => channels[0]));
   const paths = computeVectorized(imageData);
@@ -32,6 +32,9 @@ export function vectorizeSegmentation(imageData) {
       path.map(([y, x]) => ({ x, y: imageData.length - y })),
       2.0
     );
-    return simplePath.map(({ x, y }) => ({ lng: x, lat: y }));
+    return simplePath.map(({ x, y }) => ({
+      lng: x / scaling,
+      lat: y / scaling,
+    }));
   });
 }

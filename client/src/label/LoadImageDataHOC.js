@@ -26,14 +26,20 @@ export function withLoadImageData(Comp) {
           const resetImage = () => {
             const canvas = document.getElementById('test-canvas');
             const ctx = canvas.getContext('2d');
-            canvas.height = height;
-            canvas.width = width;
-            ctx.drawImage(img, 0, 0, width, height);
-            const data = ctx.getImageData(0, 0, width, height).data;
+
+            const scale = Math.min(800, height) / height;
+            const sHeight = Math.floor(scale * height);
+            const sWidth = Math.floor(scale * width);
+            canvas.height = sHeight;
+            canvas.width = sWidth;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.imageSmoothingEnabled = true;
+            ctx.drawImage(img, 0, 0, sWidth, sHeight);
+            const data = ctx.getImageData(0, 0, sWidth, sHeight).data;
             const imgB64 = canvas
               .toDataURL()
               .substring('data:image/png;base64,'.length);
-            setState({ imageData: data, imgB64 });
+            setState({ imageData: data, imgB64, b64Scaling: scale });
           };
 
           if (document.readyState !== 'loading') {
@@ -48,7 +54,7 @@ export function withLoadImageData(Comp) {
 
     render() {
       const { props, state } = this;
-      const { height, width, imageData, imgB64 } = state;
+      const { height, width, imageData, imgB64, b64Scaling } = state;
 
       return (
         <Comp
@@ -56,6 +62,7 @@ export function withLoadImageData(Comp) {
           width={width}
           imageData={imageData}
           imgB64={imgB64}
+          b64Scaling={b64Scaling}
           {...props}
         />
       );

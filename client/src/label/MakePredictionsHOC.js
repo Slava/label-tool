@@ -14,7 +14,7 @@ export function withPredictions(Comp) {
     }
 
     async makePrediction(model) {
-      const { imgB64, height, width } = this.props;
+      const { imgB64, b64Scaling, height, width } = this.props;
       const { id } = model;
 
       const req = fetch('/api/mlmodels/' + id, {
@@ -53,7 +53,7 @@ export function withPredictions(Comp) {
         return preds;
       } else if (model.type === 'semantic_segmentation') {
         const imageData = resp.predictions[0].raw_image;
-        const vectors = vectorizeSegmentation(imageData);
+        const vectors = vectorizeSegmentation(imageData, b64Scaling);
         return vectors.map(path => ({
           type: 'polygon',
           color: 'gray',

@@ -18,7 +18,7 @@
     "request": "^2.88.0"
   },
   "scripts": {
-    "start": "PORT=3001 yarn run nodemon src/index.js",
+    "start": "yarn run nodemon src/index.js",
     "resetdb": "rm database.sqlite; for file in ./migrations/*.up.sql; do sqlite3 ./database.sqlite < $file; done"
   },
   "husky": {

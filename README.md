@@ -1,4 +1,8 @@
-# Image Labeling App
+# Image Labeling Tool
+
+An web app that allows you to label images, draw bounding boxes, shapes, collect information in forms with dropdowns, checkboxes and inputs.
+
+The labeling UI provides a lot of features for drawing polygon shapes, editing them with assisted tracing with auto-tracing based on edges or an external ML model.
 
 ## Development
 
@@ -10,11 +14,7 @@ cd server && yarn install && cd ..
 cd client && yarn install && cd ..
 ```
 
-Run server migrations to setup the database:
-
-```bash
-cd server && yarn run resetdb && cd ..
-```
+The server will run migrations on the first run if the database file doesn't exist already.
 
 Run in the development mode:
 
@@ -53,9 +53,6 @@ The default `Dockerfile` points to `/uploads` and `/db/db.sqlite` for persisted 
 mkdir ~/containersmnt/
 mkdir ~/containersmnt/db/
 mkdir ~/containersmnt/uploads/
-cd server
-DATABASE_FILE_PATH=~/containersmnt/db/db.sqlite yarn run resetdb
-cd ..
 ```
 
 Now build the container:

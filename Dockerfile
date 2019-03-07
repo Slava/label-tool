@@ -16,8 +16,6 @@ RUN cd client && yarn build
 ENV DATABASE_FILE_PATH=/db/db.sqlite
 ENV UPLOADS_PATH=/uploads
 
-RUN cd server && yarn run resetdb
-
 ENV PORT=3000
 ENV NODE_ENV=production
 EXPOSE 3000

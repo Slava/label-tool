@@ -18,8 +18,7 @@
     "request": "^2.88.0"
   },
   "scripts": {
-    "start": "yarn run nodemon src/index.js",
-    "resetdb": "DBPATH=${DATABASE_FILE_PATH:-database.sqlite}; for file in ./migrations/*.up.sql; do sqlite3 ./tmp.sqlite < $file; done; mv tmp.sqlite $DBPATH"
+    "start": "yarn run nodemon src/index.js"
   },
   "husky": {
     "hooks": {

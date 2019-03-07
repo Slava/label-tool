@@ -1,5 +1,5 @@
 import React, { PureComponent, Component } from 'react';
-import { Radio, Select, Button } from 'semantic-ui-react';
+import { Radio, Select, Button, Loader } from 'semantic-ui-react';
 
 const defaultStyle = {
   width: '100%',
@@ -79,12 +79,19 @@ export class MakePredictionToolbar extends Component {
     super(props);
     this.state = {
       model: props.models[0].id,
+      loading: false,
     };
   }
 
+  async handleGenerate(model) {
+    this.setState({ loading: true });
+    await this.props.generate(model);
+    this.setState({ loading: false });
+  }
+
   render() {
-    const { style, generate, models } = this.props;
-    const { model } = this.state;
+    const { style, models } = this.props;
+    const { model, loading } = this.state;
 
     const selectProps = {
       style: selectStyle,
@@ -106,9 +113,10 @@ export class MakePredictionToolbar extends Component {
           <Select {...selectProps} value={model} options={options} />
         </span>
         <span style={groupStyle}>
-          <Button disabled={disabled} onClick={() => generate(m)}>
+          <Button disabled={disabled} onClick={() => this.handleGenerate(m)}>
             Generate
           </Button>
+          <Loader active={loading} inline />
           <span>{text}</span>
         </span>
       </div>

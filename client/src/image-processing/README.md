@@ -43,7 +43,7 @@ First, run BFS and separate each connected component of a different color/label.
 Then starting from the left-most pixel of the top-most row belonging to each segment, start tracing in the clock-wise direction. The traversal of the shape is simple if we consider the 2x2 squares of pixels and calculate the direction of movement based on that. In code, this is implemented by manually specifying the direction change based on the 4-bit bitmask representing the four pixels, where 1 means the pixel belongs to the segment and 0 means it doesn't.
 
 ```
-+-------+-------+
++-------|-------+
 |       |       |
 |   0   |   1   |
 |       |       |
@@ -51,7 +51,7 @@ Then starting from the left-most pixel of the top-most row belonging to each seg
 |       |       |
 |   3   |   2   |
 |       |       |
-+-------+-------+
++-------|-------+
 ```
 
 The diagram above shows the order of pixels represented in the mask, where P is an imaginary point. There is an assumption that the traversal is happening on the outer edge in the clock-wise direction, so the shape is always on the right.
@@ -59,3 +59,8 @@ The diagram above shows the order of pixels represented in the mask, where P is 
 After the traversal comes back to the left-most pixel of the top-most row the algorithm terminates.
 
 Note, that this algorithm can handle both convex and non-convex shapes. But it fails to traverse the holes in the shapes (like a doughnut or a bagel shape). For the most part this is acceptable, since the current version of the labeling app doesn't provide tools to draw such shapes in the user interface anyway.
+
+The idea of the traversal algorithm is taken from the first stage of the following paper:
+Potrace: a polygon-based tracing algorithm, Peter Selinger [PDF](http://potrace.sourceforge.net/potrace.pdf).
+
+A known algorithm named Marching Squares has a similar idea but operates on diagonal edges too: [Wikipedia](https://en.wikipedia.org/wiki/Marching_squares).

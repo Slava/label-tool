@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { genId } from './utils';
+import { vectorizeSegmentation } from './tracing';
 
 export function withPredictions(Comp) {
   return class PredictionsLayer extends Component {
@@ -50,6 +51,16 @@ export function withPredictions(Comp) {
           });
         });
         return preds;
+      } else if (model.type === 'semantic_segmentation') {
+        const imageData = resp.predictions[0].raw_image;
+        const vectors = vectorizeSegmentation(imageData);
+        return vectors.map(path => ({
+          type: 'polygon',
+          color: 'gray',
+          points: path,
+          id: genId(),
+          modelId: model.id,
+        }));
       }
 
       return resp.predictions;

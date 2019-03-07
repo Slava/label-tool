@@ -355,8 +355,6 @@ class LabelingApp extends Component {
             const preds = await makePrediction(model);
             if (model.type !== 'object_classification') {
               preds.forEach(f => this.handleChange('new', f));
-            } else {
-              alert(preds.join(', '));
             }
           }}
         />

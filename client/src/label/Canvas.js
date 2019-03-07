@@ -200,11 +200,11 @@ class Canvas extends Component {
             }
           } else {
             if (key === 'c') {
-              if (selectedFigureId) {
+              if (selectedFigureId && this.getSelectedFigure()) {
                 onReassignment(this.getSelectedFigure().type);
               }
             } else if (key === 'backspace' || key === 'del') {
-              if (selectedFigureId) {
+              if (selectedFigureId && this.getSelectedFigure()) {
                 onChange('delete', this.getSelectedFigure());
               }
             }

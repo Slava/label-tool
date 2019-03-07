@@ -74,36 +74,57 @@ export class PathToolbar extends PureComponent {
   }
 }
 
-let lastSelected = null;
+const predictionSmoothingOptions = [
+  { value: 1.0, text: 'Slight' },
+  { value: 2.5, text: 'Normal' },
+  { value: 5.0, text: 'Strong' },
+  { value: 10.0, text: 'Extreme' },
+];
+
+let lastSelected = {};
 export class MakePredictionToolbar extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      model: lastSelected || props.models[0].id,
+      model: lastSelected.model || props.models[0].id,
+      smoothing: lastSelected.smoothing || predictionSmoothingOptions[1].value,
       loading: false,
     };
   }
 
-  async handleGenerate(model) {
+  async handleGenerate(model, smoothing) {
     this.setState({ loading: true });
-    await this.props.generate(model);
+    await this.props.generate(model, { smoothing });
     this.setState({ loading: false });
   }
 
   render() {
     const { style, models } = this.props;
-    const { model, loading } = this.state;
+    const { model, smoothing, loading } = this.state;
 
     const selectProps = {
       style: selectStyle,
-      onChange: (e, { value }) => {
-        this.setState({ model: value });
-        lastSelected = value;
+      onChange: (e, { name, value }) => {
+        this.setState({ [name]: value });
+        lastSelected[name] = value;
       },
     };
 
     const options = models.map(({ id, name }) => ({ value: id, text: name }));
     const m = models.find(m => m.id === model);
+
+    const smoothingSelect =
+      m.type === 'semantic_segmentation' ? (
+        <span style={groupStyle}>
+          Smoothing:
+          <Select
+            {...selectProps}
+            name="smoothing"
+            value={smoothing}
+            options={predictionSmoothingOptions}
+          />
+        </span>
+      ) : null;
 
     const disabled = m.type === 'object_classification';
     const text = disabled
@@ -114,10 +135,19 @@ export class MakePredictionToolbar extends Component {
       <div style={{ ...style, ...defaultStyle }}>
         <span style={groupStyle}>
           Generate selections using a model
-          <Select {...selectProps} value={model} options={options} />
+          <Select
+            {...selectProps}
+            name="model"
+            value={model}
+            options={options}
+          />
         </span>
+        {smoothingSelect}
         <span style={groupStyle}>
-          <Button disabled={disabled} onClick={() => this.handleGenerate(m)}>
+          <Button
+            disabled={disabled}
+            onClick={() => this.handleGenerate(m, smoothing)}
+          >
             Generate
           </Button>
           <Loader active={loading} inline />

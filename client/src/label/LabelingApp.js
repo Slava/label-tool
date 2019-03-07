@@ -351,8 +351,8 @@ class LabelingApp extends Component {
         <MakePredictionToolbar
           style={toolbarStyle}
           models={models}
-          generate={async model => {
-            const preds = await makePrediction(model);
+          generate={async (model, options) => {
+            const preds = await makePrediction(model, options);
             if (model.type !== 'object_classification') {
               preds.forEach(f => this.handleChange('new', f));
             }

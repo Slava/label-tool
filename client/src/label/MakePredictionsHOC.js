@@ -13,7 +13,7 @@ export function withPredictions(Comp) {
       this.makePrediction = this.makePrediction.bind(this);
     }
 
-    async makePrediction(model) {
+    async makePrediction(model, options = {}) {
       const { imgB64, b64Scaling, height, width } = this.props;
       const { id } = model;
 
@@ -53,7 +53,11 @@ export function withPredictions(Comp) {
         return preds;
       } else if (model.type === 'semantic_segmentation') {
         const imageData = resp.predictions[0].raw_image;
-        const vectors = vectorizeSegmentation(imageData, b64Scaling);
+        const { smoothing } = options;
+        const vectors = vectorizeSegmentation(imageData, {
+          scaling: b64Scaling,
+          smoothing,
+        });
         return vectors.map(path => ({
           type: 'polygon',
           color: 'gray',

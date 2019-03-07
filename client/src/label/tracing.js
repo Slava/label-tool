@@ -23,14 +23,16 @@ export function computeTrace(
   return simplePath.map(({ x, y }) => ({ lng: x, lat: y }));
 }
 
-export function vectorizeSegmentation(imageData, scaling) {
+export function vectorizeSegmentation(imageData, { scaling, smoothing }) {
+  scaling = scaling || 1.0;
+  smoothing = smoothing || 2.0;
   // reduce from nxmx1 to nxm
   imageData = imageData.map(row => row.map(channels => channels[0]));
   const paths = computeVectorized(imageData);
   return paths.map(path => {
     const simplePath = LineUtil.simplify(
       path.map(([y, x]) => ({ x, y: imageData.length - y })),
-      2.0
+      smoothing
     );
     return simplePath.map(({ x, y }) => ({
       lng: x / scaling,

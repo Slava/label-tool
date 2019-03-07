@@ -74,11 +74,12 @@ export class PathToolbar extends PureComponent {
   }
 }
 
+let lastSelected = null;
 export class MakePredictionToolbar extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      model: props.models[0].id,
+      model: lastSelected || props.models[0].id,
       loading: false,
     };
   }
@@ -95,7 +96,10 @@ export class MakePredictionToolbar extends Component {
 
     const selectProps = {
       style: selectStyle,
-      onChange: (e, { value }) => this.setState({ model: value }),
+      onChange: (e, { value }) => {
+        this.setState({ model: value });
+        lastSelected = value;
+      },
     };
 
     const options = models.map(({ id, name }) => ({ value: id, text: name }));

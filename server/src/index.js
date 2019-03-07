@@ -12,6 +12,9 @@ const images = require('./queries/images');
 const mlmodels = require('./queries/mlmodels');
 const exporter = require('./exporter');
 
+const UPLOADS_PATH =
+  process.env.UPLOADS_PATH || path.join(__dirname, '..', 'uploads');
+
 const app = express();
 
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -197,7 +200,7 @@ const uploads = multer({
         if (!projects.get(projectId)) {
           throw new Error('No such projectId.');
         }
-        const dest = path.join(__dirname, '..', 'uploads', projectId);
+        const dest = path.join(UPLOADS_PATH, projectId);
         try {
           await fs.mkdir(dest);
         } catch (err) {}

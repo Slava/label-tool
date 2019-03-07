@@ -35,3 +35,11 @@ Now you can run the server app in prod mode serving the client build:
 ```bash
 env PORT=80 NODE_ENV=production node server/src/index.js
 ```
+
+## Config
+
+The following environment variables can be tweaked:
+
+- `PORT` - the part the app is served on (dev, prod)
+- `API_PORT` - to differentiate the port for the API to run on (should be only used in dev)
+- `UPLOADS_PATH` - absolute path where the app stores uploaded images, defaults to server's folder 'uploads'

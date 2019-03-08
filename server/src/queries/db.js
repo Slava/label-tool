@@ -10,7 +10,7 @@ const exists = fs.existsSync(dbPath);
 const db = sqlite3(dbPath, {});
 
 if (!exists) {
-  const migrations = path.join(path.dirname(dbPath), 'migrations');
+  const migrations = path.join(path.join(__dirname, '..', '..'), 'migrations');
   const files = fs.readdirSync(migrations);
   files.sort();
   files.forEach(f => {

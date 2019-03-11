@@ -64,13 +64,14 @@ docker build -t imslavko/image-labeling-tool .
 Run attaching the mounts:
 
 ```bash
-docker run -p 5000:3000 -v ~/containersmnt/uploads:/uploads -v ~/containersmnt/db:/db -d imslavko/image-labeling-tool
+docker run -p 5000:3000 -u $(id -u):$(id -g) -v ~/containersmnt/uploads:/uploads -v ~/containersmnt/db:/db -d imslavko/image-labeling-tool
 ```
 
 Access the site at `localhost:5000`.
 
 ### Run with docker-compose
-Checkout the ```docker-compose.yml``` for detailed configuration.
+
+Checkout the `docker-compose.yml` for detailed configuration.
 
 ```bash
 # if it needs to build the docker image,

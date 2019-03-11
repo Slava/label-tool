@@ -173,6 +173,19 @@ export default class ProjectPage extends Component {
             style={{ fontSize: 24, width: '100%' }}
             onChange={this.handleNameChange}
           />
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'row-reverse',
+              marginTop: 5,
+            }}
+          >
+            <Input
+              label="Labeling link"
+              value={window.location.origin + '/label/' + projectId}
+              onClick={e => e.target.select()}
+            />
+          </div>
           <div style={{ padding: '1em 0 110px 0' }}>
             <Header disabled>LABELS</Header>
             <SortableContainer onSortEnd={this.onSortEnd} useDragHandle>

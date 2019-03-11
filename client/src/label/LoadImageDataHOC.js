@@ -35,10 +35,15 @@ export function withLoadImageData(Comp) {
             ctx.imageSmoothingQuality = 'high';
             ctx.imageSmoothingEnabled = true;
             ctx.drawImage(img, 0, 0, sWidth, sHeight);
-            const data = ctx.getImageData(0, 0, sWidth, sHeight).data;
             const imgB64 = canvas
               .toDataURL()
               .substring('data:image/png;base64,'.length);
+
+            canvas.height = height;
+            canvas.width = width;
+            ctx.drawImage(img, 0, 0, width, height);
+            const data = ctx.getImageData(0, 0, width, height).data;
+
             setState({ imageData: data, imgB64, b64Scaling: scale });
           };
 

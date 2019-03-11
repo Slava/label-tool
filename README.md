@@ -68,3 +68,14 @@ docker run -p 5000:3000 -v ~/containersmnt/uploads:/uploads -v ~/containersmnt/d
 ```
 
 Access the site at `localhost:5000`.
+
+### Run with docker-compose
+Checkout the ```docker-compose.yml``` for detailed configuration.
+
+```bash
+# if it needs to build the docker image,
+docker-compose up -d --build
+
+# if it only needs to run,
+docker-compose up -d
+```

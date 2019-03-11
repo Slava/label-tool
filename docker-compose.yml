@@ -1,0 +1,10 @@
+version: '3'
+services:
+  image-labeling-tool:
+    build: .
+    image: imslavko/image-labeling-tool:latest
+    volumes:
+      - "/mnt/vision-nas/image-labeling-tool/uploads:/uploads"
+      - "/mnt/vision-nas/image-labeling-tool/db:/db"
+    ports:
+     - "5000:3000"

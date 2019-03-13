@@ -160,7 +160,7 @@ export default class UploadImages extends Component {
                 value={urlsText}
                 onChange={this.handleChange}
               />
-              <Button>Source from the URLs</Button>
+              <Button>Source from URLs</Button>
             </Form>
             {urlsMessage}
           </Grid.Column>
@@ -173,7 +173,7 @@ export default class UploadImages extends Component {
                 value={localPath}
                 onChange={this.handleChange}
               />
-              <Button>Source from the server's local path</Button>
+              <Button>Source from server's filesystem</Button>
             </Form>
             {localPathMessage}
           </Grid.Column>

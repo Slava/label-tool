@@ -1,6 +1,13 @@
 import React, { Component } from 'react';
 
-import { Header, Button, Loader, Input } from 'semantic-ui-react';
+import {
+  Header,
+  Button,
+  Loader,
+  Input,
+  List,
+  Segment,
+} from 'semantic-ui-react';
 
 import DocumentMeta from 'react-document-meta';
 
@@ -165,75 +172,114 @@ export default class ProjectPage extends Component {
 
     return (
       <DocumentMeta title={`Edit project ${project.name}`}>
-        <div className="ui" style={{ paddingBottom: 200 }}>
-          <Input
-            placeholder="Project name"
-            control="input"
-            defaultValue={project.name}
-            style={{ fontSize: 24, width: '100%' }}
-            onChange={this.handleNameChange}
-          />
-          <div
+        <div style={{ display: 'flex' }}>
+          <div className="ui" style={{ paddingBottom: 200, flex: 1 }}>
+            <Input
+              placeholder="Project name"
+              control="input"
+              defaultValue={project.name}
+              style={{ fontSize: 24, width: '100%', marginTop: 10 }}
+              onChange={this.handleNameChange}
+            />
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'row-reverse',
+                marginTop: 5,
+              }}
+            >
+              <Input
+                label="Labeling link"
+                value={window.location.origin + '/label/' + projectId}
+                onClick={e => e.target.select()}
+              />
+            </div>
+            <div id="labels" style={{ padding: '2em 0 110px 0' }}>
+              <Header disabled>LABELS</Header>
+              <SortableContainer onSortEnd={this.onSortEnd} useDragHandle>
+                {renderedItems}
+              </SortableContainer>
+              <Button
+                circular
+                icon="plus"
+                size="massive"
+                style={{ float: 'right', marginTop: '2em' }}
+                onClick={this.handleNew}
+              />
+            </div>
+            <div id="images" style={{ padding: '2em 0' }}>
+              <Header disabled>IMAGES</Header>
+              <ProjectImages
+                projectId={projectId}
+                refetchRef={f => this.setState({ handleImagesChange: f })}
+              />
+            </div>
+            <div id="upload-images" style={{ padding: '2em 0' }}>
+              <Header disabled>UPLOAD IMAGES</Header>
+              <UploadImages
+                projectId={projectId}
+                onChange={this.state.handleImagesChange}
+              />
+            </div>
+            <div id="export-data" style={{ padding: '2em 0' }}>
+              <Header disabled>EXPORT DATA</Header>
+              <a href={`/api/projects/${projectId}/export`}>
+                <Button
+                  icon="download"
+                  label="Download a zip-file with JSON-encoded labels"
+                />
+              </a>
+            </div>
+            <div id="reference-information" style={{ padding: '2em 0' }}>
+              <Header disabled>REFERENCE INFORMATION</Header>
+              <UploadReference
+                project={project}
+                onChange={this.handleReferenceChange}
+                onUpload={() => this.componentDidMount()}
+              />
+            </div>
+            <div id="ml-assistance" style={{ padding: '2em 0' }}>
+              <Header disabled>ML ASSISTANCE MODELS</Header>
+              <MLAssist />
+            </div>
+          </div>
+          <Segment
             style={{
-              display: 'flex',
-              flexDirection: 'row-reverse',
-              marginTop: 5,
+              flex: '0 0 auto',
+              width: 200,
+              position: 'sticky',
+              top: 65,
+              alignSelf: 'flex-start',
+              marginTop: 0,
+              marginLeft: 30,
+              boxShadow: '0 0 #FFFFFF',
             }}
           >
-            <Input
-              label="Labeling link"
-              value={window.location.origin + '/label/' + projectId}
-              onClick={e => e.target.select()}
-            />
-          </div>
-          <div style={{ padding: '1em 0 110px 0' }}>
-            <Header disabled>LABELS</Header>
-            <SortableContainer onSortEnd={this.onSortEnd} useDragHandle>
-              {renderedItems}
-            </SortableContainer>
-            <Button
-              circular
-              icon="plus"
-              size="massive"
-              style={{ float: 'right', marginTop: '2em' }}
-              onClick={this.handleNew}
-            />
-          </div>
-          <div style={{ padding: '2em 0' }}>
-            <Header disabled>IMAGES</Header>
-            <ProjectImages
-              projectId={projectId}
-              refetchRef={f => this.setState({ handleImagesChange: f })}
-            />
-          </div>
-          <div style={{ padding: '2em 0' }}>
-            <Header disabled>UPLOAD IMAGES</Header>
-            <UploadImages
-              projectId={projectId}
-              onChange={this.state.handleImagesChange}
-            />
-          </div>
-          <div style={{ padding: '2em 0' }}>
-            <Header disabled>REFERENCE INFORMATION</Header>
-            <UploadReference
-              project={project}
-              onChange={this.handleReferenceChange}
-              onUpload={() => this.componentDidMount()}
-            />
-          </div>
-          <div style={{ padding: '2em 0' }}>
-            <Header disabled>ML ASSISTANCE MODELS</Header>
-            <MLAssist />
-          </div>
-          <div style={{ padding: '2em 0' }}>
-            <Header disabled>EXPORT DATA</Header>
-            <a href={`/api/projects/${projectId}/export`}>
-              <Button
-                icon="download"
-                label="Download a zip-file with JSON-encoded labels"
-              />
-            </a>
-          </div>
+            <Header as="h4">On this page:</Header>
+            <List>
+              <List.Item>
+                <a href="#labels">Labels</a>
+              </List.Item>
+              <List.Item>
+                <a href="#images">Images</a>
+              </List.Item>
+              <List.Item>
+                <a href="#upload-images">Upload Images</a>
+              </List.Item>
+              <List.Item>
+                <a href="#import-data">Import data</a>
+              </List.Item>
+              <List.Item>
+                <a href="#export-data">Export data</a>
+              </List.Item>
+              <List.Item>
+                <a href="#reference-information">Reference Info</a>
+              </List.Item>
+              <List.Item>
+                <a href="#ml-assistance">ML Assistance</a>
+              </List.Item>
+            </List>
+          </Segment>
         </div>
       </DocumentMeta>
     );

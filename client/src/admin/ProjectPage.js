@@ -224,7 +224,13 @@ export default class ProjectPage extends Component {
             </div>
             <div id="import-data" style={{ padding: '2em 0' }}>
               <Header disabled>IMPORT DATA</Header>
-              <ImportData projectId={projectId} />
+              <ImportData
+                projectId={projectId}
+                onChange={() => {
+                  this.state.handleImagesChange();
+                  this.componentDidMount();
+                }}
+              />
             </div>
             <div id="export-data" style={{ padding: '2em 0' }}>
               <Header disabled>EXPORT DATA</Header>

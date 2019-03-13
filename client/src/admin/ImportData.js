@@ -30,6 +30,7 @@ export default class ImportData extends Component {
     });
 
     form.reset();
+    this.props.onChange();
   }
 
   render() {

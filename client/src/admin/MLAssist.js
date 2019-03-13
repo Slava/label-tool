@@ -127,7 +127,6 @@ export default class MLAssist extends Component {
   render() {
     const { error, isLoaded, models, currentValue } = this.state;
     const value = currentValue;
-    const filteredModels = (models || []).filter(({ type }) => type === value);
 
     if (error) {
       return <div>Error: {error.message}</div>;
@@ -135,37 +134,15 @@ export default class MLAssist extends Component {
       return <Loader active inline="centered" />;
     }
 
+    const emptyMessage = models.length ? null : (
+      <div style={{ textAlign: 'center', padding: '3em' }}>
+        No end-points, add one below
+      </div>
+    );
+
     return (
       <Segment>
-        <Form style={{ maxWidth: 600 }}>
-          <Form.Select
-            label="Model type"
-            options={options}
-            value={value}
-            onChange={(e, { value }) => this.setState({ currentValue: value })}
-          />
-        </Form>
-        <Header as="h3">Expected API format</Header>
-        <Table>
-          <Table.Header>
-            <Table.Row>
-              <Table.HeaderCell>Input Format</Table.HeaderCell>
-              <Table.HeaderCell>Output Format</Table.HeaderCell>
-            </Table.Row>
-          </Table.Header>
-          <Table.Body>
-            <Table.Row>
-              <Table.Cell>
-                <pre>{inputFormat}</pre>
-              </Table.Cell>
-              <Table.Cell>
-                <pre>{outputFormats[value]}</pre>
-              </Table.Cell>
-            </Table.Row>
-          </Table.Body>
-        </Table>
-
-        <Header as="h3">End-points</Header>
+        <Header as="h2">Available end-points</Header>
         <Table>
           <Table.Header>
             <Table.Row>
@@ -176,8 +153,8 @@ export default class MLAssist extends Component {
             </Table.Row>
           </Table.Header>
           <Table.Body>
-            {filteredModels.map(({ id, name, url, type }) => (
-              <Table.Row>
+            {(models || []).map(({ id, name, url, type }) => (
+              <Table.Row key={id}>
                 <Table.Cell>{name}</Table.Cell>
                 <Table.Cell>{url}</Table.Cell>
                 <Table.Cell>{type}</Table.Cell>
@@ -193,21 +170,53 @@ export default class MLAssist extends Component {
             ))}
           </Table.Body>
         </Table>
+        {emptyMessage}
+        <div style={{ marginTop: '2em' }}>
+          <Header as="h2">Add a new end-point</Header>
+          <Form style={{ maxWidth: 600 }}>
+            <Form.Select
+              label="Model type"
+              options={options}
+              value={value}
+              onChange={(e, { value }) =>
+                this.setState({ currentValue: value })
+              }
+            />
+          </Form>
+          <Header as="h3">Expected API format</Header>
+          <Table>
+            <Table.Header>
+              <Table.Row>
+                <Table.HeaderCell>Input Format</Table.HeaderCell>
+                <Table.HeaderCell>Output Format</Table.HeaderCell>
+              </Table.Row>
+            </Table.Header>
+            <Table.Body>
+              <Table.Row>
+                <Table.Cell>
+                  <pre>{inputFormat}</pre>
+                </Table.Cell>
+                <Table.Cell>
+                  <pre>{outputFormats[value]}</pre>
+                </Table.Cell>
+              </Table.Row>
+            </Table.Body>
+          </Table>
 
-        <Header as="h3">Add a new end-point</Header>
-        <Form style={{ maxWidth: 600 }} onSubmit={this.onSubmit}>
-          <Form.Input
-            label="Display Name"
-            placeholder="my_model"
-            onChange={(e, { value }) => this.setState({ name: value })}
-          />
-          <Form.Input
-            label="URL"
-            placeholder="http://host:port/v1/models/{MODEL_NAME}:predict"
-            onChange={(e, { value }) => this.setState({ url: value })}
-          />
-          <Button type="submit">Add</Button>
-        </Form>
+          <Form style={{ maxWidth: 600 }} onSubmit={this.onSubmit}>
+            <Form.Input
+              label="Display Name"
+              placeholder="my_model"
+              onChange={(e, { value }) => this.setState({ name: value })}
+            />
+            <Form.Input
+              label="URL"
+              placeholder="http://host:port/v1/models/{MODEL_NAME}:predict"
+              onChange={(e, { value }) => this.setState({ url: value })}
+            />
+            <Button type="submit">Add</Button>
+          </Form>
+        </div>
       </Segment>
     );
   }

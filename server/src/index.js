@@ -48,6 +48,12 @@ app.post('/api/mlmodels/:id', (req, res) => {
     .pipe(res);
 });
 
+app.delete('/api/mlmodels/:id', (req, res) => {
+  const { id } = req.params;
+  const model = mlmodels.delete(id);
+  res.json({ success: true });
+});
+
 app.get('/api/projects', (req, res) => {
   res.json(projects.getAll());
 });

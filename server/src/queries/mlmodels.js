@@ -33,4 +33,12 @@ insert into mlmodels(name, url, type) values (?, ?, ?);
 
     return id;
   },
+  delete: id => {
+    db.prepare(
+      `
+delete from mlmodels
+where id = ?;
+`
+    ).run(id);
+  },
 };

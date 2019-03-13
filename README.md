@@ -71,12 +71,13 @@ Access the site at `localhost:5000`.
 
 ### Run with docker-compose
 
-Checkout the `docker-compose.yml` for detailed configuration.
+* Checkout the `docker-compose.yml` for detailed configuration.
+* Need to set & export environment variable CURRENT_UID before running.
 
 ```bash
 # if it needs to build the docker image,
-docker-compose up -d --build
+CURRENT_UID=$(id -u):$(id -g) docker-compose up -d --build
 
 # if it only needs to run,
-docker-compose up -d
+CURRENT_UID=$(id -u):$(id -g) docker-compose up -d
 ```

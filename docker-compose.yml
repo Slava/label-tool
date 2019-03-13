@@ -1,8 +1,9 @@
-version: '3'
+version: '3.3'
 services:
-  image-labeling-tool:
+  server:
     build: .
     image: imslavko/image-labeling-tool:latest
+    user: ${CURRENT_UID}
     volumes:
       - "/mnt/vision-nas/image-labeling-tool/uploads:/uploads"
       - "/mnt/vision-nas/image-labeling-tool/db:/db"

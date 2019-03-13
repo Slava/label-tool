@@ -42,9 +42,9 @@ exports.exportProject = projectId => {
               label: name,
               line_color: null,
               fill_color: null,
-              points: transform(
-                pts.map(({ lng, lat }) => [lng, labelData.height - lat])
-              ).map(sanitize),
+              points: transform(pts.map(({ lng, lat }) => [lng, lat])).map(
+                sanitize
+              ),
             });
           });
         } else {

@@ -61,6 +61,8 @@ export function withLoadImageData(Comp) {
       const { props, state } = this;
       const { height, width, imageData, imgB64, b64Scaling } = state;
 
+      if (!height) return null;
+
       return (
         <Comp
           height={height}

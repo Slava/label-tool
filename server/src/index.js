@@ -11,6 +11,7 @@ const projects = require('./queries/projects');
 const images = require('./queries/images');
 const mlmodels = require('./queries/mlmodels');
 const exporter = require('./exporter');
+const importer = require('./importer');
 
 const UPLOADS_PATH =
   process.env.UPLOADS_PATH || path.join(__dirname, '..', 'uploads');
@@ -251,6 +252,23 @@ app.post(
   uploads.single('referenceImage'),
   (req, res) => {
     res.json({ success: true });
+  }
+);
+
+const imports = multer({
+  storage: importer(),
+});
+app.post(
+  '/api/import/:projectId',
+  (req, res, next) => {
+    req.importRes = [];
+    next();
+  },
+  imports.array('files'),
+  (req, res) => {
+    const { importRes } = req;
+    const message = importRes.map(({ message }) => message).join('\n');
+    res.json({ success: true, message });
   }
 );
 

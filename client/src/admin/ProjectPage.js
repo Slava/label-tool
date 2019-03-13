@@ -19,6 +19,7 @@ import arrayMove from 'array-move';
 import ProjectImages from './ProjectImages';
 import UploadImages from './UploadImages';
 import LabelFormItem from './LabelFormItem';
+import ImportData from './ImportData';
 import UploadReference from './UploadReference';
 import MLAssist from './MLAssist';
 
@@ -220,6 +221,10 @@ export default class ProjectPage extends Component {
                 projectId={projectId}
                 onChange={this.state.handleImagesChange}
               />
+            </div>
+            <div id="import-data" style={{ padding: '2em 0' }}>
+              <Header disabled>IMPORT DATA</Header>
+              <ImportData projectId={projectId} />
             </div>
             <div id="export-data" style={{ padding: '2em 0' }}>
               <Header disabled>EXPORT DATA</Header>

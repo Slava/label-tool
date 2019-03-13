@@ -7,13 +7,14 @@ export function withHistory(Comp) {
       super(props);
 
       const { labelData, labels } = props;
-      const figures = {};
+      let figures = {};
 
       labels.map(label => (figures[label.id] = []));
       figures.__temp = [];
       Object.keys(labelData).forEach(key => {
         figures[key] = (figures[key] || []).concat(labelData[key]);
       });
+      figures = this.flipY(figures);
       this.state = {
         figures, // mapping from label name to a list of Figure structures
         unfinishedFigure: null,
@@ -25,13 +26,29 @@ export function withHistory(Comp) {
       this.popState = this.popState.bind(this);
     }
 
+    flipY(figures) {
+      const { height } = this.props;
+      // flip the y-coordinate
+      const f = {};
+      Object.keys(figures).forEach(label => {
+        f[label] = figures[label].map(figure => ({
+          ...figure,
+          points: figure.points.map(({ lat, lng }) => ({
+            lat: height - lat,
+            lng,
+          })),
+        }));
+      });
+      return f;
+    }
+
     componentDidUpdate(prevProps, prevState) {
       const { onLabelChange, height, width } = this.props;
       const { figures } = this.state;
 
       if (figures !== prevState.figures) {
         onLabelChange({
-          labels: figures,
+          labels: this.flipY(figures),
           height,
           width,
         });

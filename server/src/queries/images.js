@@ -133,6 +133,24 @@ where id = ?;
 `
     ).run(imageId);
   },
+
+  getForImport: (projectId, originalName) => {
+    const image = db
+      .prepare(
+        `
+select *
+from images
+where projectsId = ? and originalName = ?;
+`
+      )
+      .get(projectId, originalName);
+
+    if (!image) {
+      throw new Error('No image with name ' + originalName);
+    }
+
+    return { ...image, labelData: JSON.parse(image.labelData) };
+  },
 };
 
 module.exports = Images;

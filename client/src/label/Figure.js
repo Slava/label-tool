@@ -65,6 +65,7 @@ class Figure extends Component {
       interactive,
       onSelect,
     } = options;
+    const { draggedPoint } = this.state;
 
     const renderPoints = this.getRenderPoints(points);
 
@@ -78,17 +79,15 @@ class Figure extends Component {
     if (editing) classes.push('editing');
     if (finished) classes.push('finished');
 
+    const vcolor = vertexColor || color;
     const vertices = renderPoints.map((pos, i) => (
       <CircleMarker
         className={classes.concat(!i ? ['first'] : []).join(' ')}
         key={id + '-' + i}
-        color={vertexColor || color}
-        fill={true}
-        fillColor={vertexColor || color}
-        fillRule="nonzero"
-        fillOpacity={1.0}
         center={pos}
-        radius={4}
+        fillOpacity={0.0}
+        opacity={0.0}
+        radius={11}
         onClick={() => this.onPointClick(i)}
         draggable={editing}
         onDrag={e => {
@@ -101,7 +100,19 @@ class Figure extends Component {
           this.onPointMoved(e.target.getLatLng(), i);
           this.setState({ dragging: false, draggedPoint: null });
         }}
-      />
+      >
+        <CircleMarker
+          color={vcolor}
+          fill={true}
+          fillColor={vcolor}
+          fillRule="nonzero"
+          fillOpacity={1.0}
+          radius={4}
+          center={
+            draggedPoint && draggedPoint.index === i ? draggedPoint.point : pos
+          }
+        />
+      </CircleMarker>
     ));
 
     const guideLines = this.makeGuides();
@@ -189,17 +200,24 @@ export class PolygonFigure extends Figure {
         <CircleMarker
           key={id + '-' + i + '-mid'}
           className="midpoint"
-          color="white"
           center={midPoint(a, b)}
-          radius={3}
-          fill={true}
-          fillOpacity={0.5}
-          opacity={0.5}
+          radius={8}
+          opacity={0.0}
+          fillOpacity={0.0}
           onMousedown={e => {
             onChange('add', { point: midPoint(a, b), pos: i + 1, figure });
             skipNextClick();
           }}
-        />
+        >
+          <CircleMarker
+            radius={3}
+            color="white"
+            fill={true}
+            fillOpacity={0.5}
+            opacity={0.5}
+            center={midPoint(a, b)}
+          />
+        </CircleMarker>
       ));
 
     return midPoints;

@@ -53,6 +53,7 @@ export default class Sidebar extends PureComponent {
           flexDirection: 'column',
           padding: '1em 0.5em',
           borderRight: '1px solid #ccc',
+          height: '100%',
           ...style,
         }}
       >
@@ -60,7 +61,7 @@ export default class Sidebar extends PureComponent {
           {title}
           {hotkeysButton}
         </Header>
-        <List divided selection style={{ flex: 1 }}>
+        <List divided selection style={{ flex: 1, overflowY: 'auto' }}>
           {labels.map((label, i) =>
             ListItem({
               shortcut: shortcuts[i],

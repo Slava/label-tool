@@ -15,12 +15,6 @@ import Hotkeys from 'react-hot-keys';
 
 const headerIconStyle = { fontSize: '0.8em', float: 'right' };
 export default class Sidebar extends PureComponent {
-  captureKeyPresses(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    e.nativeEvent.stopImmediatePropagation();
-    return false;
-  }
   render() {
     const {
       title,
@@ -61,9 +55,6 @@ export default class Sidebar extends PureComponent {
           borderRight: '1px solid #ccc',
           ...style,
         }}
-        onKeyDown={this.captureKeyPresses}
-        onKeyUp={this.captureKeyPresses}
-        onKeyPress={this.captureKeyPresses}
       >
         <Header size="large" style={{ flex: '0 0 auto' }}>
           {title}

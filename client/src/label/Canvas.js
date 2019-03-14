@@ -191,6 +191,12 @@ class Canvas extends Component {
       <Hotkeys
         keyName="backspace,del,c,f,-,=,left,right,up,down"
         onKeyDown={key => {
+          const tagName = document.activeElement
+            ? document.activeElement.tagName.toLowerCase()
+            : null;
+          if (['input', 'textarea'].includes(tagName)) {
+            return false;
+          }
           if (drawing) {
             if (key === 'f') {
               const { type, points } = unfinishedFigure;

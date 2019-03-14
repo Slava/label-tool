@@ -27,19 +27,36 @@ export function withHistory(Comp) {
     }
 
     flipY(figures) {
-      const { height } = this.props;
       // flip the y-coordinate
       const f = {};
       Object.keys(figures).forEach(label => {
-        f[label] = figures[label].map(figure => ({
-          ...figure,
-          points: figure.points.map(({ lat, lng }) => ({
-            lat: height - lat,
-            lng,
-          })),
-        }));
+        f[label] = figures[label].map(figure => {
+          let tracingOptions;
+          if (figure.tracingOptions && figure.tracingOptions.enabled) {
+            tracingOptions = {
+              ...figure.tracingOptions,
+              trace: this.transformPoints(figure.tracingOptions.trace),
+            };
+          } else {
+            tracingOptions = figure.tracingOptions;
+          }
+
+          return {
+            ...figure,
+            points: this.transformPoints(figure.points),
+            tracingOptions,
+          };
+        });
       });
       return f;
+    }
+
+    transformPoints(points) {
+      const { height } = this.props;
+      return points.map(({ lat, lng }) => ({
+        lat: height - lat,
+        lng,
+      }));
     }
 
     componentDidUpdate(prevProps, prevState) {

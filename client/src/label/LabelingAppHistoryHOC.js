@@ -31,6 +31,9 @@ export function withHistory(Comp) {
       const f = {};
       Object.keys(figures).forEach(label => {
         f[label] = figures[label].map(figure => {
+          if (figure.type !== 'polygon' && figure.type !== 'bbox')
+            return figure;
+
           let tracingOptions;
           if (figure.tracingOptions && figure.tracingOptions.enabled) {
             tracingOptions = {

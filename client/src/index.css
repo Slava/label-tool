@@ -20,3 +20,11 @@ body .canvas-container {
   z-index: -5000;
   opacity: 0;
 }
+
+.help-body img {
+  max-width: 100%;
+}
+
+.help-body img + p {
+  margin-top: 2em;
+}

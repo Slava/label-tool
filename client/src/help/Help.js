@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Route, Link } from 'react-router-dom';
 import DocumentMeta from 'react-document-meta';
 
-import { Header, Container, List, Icon, Label } from 'semantic-ui-react';
+import { Header, List, Icon, Label } from 'semantic-ui-react';
 
 import Menubar from '../common/Menubar';
 
@@ -20,6 +20,13 @@ import mlObjectDescriptionImg from './tutorial/ml-object-description.gif';
 import mlObjectDetectionImg from './tutorial/ml-object-detection.gif';
 import mlSemanticSegmentationImg from './tutorial/ml-semantic-segmentation.gif';
 
+import projectPageImg from './tutorial/project-page.png';
+import projectImagesImg from './tutorial/project-images.png';
+import projectDataImg from './tutorial/project-data.png';
+import projectReferenceImg from './tutorial/project-reference.png';
+import projectReferenceInterfaceImg from './tutorial/project-reference-interface.png';
+import projectMlAssistImg from './tutorial/project-ml-assist.png';
+
 function Img({ src, caption }) {
   return (
     <figure style={{ textAlign: 'center', margin: '1em 1em' }}>
@@ -34,7 +41,7 @@ function Img({ src, caption }) {
 const sections = [
   {
     id: 'labeling',
-    title: 'How to label',
+    title: 'How To Label',
     comp: () => {
       return (
         <div>
@@ -214,7 +221,106 @@ const sections = [
     id: 'admin',
     title: 'Managing Projects',
     comp: () => {
-      return <div />;
+      return (
+        <div>
+          <Header as="h1">Managing Projects</Header>
+          <p>
+            After creating a project on the{' '}
+            <Link to="/admin">admin panel page</Link> you can edit project's
+            details, edit the labels, upload new images, export or import the
+            labeling data etc.
+          </p>
+
+          <p>
+            You can add a variety of label types, either for image segmentation
+            (bounding box, polygon) or textual information (text input, multiple
+            choice, single choice). Drag the label handles to reorder. Renaming
+            a label doesn't change its internal representation id.
+          </p>
+
+          <Img
+            src={projectPageImg}
+            caption="The project page allows you to edit its name, and edit the labels"
+          />
+
+          <Header as="h2">Images</Header>
+          <p>
+            Next, you can manage all your images, see which ones are labeled,
+            open or delete individual ones.
+          </p>
+          <Img
+            src={projectImagesImg}
+            caption="Images management part of the project"
+          />
+
+          <Header as="h2">Data Management</Header>
+          <p>
+            Following there are the areas where you can: upload images, import
+            labeling data from tools like{' '}
+            <a href="https://github.com/wkentaro/labelme">LabelMe</a>, or export
+            your labeling data in the same format.
+          </p>
+
+          <p>
+            When uploading images from disk, they are stored internally on the
+            server's filesystem. If the other methods are used (URLs, local
+            filesystem path) the files are proxied and never stored internally.
+          </p>
+          <Img
+            src={projectDataImg}
+            caption="Upload, import or export your data"
+          />
+        </div>
+      );
+    },
+  },
+  {
+    id: 'admin-advanced',
+    title: 'Configuring Advanced Features',
+    comp: () => {
+      return (
+        <div>
+          <Header as="h1">Configuring Advanced Features</Header>
+          <p>
+            There are a couple of features that are more specific to use-cases
+            and tasks this app was designed for originally.
+          </p>
+          <Header as="h2">Reference Information</Header>
+          <p>
+            Sometimes the classification task becomes subjective and some
+            instruction text or a reference image is helpful to display to the
+            labelers. For this reason, you can upload a reference image and add
+            a caption text with necessary instructions that will appear on top
+            of the labeling interface.
+          </p>
+          <Img
+            src={projectReferenceImg}
+            caption="Adding a reference image and text for a project as an admin"
+          />
+          <Img
+            src={projectReferenceInterfaceImg}
+            caption="What a reference image looks like when displayed for the labelers"
+          />
+
+          <Header as="h2">Configuring ML-assisted Features</Header>
+          <p>
+            On the bottom of a project page, you can add end-points to the{' '}
+            <a href="https://www.tensorflow.org/tfx/guide/serving">
+              TensorFlow Serving-style
+            </a>{' '}
+            services. For all types of services the image is sent a s
+            base64-encoded png image and depending on the type of the service
+            the app expects a response in a different format. The examples of
+            the request/response exchange are displayed according to the
+            selected type.
+          </p>
+
+          <Img
+            src={projectMlAssistImg}
+            caption="Adding end-points to ML services"
+          />
+        </div>
+      );
     },
   },
 ];
@@ -244,7 +350,7 @@ export default class Help extends Component {
       <Menubar active="help">
         <DocumentMeta title="Help -- Image Labeling Tool">
           <div className="help-body" style={{ display: 'flex', marginTop: 30 }}>
-            <List style={{ width: 150, minHeight: 500 }}>
+            <List style={{ maxWidth: 200, minHeight: 500 }}>
               <List.Item>
                 <List.Icon name="align left" />
                 <List.Content>
@@ -253,10 +359,10 @@ export default class Help extends Component {
               </List.Item>
               {links}
             </List>
-            <Container text style={{ width: '100%', paddingBottom: '5em' }}>
+            <div style={{ flex: 1, paddingBottom: '5em', margin: '0 90px' }}>
               <Route path="/help/:id" render={renderer} />
               <Route exact path="/help" render={exactRenderer} />
-            </Container>
+            </div>
           </div>
         </DocumentMeta>
       </Menubar>

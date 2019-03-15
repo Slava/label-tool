@@ -223,7 +223,10 @@ export default class Help extends Component {
   render() {
     const links = sections.map(section => (
       <List.Item key={section.id}>
-        <Link to={'/help/' + section.id}>{section.title}</Link>
+        <List.Icon name="circle" style={{ opacity: 0.0 }} />
+        <List.Content>
+          <Link to={'/help/' + section.id}>{section.title}</Link>
+        </List.Content>
       </List.Item>
     ));
 
@@ -241,7 +244,15 @@ export default class Help extends Component {
       <Menubar active="help">
         <DocumentMeta title="Help -- Image Labeling Tool">
           <div className="help-body" style={{ display: 'flex', marginTop: 30 }}>
-            <List style={{ width: 150, minHeight: 500 }}>{links}</List>
+            <List style={{ width: 150, minHeight: 500 }}>
+              <List.Item>
+                <List.Icon name="align left" />
+                <List.Content>
+                  <Header as="h4">Table of Contents</Header>
+                </List.Content>
+              </List.Item>
+              {links}
+            </List>
             <Container text style={{ width: '100%', paddingBottom: '5em' }}>
               <Route path="/help/:id" render={renderer} />
               <Route exact path="/help" render={exactRenderer} />

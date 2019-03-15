@@ -361,37 +361,61 @@ class LabelingApp extends Component {
       );
     }
 
+    const demoBar = this.props.demo ? (
+      <div
+        style={{
+          width: '100%',
+          flex: '0 0 auto',
+          background: '#FFD700',
+          padding: '5px 10px',
+          fontWeight: 800,
+          textAlign: 'center',
+        }}
+      >
+        This is a demo page. The changes will not be saved and all network
+        responses are static.{' '}
+        <a target="_blank" href="https://github.com/Slava/image-labeling-tool">
+          GitHub repo
+        </a>
+      </div>
+    ) : null;
+
     return (
-      <div style={{ display: 'flex', height: '100vh' }}>
-        <Hotkeys keyName="ctrl+z" onKeyDown={popState}>
-          <Sidebar
-            labels={labels}
-            {...sidebarProps}
-            {...forwardedProps}
-            style={{ flex: 1, maxWidth: 300 }}
-          />
-          {hotkeysPanelDOM}
-          <div style={{ flex: 4, display: 'flex', flexDirection: 'column' }}>
-            <Reference {...reference} />
-            <div style={{ position: 'relative', height: '100%' }}>
-              {toolbarDOM}
-              <Canvas
-                url={imageUrl}
-                height={height}
-                width={width}
-                figures={allFigures}
-                unfinishedFigure={unfinishedFigure}
-                onChange={this.handleChange}
-                onReassignment={type =>
-                  this.setState({ reassigning: { status: true, type } })
-                }
-                onSelectionChange={this.handleSelectionChange}
-                ref={this.canvasRef}
-                style={{ flex: 1 }}
-              />
+      <div
+        style={{ display: 'flex', height: '100vh', flexDirection: 'column' }}
+      >
+        {demoBar}
+        <div style={{ display: 'flex', flex: 1, height: '100%' }}>
+          <Hotkeys keyName="ctrl+z" onKeyDown={popState}>
+            <Sidebar
+              labels={labels}
+              {...sidebarProps}
+              {...forwardedProps}
+              style={{ flex: 1, maxWidth: 300 }}
+            />
+            {hotkeysPanelDOM}
+            <div style={{ flex: 4, display: 'flex', flexDirection: 'column' }}>
+              <Reference {...reference} />
+              <div style={{ position: 'relative', height: '100%' }}>
+                {toolbarDOM}
+                <Canvas
+                  url={imageUrl}
+                  height={height}
+                  width={width}
+                  figures={allFigures}
+                  unfinishedFigure={unfinishedFigure}
+                  onChange={this.handleChange}
+                  onReassignment={type =>
+                    this.setState({ reassigning: { status: true, type } })
+                  }
+                  onSelectionChange={this.handleSelectionChange}
+                  ref={this.canvasRef}
+                  style={{ flex: 1 }}
+                />
+              </div>
             </div>
-          </div>
-        </Hotkeys>
+          </Hotkeys>
+        </div>
       </div>
     );
   }

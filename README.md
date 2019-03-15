@@ -10,6 +10,7 @@ The labeling UI provides a lot of features for drawing polygon shapes, editing t
 ![](./client/src/help/tutorial/polygon-labeling.gif)
 ![](./client/src/help/tutorial/auto-tracing.gif)
 ![](./client/src/help/tutorial/ml-semantic-segmentation.gif)
+![](./client/src/help/tutorial/project-page.png)
 
 ## Development
 

@@ -323,6 +323,29 @@ const sections = [
       );
     },
   },
+  {
+    id: 'security',
+    title: 'Security',
+    comp: () => {
+      return (
+        <div>
+          <Header as="h1">Security</Header>
+          <p>
+            There is <b>no security</b> in the current iteration of the app.
+            There are no user-based permissions, all pages are accessible by
+            anyone.
+          </p>
+          <p>
+            Since this app was originally designed to be used internally, on a
+            virtual private network (local to your corporation or a research
+            group) this project currently lacks features that would make it a
+            fully-fledged service like{' '}
+            <a href="https://www.labelbox.com/">LabelBox</a>.
+          </p>
+        </div>
+      );
+    },
+  },
 ];
 
 export default class Help extends Component {

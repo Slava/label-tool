@@ -4,6 +4,13 @@ An web app that allows you to label images, draw bounding boxes, shapes, collect
 
 The labeling UI provides a lot of features for drawing polygon shapes, editing them with assisted tracing with auto-tracing based on edges or an external ML model.
 
+## Screenshots
+
+![](./client/src/help/tutorial/bbox-labeling.gif)
+![](./client/src/help/tutorial/polygon-labeling.gif)
+![](./client/src/help/tutorial/auto-tracing.gif)
+![](./client/src/help/tutorial/ml-semantic-segmentation.gif)
+
 ## Development
 
 Install npm packages for client, server and the top-level folder:
@@ -71,8 +78,8 @@ Access the site at `localhost:5000`.
 
 ### Run with docker-compose
 
-* Checkout the `docker-compose.yml` for detailed configuration.
-* Need to set & export environment variable CURRENT_UID before running.
+- Checkout the `docker-compose.yml` for detailed configuration.
+- Need to set & export environment variable CURRENT_UID before running.
 
 ```bash
 # if it needs to build the docker image,

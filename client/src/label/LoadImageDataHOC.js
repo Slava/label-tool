@@ -14,7 +14,7 @@ export function withLoadImageData(Comp) {
     }
 
     componentDidUpdate(prevProps, prevState) {
-      const { imageUrl } = this.props;
+      const { imageUrl, demo } = this.props;
 
       if (imageUrl !== prevProps.imageUrl) {
         const img = new Image();
@@ -27,7 +27,7 @@ export function withLoadImageData(Comp) {
             const canvas = document.getElementById('test-canvas');
             const ctx = canvas.getContext('2d');
 
-            const scale = Math.min(800, height) / height;
+            const scale = demo ? 0.5 : Math.min(800, height) / height;
             const sHeight = Math.floor(scale * height);
             const sWidth = Math.floor(scale * width);
             canvas.height = sHeight;

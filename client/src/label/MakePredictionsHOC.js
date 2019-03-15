@@ -14,7 +14,7 @@ export function withPredictions(Comp) {
     }
 
     async makePrediction(model, options = {}) {
-      const { imgB64, b64Scaling, height, width } = this.props;
+      const { imgB64, b64Scaling, height, width, fetch } = this.props;
       const { id } = model;
 
       const req = fetch('/api/mlmodels/' + id, {
@@ -71,7 +71,8 @@ export function withPredictions(Comp) {
     }
 
     async componentDidMount() {
-      const models = await (await fetch('/api/mlmodels/')).json();
+      const { fetch } = this.props;
+      const models = await (await fetch('/api/mlmodels')).json();
       this.setState({ models });
     }
 

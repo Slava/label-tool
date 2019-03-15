@@ -4,6 +4,8 @@ import LabelingApp from './LabelingApp';
 import { Loader } from 'semantic-ui-react';
 import DocumentMeta from 'react-document-meta';
 
+import { demoMocks } from './demo';
+
 export default class LabelingLoader extends Component {
   constructor(props) {
     super(props);
@@ -13,6 +15,16 @@ export default class LabelingLoader extends Component {
       isLoaded: false,
       error: null,
     };
+  }
+
+  async fetch(...args) {
+    const { projectId } = this.props.match.params;
+    if (projectId === 'demo') {
+      const path = typeof args[0] === 'string' ? args[0] : args[0].pathname;
+      return demoMocks[path](...args);
+    }
+
+    return await fetch(...args);
   }
 
   componentDidMount() {
@@ -46,7 +58,7 @@ export default class LabelingLoader extends Component {
         url.searchParams.append('imageId', imageId);
       }
 
-      const { project, image } = await (await fetch(url)).json();
+      const { project, image } = await (await this.fetch(url)).json();
 
       if (!project) {
         history.replace(`/label/${projectId}/over`);
@@ -70,7 +82,7 @@ export default class LabelingLoader extends Component {
 
   async pushUpdate(labelData) {
     const { imageId } = this.props.match.params;
-    await fetch('/api/images/' + imageId, {
+    await this.fetch('/api/images/' + imageId, {
       method: 'PATCH',
       headers: {
         Accept: 'application/json',
@@ -82,7 +94,7 @@ export default class LabelingLoader extends Component {
 
   async markComplete() {
     const { imageId } = this.props.match.params;
-    await fetch('/api/images/' + imageId, {
+    await this.fetch('/api/images/' + imageId, {
       method: 'PATCH',
       headers: {
         Accept: 'application/json',
@@ -129,6 +141,8 @@ export default class LabelingLoader extends Component {
           reference={{ referenceLink, referenceText }}
           labelData={image.labelData.labels || {}}
           imageUrl={image.link}
+          fetch={this.fetch.bind(this)}
+          demo={project.id === 'demo'}
           {...props}
         />
       </DocumentMeta>

@@ -83,6 +83,11 @@ app.patch('/api/projects/:id', (req, res) => {
   res.json({ success: true });
 });
 
+app.delete('/api/projects/:id', (req, res) => {
+  projects.delete(req.params.id);
+  res.json({ success: true });
+});
+
 app.get('/api/images', (req, res) => {
   res.json(images.getForProject(req.query.projectId));
 });

@@ -35,6 +35,7 @@ export default class ProjectPage extends Component {
     this.onSortEnd = this.onSortEnd.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.handleNew = this.handleNew.bind(this);
+    this.handleDelete = this.handleDelete.bind(this);
     this.handleNameChange = this.handleNameChange.bind(this);
     this.handleReferenceChange = this.handleReferenceChange.bind(this);
   }
@@ -115,6 +116,16 @@ export default class ProjectPage extends Component {
         },
       }),
     });
+  }
+
+  async handleDelete() {
+    const { match, history } = this.props;
+    const { projectId } = match.params;
+    await fetch('/api/projects/' + projectId, {
+      method: 'DELETE',
+    });
+
+    history.push('/admin/');
   }
 
   handleNameChange(e) {
@@ -253,6 +264,16 @@ export default class ProjectPage extends Component {
               <Header disabled>ML ASSISTANCE MODELS</Header>
               <MLAssist />
             </div>
+            <div id="delete-project" style={{ padding: '2em 0' }}>
+              <Header disabled>DELETE PROJECT</Header>
+              <p>
+                The button bellow will delete all metadata about labels, images
+                and the project.
+              </p>
+              <Button negative onClick={this.handleDelete}>
+                Delete project
+              </Button>
+            </div>
           </div>
           <Segment
             style={{
@@ -288,6 +309,9 @@ export default class ProjectPage extends Component {
               </List.Item>
               <List.Item>
                 <a href="#ml-assistance">ML Assistance</a>
+              </List.Item>
+              <List.Item>
+                <a href="#delete-project">Delete Project</a>
               </List.Item>
             </List>
           </Segment>

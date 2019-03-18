@@ -90,4 +90,7 @@ update projects
 `
     ).run(referenceLink, id);
   },
+  delete: id => {
+    db.prepare(`delete from projects where id=?;`).run(id);
+  },
 };

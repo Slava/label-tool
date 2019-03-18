@@ -10,24 +10,21 @@ import Help from './help/Help';
 class App extends Component {
   render() {
     if (process.env.REACT_APP_DEMO) {
-      return (
-        <Router basename="/demo">
-          <Fragment>
-            <Redirect exact from="/" to="/label/demo/1" />
-            <Route
-              exact
-              path="/label/:projectId/:imageId"
-              render={props =>
-                props.match.params.imageId === 'over' ? (
-                  <OverScreen {...props} />
-                ) : (
-                  <LabelingLoader {...props} />
-                )
-              }
-            />
-          </Fragment>
-        </Router>
-      );
+      const props = {
+        match: {
+          params: {
+            projectId: 'demo',
+            imageId: 1,
+          },
+        },
+        history: {
+          replace: () => {},
+          push: () => {},
+          goBack: () => {},
+          replace: () => {},
+        },
+      };
+      return <LabelingLoader {...props} />;
     }
 
     return (

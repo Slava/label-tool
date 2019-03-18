@@ -1,10 +1,10 @@
 {
   "main.css": "/label-tool/demo/static/css/main.00dd1c70.chunk.css",
-  "main.js": "/label-tool/demo/static/js/main.02d0ff03.chunk.js",
-  "main.js.map": "/label-tool/demo/static/js/main.02d0ff03.chunk.js.map",
+  "main.js": "/label-tool/demo/static/js/main.a7d4486c.chunk.js",
+  "main.js.map": "/label-tool/demo/static/js/main.a7d4486c.chunk.js.map",
   "static/css/1.588dc1ca.chunk.css": "/label-tool/demo/static/css/1.588dc1ca.chunk.css",
-  "static/js/1.334c0eb4.chunk.js": "/label-tool/demo/static/js/1.334c0eb4.chunk.js",
-  "static/js/1.334c0eb4.chunk.js.map": "/label-tool/demo/static/js/1.334c0eb4.chunk.js.map",
+  "static/js/1.e91ac0b4.chunk.js": "/label-tool/demo/static/js/1.e91ac0b4.chunk.js",
+  "static/js/1.e91ac0b4.chunk.js.map": "/label-tool/demo/static/js/1.e91ac0b4.chunk.js.map",
   "runtime~main.js": "/label-tool/demo/static/js/runtime~main.e1003e6e.js",
   "runtime~main.js.map": "/label-tool/demo/static/js/runtime~main.e1003e6e.js.map",
   "static/media/semantic.min.css": "/label-tool/demo/static/media/brand-icons.a1a749e8.svg",
@@ -29,9 +29,9 @@
   "static/media/project-reference-interface.png": "/label-tool/demo/static/media/project-reference-interface.2e520ab6.png",
   "static/media/project-ml-assist.png": "/label-tool/demo/static/media/project-ml-assist.6f2dc06b.png",
   "static/media/semantic-segmentation.json.resp": "/label-tool/demo/static/media/semantic-segmentation.json.a51c4372.resp",
-  "static/css/main.00dd1c70.chunk.css.map": "/label-tool/demo/static/css/main.00dd1c70.chunk.css.map",
   "static/css/1.588dc1ca.chunk.css.map": "/label-tool/demo/static/css/1.588dc1ca.chunk.css.map",
+  "static/css/main.00dd1c70.chunk.css.map": "/label-tool/demo/static/css/main.00dd1c70.chunk.css.map",
   "index.html": "/label-tool/demo/index.html",
-  "precache-manifest.31b931f9e5d2f4a530a9c2af07e1ecd0.js": "/label-tool/demo/precache-manifest.31b931f9e5d2f4a530a9c2af07e1ecd0.js",
+  "precache-manifest.523786f9f3dfe9635dae083a6be32f1c.js": "/label-tool/demo/precache-manifest.523786f9f3dfe9635dae083a6be32f1c.js",
   "service-worker.js": "/label-tool/demo/service-worker.js"
 }

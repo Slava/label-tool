@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
 
 importScripts(
-  "/labeltool/demo/precache-manifest.87f91f6ed311c136f7d59a4f2bbfd1fa.js"
+  "/label-tool/demo/precache-manifest.e0a8d86de5ac1d584ff9488432031e87.js"
 );
 
 workbox.clientsClaim();
@@ -28,7 +28,7 @@ self.__precacheManifest = [].concat(self.__precacheManifest || []);
 workbox.precaching.suppressWarnings();
 workbox.precaching.precacheAndRoute(self.__precacheManifest, {});
 
-workbox.routing.registerNavigationRoute("/labeltool/demo/index.html", {
+workbox.routing.registerNavigationRoute("/label-tool/demo/index.html", {
   
   blacklist: [/^\/_/,/\/[^\/]+\.[^\/]+$/],
 });

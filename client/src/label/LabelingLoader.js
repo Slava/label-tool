@@ -114,9 +114,7 @@ export default class LabelingLoader extends Component {
       return <Loader active inline="centered" />;
     }
 
-    const title = `Image ${image.id} for project ${
-      project.name
-    } -- Image Labeling Tool`;
+    const title = `Image ${image.id} for project ${project.name} -- Label Tool`;
 
     const props = {
       onBack: () => {

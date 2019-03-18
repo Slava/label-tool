@@ -1,0 +1,69 @@
+{
+    "predictions": [
+        {
+            "det_score": 0.877061,
+            "det_boxes": [0.827898, 0.243001, 0.888948, 0.312978],
+            "det_class": "Footwear"
+        },
+        {
+            "det_score": 0.863106,
+            "det_boxes": [0.766002, 0.431989, 0.880745, 0.466447],
+            "det_class": "Footwear"
+        },
+        {
+            "det_score": 0.862396,
+            "det_boxes": [0.815161, 0.338282, 0.933636, 0.393229],
+            "det_class": "Footwear"
+        },
+        {
+            "det_score": 0.858014,
+            "det_boxes": [0.860142, 0.170491, 0.927444, 0.220483],
+            "det_class": "Footwear"
+        },
+        {
+            "det_score": 0.760109,
+            "det_boxes": [0.138171, 0.156501, 0.910062, 0.32886],
+            "det_class": "Man"
+        },
+        {
+            "det_score": 0.750701,
+            "det_boxes": [0.147579, 0.312544, 0.905632, 0.487122],
+            "det_class": "Woman"
+        },
+        {
+            "det_score": 0.738144,
+            "det_boxes": [0.287543, 0.699509, 0.753664, 0.802844],
+            "det_class": "Man"
+        },
+        {
+            "det_score": 0.690941,
+            "det_boxes": [0.68422, 0.625043, 0.724109, 0.647132],
+            "det_class": "Footwear"
+        },
+        {
+            "det_score": 0.640739,
+            "det_boxes": [0.702673, 0.755785, 0.737817, 0.782496],
+            "det_class": "Footwear"
+        },
+        {
+            "det_score": 0.639554,
+            "det_boxes": [0.530539, 0.190219, 0.880561, 0.305581],
+            "det_class": "Jeans"
+        },
+        {
+            "det_score": 0.614246,
+            "det_boxes": [0.347088, 0.590321, 0.731616, 0.677946],
+            "det_class": "Woman"
+        },
+        {
+            "det_score": 0.606209,
+            "det_boxes": [0.361153, 0.145439, 0.715481, 0.220333],
+            "det_class": "Man"
+        },
+        {
+            "det_score": 0.50628,
+            "det_boxes": [0.678635, 0.719213, 0.718409, 0.737292],
+            "det_class": "Footwear"
+        }
+    ]
+}

@@ -371,7 +371,7 @@ export default class Help extends Component {
 
     return (
       <Menubar active="help">
-        <DocumentMeta title="Help -- Image Labeling Tool">
+        <DocumentMeta title="Help -- Label Tool">
           <div className="help-body" style={{ display: 'flex', marginTop: 30 }}>
             <List style={{ maxWidth: 200, minHeight: 500 }}>
               <List.Item>

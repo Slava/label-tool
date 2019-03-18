@@ -4,6 +4,10 @@ An web app that allows you to label images, draw bounding boxes, shapes, collect
 
 The labeling UI provides a lot of features for drawing polygon shapes, editing them with assisted tracing with auto-tracing based on edges or an external ML model.
 
+## [Labeling Demo](http://slv.io/label-tool/demo/)
+
+Demo of the labeling interface with all data served statically (no persistence, reverts on refresh).
+
 ## Screenshots
 
 ![](./client/src/help/tutorial/bbox-labeling.gif)

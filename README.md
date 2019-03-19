@@ -1,6 +1,6 @@
 # Image Labeling Tool
 
-An web app that allows you to label images, draw bounding boxes, shapes, collect information in forms with dropdowns, checkboxes and inputs.
+This web app allows you to label images, draw bounding boxes, shapes, collect information in forms with dropdowns, checkboxes and inputs.
 
 The labeling UI provides a lot of features for drawing polygon shapes, editing them with assisted tracing with auto-tracing based on edges or an external ML model.
 

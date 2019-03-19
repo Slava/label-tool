@@ -93,3 +93,6 @@ CURRENT_UID=$(id -u):$(id -g) docker-compose up -d --build
 # if it only needs to run,
 CURRENT_UID=$(id -u):$(id -g) docker-compose up -d
 ```
+## Project Support and Development
+
+This project has been developed as part of my internship at the [NCsoft](http://global.ncsoft.com/global/) Vision AI Lab in the beginning of 2019.

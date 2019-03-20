@@ -4,6 +4,8 @@ This web app allows you to label images, draw bounding boxes, shapes, collect in
 
 The labeling UI provides a lot of features for drawing polygon shapes, editing them with assisted tracing with auto-tracing based on edges or an external ML model.
 
+Use it when you need to segment and label multiple images, either yourself or by a group. This tool makes it easy to gather and later export the data in a format compatible with [LabelMe](https://github.com/wkentaro/labelme). You can use this tool as an alternative to self-hosted tools like [LabelMe](https://github.com/wkentaro/labelme), [js-segment-annotator](https://github.com/kyamagu/js-segment-annotator), etc or hosted services like [LabelBox](https://www.labelbox.com/).
+
 ## [Labeling Demo](http://slv.io/label-tool/demo/)
 
 Demo of the labeling interface with all data served statically (no persistence, reverts on refresh).

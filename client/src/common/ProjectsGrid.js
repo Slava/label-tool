@@ -16,7 +16,12 @@ export default class ProjectsGrid extends Component {
 
   async componentDidMount() {
     try {
-      const projects = await (await fetch('/api/projects/')).json();
+      const r = await fetch('/api/projects/');
+      if (!r.ok && r.status === 401) {
+        window.location = '/admin/login/';
+        return;
+      }
+      const projects = await r.json();
       this.setState({
         isLoaded: true,
         projects,

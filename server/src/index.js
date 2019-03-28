@@ -12,12 +12,14 @@ const images = require('./queries/images');
 const mlmodels = require('./queries/mlmodels');
 const exporter = require('./exporter');
 const importer = require('./importer');
+const { setup, checkLoginMiddleware, authHandler } = require('./auth');
 
 const UPLOADS_PATH =
   process.env.UPLOADS_PATH || path.join(__dirname, '..', 'uploads');
 
 const app = express();
 
+setup(app);
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json({ limit: '10mb' }));
 
@@ -25,7 +27,7 @@ app.get('/api/mlmodels', (req, res) => {
   res.json(mlmodels.getAll());
 });
 
-app.post('/api/mlmodels', (req, res) => {
+app.post('/api/mlmodels', checkLoginMiddleware, (req, res) => {
   // TODO: sanitize input data
   const { model } = req.body;
   const id = mlmodels.create(model);
@@ -49,17 +51,17 @@ app.post('/api/mlmodels/:id', (req, res) => {
     .pipe(res);
 });
 
-app.delete('/api/mlmodels/:id', (req, res) => {
+app.delete('/api/mlmodels/:id', checkLoginMiddleware, (req, res) => {
   const { id } = req.params;
   const model = mlmodels.delete(id);
   res.json({ success: true });
 });
 
-app.get('/api/projects', (req, res) => {
+app.get('/api/projects', checkLoginMiddleware, (req, res) => {
   res.json(projects.getAll());
 });
 
-app.post('/api/projects', (req, res) => {
+app.post('/api/projects', checkLoginMiddleware, (req, res) => {
   res.json(projects.create());
 });
 
@@ -67,7 +69,7 @@ app.get('/api/projects/:id', (req, res) => {
   res.json(projects.get(req.params.id));
 });
 
-app.patch('/api/projects/:id', (req, res) => {
+app.patch('/api/projects/:id', checkLoginMiddleware, (req, res) => {
   const { project } = req.body;
   try {
     projects.update(req.params.id, project);
@@ -83,7 +85,7 @@ app.patch('/api/projects/:id', (req, res) => {
   res.json({ success: true });
 });
 
-app.delete('/api/projects/:id', (req, res) => {
+app.delete('/api/projects/:id', checkLoginMiddleware, (req, res) => {
   projects.delete(req.params.id);
   res.json({ success: true });
 });
@@ -96,7 +98,7 @@ app.get('/api/images/:id', (req, res) => {
   res.json(images.get(req.params.id));
 });
 
-app.post('/api/images', async (req, res) => {
+app.post('/api/images', checkLoginMiddleware, async (req, res) => {
   const { projectId, urls, localPath } = req.body;
   if (urls) {
     try {
@@ -146,7 +148,7 @@ app.post('/api/images', async (req, res) => {
   }
 });
 
-app.delete('/api/images/:id', (req, res) => {
+app.delete('/api/images/:id', checkLoginMiddleware, (req, res) => {
   images.delete(req.params.id);
   res.json({ success: true });
 });
@@ -244,12 +246,18 @@ const uploads = multer({
   }),
 });
 
-app.post('/api/uploads/:projectId', uploads.array('images'), (req, res) => {
-  res.json({ success: true });
-});
+app.post(
+  '/api/uploads/:projectId',
+  checkLoginMiddleware,
+  uploads.array('images'),
+  (req, res) => {
+    res.json({ success: true });
+  }
+);
 
 app.post(
   '/api/uploads/:projectId/reference',
+  checkLoginMiddleware,
   (req, res, next) => {
     req.reference = true;
     next();
@@ -265,6 +273,7 @@ const imports = multer({
 });
 app.post(
   '/api/import/:projectId',
+  checkLoginMiddleware,
   (req, res, next) => {
     req.importRes = [];
     next();
@@ -293,7 +302,7 @@ app.get('/uploads/:projectId/:imageName', (req, res) => {
   res.sendFile(path.join(UPLOADS_PATH, projectId, path.join('/', imageName)));
 });
 
-app.get('/api/projects/:projectId/export', (req, res) => {
+app.get('/api/projects/:projectId/export', checkLoginMiddleware, (req, res) => {
   const archive = archiver('zip');
 
   archive.on('error', err => {
@@ -311,6 +320,8 @@ app.get('/api/projects/:projectId/export', (req, res) => {
 
   archive.finalize();
 });
+
+app.get('/api/auth', authHandler);
 
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../../client/build')));

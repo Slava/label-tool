@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { Route, Redirect, BrowserRouter as Router } from 'react-router-dom';
+import { Route, BrowserRouter as Router } from 'react-router-dom';
 
 import LabelHome from './label/LabelHome';
 import LabelingLoader from './label/LabelingLoader';
@@ -21,7 +21,6 @@ class App extends Component {
           replace: () => {},
           push: () => {},
           goBack: () => {},
-          replace: () => {},
         },
       };
       return <LabelingLoader {...props} />;

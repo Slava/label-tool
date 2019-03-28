@@ -5,6 +5,7 @@ import './AdminApp.css';
 import Menubar from '../common/Menubar';
 import ProjectsGrid from '../common/ProjectsGrid';
 import ProjectPage from './ProjectPage';
+import LoginPage from './LoginPage';
 
 class AdminApp extends Component {
   render() {
@@ -22,6 +23,7 @@ class AdminApp extends Component {
               />
             )}
           />
+          <Route exact path="/admin/login" component={LoginPage} />
           <Route path="/admin/:projectId" component={ProjectPage} />
         </Switch>
       </Menubar>

@@ -72,6 +72,7 @@ The following environment variables can be tweaked:
 - `API_PORT` - to differentiate the port for the API to run on (should be only used in dev)
 - `UPLOADS_PATH` - absolute path where the app stores uploaded images, defaults to server's folder 'uploads'
 - `DATABASE_FILE_PATH` - absolute path of the file where the app stores the SQLite data. Defaults to `database.sqlite` in the server folder
+- `ADMIN_PASSWORD` - sets a simple password on all non-labeler actions (stored in a hased form).
 
 ## Run in Docker
 
@@ -109,6 +110,7 @@ CURRENT_UID=$(id -u):$(id -g) docker-compose up -d --build
 # if it only needs to run,
 CURRENT_UID=$(id -u):$(id -g) docker-compose up -d
 ```
+
 ## Project Support and Development
 
 This project has been developed as part of my internship at the [NCSOFT](http://global.ncsoft.com/global/) Vision AI Lab in the beginning of 2019.

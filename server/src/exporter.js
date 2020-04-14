@@ -16,6 +16,10 @@ exports.exportProject = projectId => {
       const labels = [];
 
       project.form.formParts.forEach(({ id, type, name }) => {
+        if (labelData.labels == null || labelData.labels == undefined) {
+          console.log("No labels found for: " + id);
+          return;
+        }
         const things = labelData.labels[id];
         if (type === 'bbox' || type === 'polygon') {
           function transform(points) {
@@ -32,6 +36,9 @@ exports.exportProject = projectId => {
             y = Math.floor(Math.max(y, 0));
             y = Math.min(y, labelData.height);
             return [x, y];
+          }
+          if (things == null || things == undefined) {
+            return;
           }
           things.forEach(({ points, tracingOptions }) => {
             const pts =

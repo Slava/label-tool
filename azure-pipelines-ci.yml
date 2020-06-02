@@ -1,0 +1,16 @@
+# React - CI
+
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: Docker@2
+  inputs:
+    containerRegistry: 'DockerHubJoachim'
+    repository: 'imslavko/image-labeling-tool'
+    command: 'build'
+    Dockerfile: 'Dockerfile'
+    tags: 'latest'

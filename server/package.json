@@ -6,7 +6,7 @@
   "private": true,
   "dependencies": {
     "archiver": "^3.0.0",
-    "bcrypt": "^3.0.5",
+    "bcrypt": "^5.0.0",
     "better-sqlite3": "^5.4.0",
     "body-parser": "^1.18.3",
     "cookie-parser": "^1.4.4",
